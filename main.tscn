@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://chan818dqu3ng"]
+
+[ext_resource type="Script" path="res://Board.cs" id="1_3r2g8"]
+
+[node name="Main" type="Node2D"]
+
+[node name="Board" type="Node2D" parent="."]
+script = ExtResource("1_3r2g8")
+
+[node name="Tile" type="Sprite2D" parent="Board"]

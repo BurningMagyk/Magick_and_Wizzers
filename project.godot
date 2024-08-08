@@ -11,8 +11,8 @@ config_version=5
 [application]
 
 config/name="Magick_and_Wizzers"
-run/main_scene="res://test.tscn"
-config/features=PackedStringArray("4.2", "Forward Plus")
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.2", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
 [dotnet]
