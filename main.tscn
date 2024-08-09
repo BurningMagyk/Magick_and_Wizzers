@@ -1,10 +1,17 @@
-[gd_scene load_steps=2 format=3 uid="uid://chan818dqu3ng"]
+[gd_scene load_steps=5 format=3 uid="uid://chan818dqu3ng"]
 
 [ext_resource type="Script" path="res://Board.cs" id="1_3r2g8"]
+[ext_resource type="PackedScene" uid="uid://l4a01ci3ljt8" path="res://Tile.tscn" id="2_d88hh"]
+[ext_resource type="Texture2D" uid="uid://diu7ilsd4nqsw" path="res://icon.svg" id="3_bqegr"]
+[ext_resource type="Script" path="res://UI.cs" id="4_j1k82"]
 
 [node name="Main" type="Node2D"]
 
 [node name="Board" type="Node2D" parent="."]
 script = ExtResource("1_3r2g8")
 
-[node name="Tile" type="Sprite2D" parent="Board"]
+[node name="Tile" parent="Board" instance=ExtResource("2_d88hh")]
+texture = ExtResource("3_bqegr")
+
+[node name="UI" type="Node" parent="."]
+script = ExtResource("4_j1k82")
