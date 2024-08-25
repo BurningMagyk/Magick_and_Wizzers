@@ -207,3 +207,49 @@ texture = ExtResource("2_btksr")
 
 [node name="UI" type="Node" parent="."]
 script = ExtResource("4_j1k82")
+
+[node name="Card [0]" type="ColorRect" parent="UI"]
+offset_left = 50.0
+offset_top = 200.0
+offset_right = 220.0
+offset_bottom = 450.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/Card [0]"]
+layout_mode = 0
+offset_right = 170.0
+offset_bottom = 250.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/Card [0]/VBoxContainer"]
+layout_mode = 2
+
+[node name="Level" type="Label" parent="UI/Card [0]/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "1"
+
+[node name="Element" type="ColorRect" parent="UI/Card [0]/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.03
+color = Color(0, 0, 0, 1)
+
+[node name="Point Stats" type="HBoxContainer" parent="UI/Card [0]/VBoxContainer"]
+layout_mode = 2
+
+[node name="Action Points" type="Label" parent="UI/Card [0]/VBoxContainer/Point Stats"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Hit Points" type="Label" parent="UI/Card [0]/VBoxContainer/Point Stats"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
