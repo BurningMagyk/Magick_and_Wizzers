@@ -208,6 +208,8 @@ texture = ExtResource("2_btksr")
 [node name="UI" type="Node" parent="."]
 script = ExtResource("4_j1k82")
 
+[node name="Camera" type="Camera2D" parent="UI"]
+
 [node name="Card [0]" type="ColorRect" parent="UI"]
 offset_left = 50.0
 offset_top = 200.0
