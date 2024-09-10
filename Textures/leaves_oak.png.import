@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ctqo0hha3ck6x"
-path="res://.godot/imported/leaves_oak.png-d3dcdab497c482f99fa80e1fcc98ebbc.ctex"
+path="res://.godot/imported/leaves_oak.png-26c174b5fdb74c1ef0410420ff73ca65.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Textures/leaves_oak.png"
-dest_files=["res://.godot/imported/leaves_oak.png-d3dcdab497c482f99fa80e1fcc98ebbc.ctex"]
+source_file="res://textures/leaves_oak.png"
+dest_files=["res://.godot/imported/leaves_oak.png-26c174b5fdb74c1ef0410420ff73ca65.ctex"]
 
 [params]
 

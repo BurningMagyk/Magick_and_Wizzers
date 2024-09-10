@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://dy4qvtdocn74e"]
+
+[ext_resource type="Texture2D" uid="uid://o2ai1gt3khc7" path="res://textures/dirt.png" id="1_bvmlg"]
+
+[node name="Tile" type="Sprite2D"]
+scale = Vector2(4, 4)
+texture = ExtResource("1_bvmlg")
