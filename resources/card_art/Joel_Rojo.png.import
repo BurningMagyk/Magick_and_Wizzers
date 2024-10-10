@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://llwt0q286qxi"
-path="res://.godot/imported/rain.png-5f1fb238ac883b205b4198148b56334d.ctex"
+uid="uid://cb3g2mlxn4lcf"
+path="res://.godot/imported/Joel_Rojo.png-ab362aa15d0ddfbc9f58913e726902bf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://textures/rain.png"
-dest_files=["res://.godot/imported/rain.png-5f1fb238ac883b205b4198148b56334d.ctex"]
+source_file="res://resources/card_art/Joel_Rojo.png"
+dest_files=["res://.godot/imported/Joel_Rojo.png-ab362aa15d0ddfbc9f58913e726902bf.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dtwmdgw8264rh"
-path="res://.godot/imported/mud.png-1d60de4ed079980a81ae9fff2663039c.ctex"
+uid="uid://e03e1h6vcln4"
+path="res://.godot/imported/Armin_Boroujerdi_2.png-aab1adbc445cf30d428c4e8df2b0f581.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://textures/mud.png"
-dest_files=["res://.godot/imported/mud.png-1d60de4ed079980a81ae9fff2663039c.ctex"]
+source_file="res://resources/card_art/Armin_Boroujerdi_2.png"
+dest_files=["res://.godot/imported/Armin_Boroujerdi_2.png-aab1adbc445cf30d428c4e8df2b0f581.ctex"]
 
 [params]
 
