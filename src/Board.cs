@@ -23,6 +23,9 @@ namespace Main {
 		  AddChild(tiles[i, j]);
 		}
 	  }
+
+	  // Make the base stuff invisible.
+	  GetNode<Sprite2D>("Tile").Visible = false;
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.

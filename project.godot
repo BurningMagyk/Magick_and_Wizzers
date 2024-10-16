@@ -18,3 +18,10 @@ config/icon="res://icon.svg"
 [dotnet]
 
 project/assembly_name="Magick_and_Wizzers"
+
+[input]
+
+pan={
+"deadzone": 0.5,
+"events": []
+}
