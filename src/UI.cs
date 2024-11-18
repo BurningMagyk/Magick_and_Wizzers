@@ -6,12 +6,14 @@ namespace Main {
 	{
 		private const float CAMERA_SPEED = 5F;
 		private const float WIDTH = 170, HEIGHT = 224;
-		private const int STARTING_CARD_COUNT = 5;
+		private const int STARTING_CARD_COUNT = 5, MAX_CARD_COUNT = 10;
 
+		private readonly Control[] cardsInHand = new Control[MAX_CARD_COUNT];
 		private PackedScene cardScene;
-		private Control[] cardsInHand = new Control[10];
+		private int hoveredCardIndex = -1;
 
 		private Camera2D camera;
+		private Sprite2D cardSleeve;
 		private Vector2[] joystick = new Vector2[] {
 			new Vector2(0, 0),
 			new Vector2(0, 0),
@@ -21,6 +23,7 @@ namespace Main {
 		public override void _Ready() {
 			cardScene = ResourceLoader.Load<PackedScene>("res://scenes/card.tscn");
 			camera = GetNode<Camera2D>("Camera");
+			cardSleeve = GetNode<Sprite2D>("Hand View/Card Sleeve");
 
 			for (int i = 0; i < STARTING_CARD_COUNT; i++) { DrawCard(); }
 
@@ -33,10 +36,10 @@ namespace Main {
 			
 		}
 
-        public override void _PhysicsProcess(double delta) {
-            camera.Position += joystick[0] * CAMERA_SPEED;
+		public override void _PhysicsProcess(double delta) {
+			camera.Position += joystick[0] * CAMERA_SPEED;
 			camera.Align();
-        }
+		}
 		public override void _Input(InputEvent @event) {
 			if (Input.IsActionJustPressed("ui_left")) {
 				GD.Print("Move card selection to left");
@@ -79,6 +82,13 @@ namespace Main {
 					break;
 				}
 			}
+		}
+
+		private void HoverCard(int index) {
+			hoveredCardIndex = index;
+
+			// Place the sleeve over the hovered card.
+			Control hoveredCard = cardsInHand[hoveredCardIndex];
 		}
 	}
 }
