@@ -10,7 +10,7 @@ namespace Main {
 
 		private readonly Control[] cardsInHand = new Control[MAX_CARD_COUNT];
 		private PackedScene cardScene;
-		private int hoveredCardIndex = -1;
+		private int hoveredCardIndex;
 
 		private Camera2D camera;
 		private Sprite2D cardSleeve;
@@ -29,6 +29,8 @@ namespace Main {
 
 			// Make the base stuff invisible.
 			GetNode<CanvasLayer>("Hand View").GetNode<Control>("Card").Visible = false;
+
+			HoverCard(DirectionEnum.NONE);
 		}
 
 		// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -42,10 +44,10 @@ namespace Main {
 		}
 		public override void _Input(InputEvent @event) {
 			if (Input.IsActionJustPressed("ui_left")) {
-				GD.Print("Move card selection to left");
+				HoverCard(DirectionEnum.LEFT);
 			}
 			if (Input.IsActionJustPressed("ui_right")) {
-				GD.Print("Move card selection to right");
+				HoverCard(DirectionEnum.RIGHT);
 			}
 
 			float horizontalPan = 0, verticalPan = 0;
@@ -84,11 +86,40 @@ namespace Main {
 			}
 		}
 
-		private void HoverCard(int index) {
-			hoveredCardIndex = index;
+		private void HoverCard(DirectionEnum direction) {
+			if (direction == DirectionEnum.NONE || cardsInHand[0] == null) {
+				// Unhover cards in hand or no cards in hand.
+				hoveredCardIndex = -1;
+				cardSleeve.Visible = false;
+				return;
+			} else if (direction == DirectionEnum.LEFT) {
+				if (hoveredCardIndex == -1 || hoveredCardIndex == 0) {
+					// Start sleeve at right end.
+					for (int i = cardsInHand.Length - 1; i >= 0; i--) {
+						if (cardsInHand[i] != null) {
+							hoveredCardIndex = i;
+							break;
+						}
+					}
+				} else {
+					// Move sleeve to the left.
+					hoveredCardIndex--;
+				}
+			} else if (direction == DirectionEnum.RIGHT) {
+				if (hoveredCardIndex == -1 || hoveredCardIndex == cardsInHand.Length - 1 || cardsInHand[hoveredCardIndex + 1] == null) {
+					// Start sleeve at left end.
+					hoveredCardIndex = 0;
+				} else {
+					// Move sleeve to the right.
+					hoveredCardIndex++;
+				}
+			}
+		
+			Control hoveredCard = cardsInHand[hoveredCardIndex];
 
 			// Place the sleeve over the hovered card.
-			Control hoveredCard = cardsInHand[hoveredCardIndex];
+			cardSleeve.Position = new Vector2(hoveredCard.Position.X - 10, hoveredCard.Position.Y - 10);
+			cardSleeve.Visible = true;
 		}
 	}
 }

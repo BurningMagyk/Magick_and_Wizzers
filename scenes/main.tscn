@@ -23,4 +23,6 @@ script = ExtResource("4_j1k82")
 [node name="Card" parent="UI/Hand View" instance=ExtResource("4_of886")]
 
 [node name="Card Sleeve" type="Sprite2D" parent="UI/Hand View"]
+z_index = 1
 texture = ExtResource("5_4m5vo")
+centered = false
