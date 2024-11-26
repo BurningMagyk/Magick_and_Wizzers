@@ -2,8 +2,7 @@ using Godot;
 using System;
 
 namespace Main {
-  public partial class Board : Node
-  {
+  public partial class Board : Node {
 	private const int BOARD_SIZE = 7, TILE_SIZE = 128;
 
 	private Sprite2D[,] tiles = new Sprite2D[BOARD_SIZE, BOARD_SIZE];

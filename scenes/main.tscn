@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://bc5gmn57qtpie"]
+[gd_scene load_steps=7 format=3 uid="uid://bc5gmn57qtpie"]
 
 [ext_resource type="Script" path="res://src/Board.cs" id="1_3r2g8"]
 [ext_resource type="PackedScene" uid="uid://dy4qvtdocn74e" path="res://scenes/tile.tscn" id="2_8d3qu"]
 [ext_resource type="Script" path="res://src/UI.cs" id="4_j1k82"]
+[ext_resource type="Script" path="res://src/HandView.cs" id="4_o3qah"]
 [ext_resource type="PackedScene" uid="uid://ctgrwf42n2e28" path="res://scenes/card.tscn" id="4_of886"]
 [ext_resource type="Texture2D" uid="uid://b2q5vetsajba6" path="res://resources/card_sleeve.png" id="5_4m5vo"]
 
@@ -19,6 +20,7 @@ script = ExtResource("4_j1k82")
 [node name="Camera" type="Camera2D" parent="UI"]
 
 [node name="Hand View" type="CanvasLayer" parent="UI"]
+script = ExtResource("4_o3qah")
 
 [node name="Card" parent="UI/Hand View" instance=ExtResource("4_of886")]
 
@@ -26,3 +28,5 @@ script = ExtResource("4_j1k82")
 z_index = 1
 texture = ExtResource("5_4m5vo")
 centered = false
+
+[node name="Board View" type="CanvasLayer" parent="UI"]
