@@ -84,7 +84,7 @@ namespace UI {
 					Control drawnCard = cardBase.Instantiate() as Control;
 					drawnCard.Position = new Vector2(
 						CARD_WIDTH * (i + 0.5F),
-						(viewPortRect.Size.Y - CARD_HEIGHT) / 2
+						(viewPortRect.Size.Y + Tile.TILE_SIZE) / 2
 					);
 					drawnCard.Visible = true;
 					AddChild(drawnCard);

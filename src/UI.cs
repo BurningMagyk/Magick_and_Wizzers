@@ -21,7 +21,6 @@ namespace UI {
 			handView = GetNode<HandView>("Hand View");
 			camera = GetNode<Camera2D>("Camera");
 
-			boardView.SetViewPortRect(camera.GetViewportRect());
 			handView.SetViewPortRect(camera.GetViewportRect());
 		}
 
@@ -39,10 +38,8 @@ namespace UI {
 			if (Input.IsActionJustPressed("ui_hand")) {
 				if (handView.Showing) {
 					handView.Hide();
-					boardView.Show();
-				} 
+				}
 				else {
-					boardView.Hide();
 					handView.Show();
 				}
 			}
@@ -65,6 +62,14 @@ namespace UI {
 		// 	if (Input.IsKeyPressed(Key.F)) {
 		// 		GD.Print("test");
 		// 	}
+		}
+
+		public void HoverTile(Tile tile) {
+			boardView.Hover(tile, handView.Showing);
+		}
+
+		public Vector2I GetHoverPoint() {
+			return boardView.GetHoverPoint(camera);
 		}
 	}
 }
