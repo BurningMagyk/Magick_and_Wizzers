@@ -24,6 +24,7 @@ namespace UI {
 
 			hoveredCardIndex = -1;
 			Hide();
+			cardCountSupposed = STARTING_CARD_COUNT;
 		}
 
 		// Called every frame. 'delta' is the elapsed time since the previous frame.

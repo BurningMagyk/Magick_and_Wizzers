@@ -5,6 +5,7 @@ namespace UI {
 	public partial class UI : Node {
 		private const float CAMERA_SPEED = 5F;
 
+		private BoardView boardView;
 		private HandView handView;
 		private Camera2D camera;
 		
@@ -16,9 +17,11 @@ namespace UI {
 
 		// Called when the node enters the scene tree for the first time.
 		public override void _Ready() {
+			boardView = GetNode<BoardView>("Board View");
 			handView = GetNode<HandView>("Hand View");
 			camera = GetNode<Camera2D>("Camera");
 
+			boardView.SetViewPortRect(camera.GetViewportRect());
 			handView.SetViewPortRect(camera.GetViewportRect());
 		}
 
@@ -28,29 +31,36 @@ namespace UI {
 		}
 
 		public override void _PhysicsProcess(double delta) {
-			// camera.Position += joystick[0] * CAMERA_SPEED;
-			// camera.Align();
+			camera.Position += joystick[0] * CAMERA_SPEED;
+			camera.Align();
 		}
+
 		public override void _Input(InputEvent @event) {
 			if (Input.IsActionJustPressed("ui_hand")) {
-				if (handView.Showing) { handView.Hide(); } 
-				else { handView.Show(); }
+				if (handView.Showing) {
+					handView.Hide();
+					boardView.Show();
+				} 
+				else {
+					boardView.Hide();
+					handView.Show();
+				}
 			}
 
 			float horizontalPan = 0, verticalPan = 0;
-		// 	if (Input.IsKeyPressed(Key.A)) {
-		// 		horizontalPan -= 1;
-		// 	}
-		// 	if (Input.IsKeyPressed(Key.D)) {
-		// 		horizontalPan += 1;
-		// 	}
-		// 	if (Input.IsKeyPressed(Key.W)) {
-		// 		verticalPan -= 1;
-		// 	}
-		// 	if (Input.IsKeyPressed(Key.S)) {
-		// 		verticalPan += 1;
-		// 	}
-		// 	joystick[0] = new Vector2(horizontalPan, verticalPan);
+			if (Input.IsActionPressed("left")) {		
+				horizontalPan -= 1;
+			}
+			if (Input.IsActionPressed("right")) {
+				horizontalPan += 1;
+			}
+			if (Input.IsActionPressed("up")) {
+				verticalPan -= 1;
+			}
+			if (Input.IsActionPressed("down")) {
+				verticalPan += 1;
+			}
+			joystick[0] = new Vector2(horizontalPan, verticalPan);
 
 		// 	if (Input.IsKeyPressed(Key.F)) {
 		// 		GD.Print("test");
