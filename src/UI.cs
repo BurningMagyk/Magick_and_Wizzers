@@ -69,7 +69,14 @@ namespace UI {
 		}
 
 		public Vector2I GetHoverPoint() {
+			if (handView.Showing) {
+				return boardView.GetHoverPoint(camera, handView.HoverPartition);
+			}
 			return boardView.GetHoverPoint(camera);
+		}
+		public Tile.PartitionType GetHoverPartition() {
+			if (handView.Showing) { return handView.HoverPartition; }
+			return boardView.HoverPartition;
 		}
 	}
 }

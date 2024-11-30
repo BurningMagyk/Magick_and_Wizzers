@@ -13,17 +13,21 @@ texture = ExtResource("1_bvmlg")
 script = ExtResource("2_wvv18")
 
 [node name="Hover" type="Sprite2D" parent="."]
+z_index = 1
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("3_nw3px")
 
 [node name="Hover Move" type="Sprite2D" parent="."]
+z_index = 1
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("4_4s0rb")
 
 [node name="Hover Interact" type="Sprite2D" parent="."]
+z_index = 1
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("5_wvt6w")
 
 [node name="Hover Cast" type="Sprite2D" parent="."]
+z_index = 1
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("6_iycrh")

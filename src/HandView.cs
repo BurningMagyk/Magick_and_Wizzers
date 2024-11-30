@@ -8,6 +8,7 @@ namespace UI {
 		private readonly Control[] cardsInHand = new Control[MAX_CARD_COUNT];
 
 		public bool Showing { get; private set; }
+		public Tile.PartitionType HoverPartition { get; private set; }
 
 		private PackedScene cardBase;
 		private Sprite2D cardSleeve;
@@ -23,6 +24,7 @@ namespace UI {
 			GetNode<Control>("Card").Visible = false;
 
 			hoveredCardIndex = -1;
+			HoverPartition = Tile.MAX_PARTITION;
 			Hide();
 			cardCountSupposed = STARTING_CARD_COUNT;
 		}
