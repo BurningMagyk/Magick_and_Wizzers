@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Main {
   public partial class Board : Node {
@@ -12,7 +13,10 @@ namespace Main {
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready() {
-		tiles.Add(new Tile[BOARD_SIZE, BOARD_SIZE]);
+		for (int i = 0; i <= (int) Tile.MAX_PARTITION; i++) {
+			int boardLength = BOARD_SIZE * (int) Math.Pow(2, i);
+			tiles.Add(new Tile[boardLength, boardLength]);
+		}
 
 	  	PackedScene tileScene = ResourceLoader.Load<PackedScene>("res://scenes/tile.tscn");
 	  	for (int i = 0; i < BOARD_SIZE; i++) {
@@ -29,7 +33,8 @@ namespace Main {
 			
 		  		AddChild(tileSprite);
 				tiles[0][i, j] = GetNode<Tile>(tileSprite.Name.ToString());
-				tiles[0][i, j].Partition();
+				tiles[0][i, j].Coordinate = new Vector2I(i, j);
+				tiles[0][i, j].Partition(tiles.Skip(1).ToList());
 			}
 		}
 
@@ -43,15 +48,7 @@ namespace Main {
 	}
 
 	public Tile GetTileAt(Vector2I index, Tile.PartitionType partitionType) {
-		Vector2I landIndex = new Vector2I(
-			(int) Math.Floor(index.X / Math.Pow(2, (int) partitionType)),
-			(int) Math.Floor(index.Y / Math.Pow(2, (int) partitionType))
-		);
-		Vector2I subIndex = new Vector2I(
-			index.X - landIndex.X * (int) Math.Pow(2, (int) partitionType),
-			index.Y - landIndex.Y * (int) Math.Pow(2, (int) partitionType));
-		GD.Print(subIndex);
-		return tiles[0][landIndex.X, landIndex.Y].GetTileAt(subIndex, partitionType);
+		return tiles[(int) partitionType][index.X, index.Y];
 	}
   }
 }

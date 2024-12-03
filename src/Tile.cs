@@ -1,6 +1,8 @@
 using Godot;
 using Main;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 public partial class Tile : Sprite2D {
 	public const int TILE_SIZE = 128;
@@ -36,10 +38,11 @@ public partial class Tile : Sprite2D {
 	public override void _Process(double delta) {
 	}
 
-	public void Partition() { Partition(1); }
-	private void Partition(int level) {
-		partitionLevel = level - 1;
-		if (partitionLevel >= (int) MAX_PARTITION) { return; }
+	public Vector2I Coordinate { get; set; }
+
+	public void Partition(List<Tile[,]> tilesCollection) {
+		if (tilesCollection.Count == 0) { return; }
+		partitionLevel = (int) MAX_PARTITION - tilesCollection.Count;
 
 		PackedScene tileScene = ResourceLoader.Load<PackedScene>("res://scenes/tile.tscn");
 		for (int i = 0; i < 2; i++) {
@@ -51,30 +54,17 @@ public partial class Tile : Sprite2D {
 					= new Vector2(i, j) * tileSprite.Scale * textureSize
 					- textureSize * tileSprite.Scale / 2;
 				
-				string partitionTypeName = Util.ToTitleCase(Enum.GetNames(typeof(PartitionType))[level]);
-		  		tileSprite.Name = partitionTypeName + " [" + i + ", " + j + "]";
+				string childPartitionTypeName = Util.ToTitleCase(Enum.GetNames(typeof(PartitionType))[partitionLevel + 1]);
+		  		tileSprite.Name = childPartitionTypeName + " [" + i + ", " + j + "]";
 		  		AddChild(tileSprite);
 				tiles[i, j] = GetNode<Tile>(tileSprite.Name.ToString());
+				tiles[i, j].Coordinate = new Vector2I(Coordinate.X * 2 + i, Coordinate.Y * 2 + j);
+				tilesCollection[0][tiles[i, j].Coordinate.X, tiles[i, j].Coordinate.Y] = tiles[i, j];
 
 				tiles[i, j].textureSize = textureSize;
-				tiles[i, j].Partition(level + 1);
+				tiles[i, j].Partition(tilesCollection.Skip(1).ToList());
 			}
 		}
-	}
-
-	public Tile GetTileAt(Vector2I index, PartitionType partitionType) {
-		if ((int) partitionType <= partitionLevel) { return this; }
-
-		Vector2I partitionIndex = new Vector2I(
-			(int) Math.Floor(index.X / Math.Pow(2, (int) partitionType - partitionLevel - 1)),
-			(int) Math.Floor(index.Y / Math.Pow(2, (int) partitionType - partitionLevel - 1))
-		);
-		GD.Print(partitionIndex);
-		Vector2I subIndex = new Vector2I(
-			index.X - partitionIndex.X * (int) Math.Pow(2, (int) partitionType),
-			index.Y - partitionIndex.Y * (int) Math.Pow(2, (int) partitionType));
-		
-		return tiles[partitionIndex.X, partitionIndex.Y].GetTileAt(subIndex, partitionType);
 	}
 
 	public void Hover(HoverType hoverType) {
