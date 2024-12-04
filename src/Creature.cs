@@ -38,7 +38,7 @@ namespace Main {
             ILLUSION, DOLL, GOLEM, MACHINE
         }
         public enum RaceGroupEnum {
-            FAUNA, FLORA, MAMMAL, REPTILIAN, AQUATIC, SPIRIT, HOLY, UNHOLY, UNDEAD, CONSTRUCT
+            FAUNA, FLORA, HUMAN, MAMMAL, REPTILIAN, AQUATIC, ARTHROPOD, SPIRIT, HOLY, UNHOLY, UNDEAD, CONSTRUCT
         }
 
         private ElementEnum[] elements;
@@ -46,7 +46,7 @@ namespace Main {
         private ClassEnum[] classes;
         private ClassGroupEnum[] classGroups;
         private RaceEnum[] races;
-        private RaceGroupEnum[] raceGroups;
+        private RaceGroupEnum[] raceGroupsStrong, raceGroupsWeak;
         private int maxActionPoints, maxHitPoints, actionPoints, hitPoints;
 
         // Called when the node enters the scene tree for the first time.
@@ -142,6 +142,130 @@ namespace Main {
                 }
             }
             return groups.Distinct().ToArray();
+        }
+
+        private static RaceGroupEnum[][] DetermineRaceGroups(RaceEnum[] races) {
+            List<RaceGroupEnum> groupsStrong = new List<RaceGroupEnum>();
+            List<RaceGroupEnum> groupsWeak = new List<RaceGroupEnum>();
+            foreach (RaceEnum race in races) {
+                switch (race) {
+                    case RaceEnum.DRAGON:
+                        groupsWeak.Add(RaceGroupEnum.REPTILIAN);
+                        break;
+                    case RaceEnum.DINOSAUR:
+                    case RaceEnum.REPTILE:
+                        groupsStrong.Add(RaceGroupEnum.REPTILIAN);
+                        break;
+                    case RaceEnum.CHIMERA:
+                        groupsStrong.Add(RaceGroupEnum.FAUNA);
+                        break;
+                    case RaceEnum.SPHINX:
+                        groupsWeak.Add(RaceGroupEnum.MAMMAL);
+                        groupsWeak.Add(RaceGroupEnum.HOLY);
+                        break;
+                    case RaceEnum.APE:
+                    case RaceEnum.RODENT:
+                    case RaceEnum.FELINE:
+                    case RaceEnum.CANINE:
+                    case RaceEnum.BEAR:
+                    case RaceEnum.OVID:
+                    case RaceEnum.HORSE:
+                    case RaceEnum.BAT:
+                    case RaceEnum.CETACEAN:
+                        groupsStrong.Add(RaceGroupEnum.MAMMAL);
+                        if (race == RaceEnum.CETACEAN) {
+                            groupsStrong.Add(RaceGroupEnum.AQUATIC);
+                        }
+                        break;
+                    case RaceEnum.AMPHIBIAN:
+                    case RaceEnum.SLUG:
+                    case RaceEnum.SLIME:
+                        groupsWeak.Add(RaceGroupEnum.AQUATIC);
+                        if (race == RaceEnum.SLIME) {
+                            groupsWeak.Add(RaceGroupEnum.FLORA);
+                        }
+                        break;
+                    case RaceEnum.FISH:
+                    case RaceEnum.CEPHALOPOD:
+                        groupsStrong.Add(RaceGroupEnum.AQUATIC);
+                        break;
+                    case RaceEnum.INSECT:
+                    case RaceEnum.SPIDER:
+                    case RaceEnum.CRUSTACEAN:
+                        groupsStrong.Add(RaceGroupEnum.ARTHROPOD);
+                        if (race == RaceEnum.CRUSTACEAN) {
+                            groupsStrong.Add(RaceGroupEnum.AQUATIC);
+                        }
+                        break;
+                    case RaceEnum.FUNGUS:
+                        groupsWeak.Add(RaceGroupEnum.FLORA);
+                        break;
+                    case RaceEnum.PLANT:
+                        groupsStrong.Add(RaceGroupEnum.FLORA);
+                        break;
+                    case RaceEnum.MAN:
+                        groupsStrong.Add(RaceGroupEnum.HUMAN);
+                        break;
+                    case RaceEnum.ELF:
+                    case RaceEnum.GNOME:
+                    case RaceEnum.GIANT:
+                    case RaceEnum.HOMUNCULUS:
+                    case RaceEnum.ORC:
+                        groupsWeak.Add(RaceGroupEnum.HUMAN);
+                        if (race == RaceEnum.HOMUNCULUS) {
+                            groupsWeak.Add(RaceGroupEnum.CONSTRUCT);
+                        }
+                        break;
+                    case RaceEnum.GHOST:
+                        groupsStrong.Add(RaceGroupEnum.SPIRIT);
+                        groupsWeak.Add(RaceGroupEnum.UNDEAD);
+                        break;
+                    case RaceEnum.GROTESQUE:
+                        groupsWeak.Add(RaceGroupEnum.HOLY);
+                        groupsWeak.Add(RaceGroupEnum.UNHOLY);
+                        break;
+                    case RaceEnum.FAIRY:
+                        groupsWeak.Add(RaceGroupEnum.HOLY);
+                        groupsWeak.Add(RaceGroupEnum.SPIRIT);
+                        break;
+                    case RaceEnum.ANGEL:
+                        groupsWeak.Add(RaceGroupEnum.SPIRIT);
+                        groupsStrong.Add(RaceGroupEnum.HOLY);
+                        break;
+                    case RaceEnum.AVATAR:
+                        groupsStrong.Add(RaceGroupEnum.HOLY);
+                        break;
+                    case RaceEnum.HORROR:
+                        groupsStrong.Add(RaceGroupEnum.UNHOLY);
+                        break;
+                    case RaceEnum.DEVIL:
+                        groupsWeak.Add(RaceGroupEnum.SPIRIT);
+                        groupsStrong.Add(RaceGroupEnum.UNHOLY);
+                        break;
+                    case RaceEnum.SKELETON:
+                    case RaceEnum.ZOMBIE:
+                    case RaceEnum.VAMPIRE:
+                        groupsStrong.Add(RaceGroupEnum.UNDEAD);
+                        groupsStrong.Add(RaceGroupEnum.UNHOLY);
+                        if (race == RaceEnum.VAMPIRE) {
+                            groupsWeak.Add(RaceGroupEnum.HUMAN);
+                        }
+                        break;
+                    case RaceEnum.ILLUSION:
+                        groupsWeak.Add(RaceGroupEnum.SPIRIT);
+                        groupsWeak.Add(RaceGroupEnum.CONSTRUCT);
+                        break;
+                    case RaceEnum.DOLL:
+                    case RaceEnum.GOLEM:
+                    case RaceEnum.MACHINE:
+                        groupsStrong.Add(RaceGroupEnum.CONSTRUCT);
+                        break;
+                }
+            }
+            return new RaceGroupEnum[][] {
+                groupsStrong.Distinct().ToArray(),
+                groupsWeak.Distinct().ToArray()
+            };
         }
     }
 }
