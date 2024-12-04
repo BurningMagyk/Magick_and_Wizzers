@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using Main;
 
 namespace UI {
 	public partial class BoardView : Node {
