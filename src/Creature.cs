@@ -38,7 +38,7 @@ namespace Main {
             ILLUSION, DOLL, GOLEM, MACHINE
         }
         public enum RaceGroupEnum {
-            FAUNA, FLORA, HUMAN, MAMMAL, REPTILIAN, AQUATIC, ARTHROPOD, SPIRIT, HOLY, UNHOLY, UNDEAD, CONSTRUCT
+            HUMAN, ANIMAL, MAMMAL, REPTILIAN, AQUATIC, ARTHROPOD, FLORA, SPIRIT, HOLY, UNHOLY, UNDEAD, CONSTRUCT
         }
 
         private ElementEnum[] elements;
@@ -144,6 +144,23 @@ namespace Main {
             return groups.Distinct().ToArray();
         }
 
+        private static RaceGroupEnum[][] DetermineRaceGroups(RaceEnum[] racesStrong, RaceEnum[] racesWeak) {
+            List<RaceGroupEnum> groupsStrong = new List<RaceGroupEnum>();
+            List<RaceGroupEnum> groupsWeak = new List<RaceGroupEnum>();
+            
+            RaceGroupEnum[][] determinedStrong = DetermineRaceGroups(racesStrong);
+            groupsStrong.AddRange(determinedStrong[0]);
+            groupsWeak.AddRange(determinedStrong[1]);
+
+            RaceGroupEnum[][] determinedWeak = DetermineRaceGroups(racesWeak);
+            groupsWeak.AddRange(determinedWeak[0]);
+
+            return new RaceGroupEnum[][] {
+                groupsStrong.Distinct().ToArray(),
+                groupsWeak.Distinct().ToArray()
+            };
+        }
+
         private static RaceGroupEnum[][] DetermineRaceGroups(RaceEnum[] races) {
             List<RaceGroupEnum> groupsStrong = new List<RaceGroupEnum>();
             List<RaceGroupEnum> groupsWeak = new List<RaceGroupEnum>();
@@ -157,7 +174,7 @@ namespace Main {
                         groupsStrong.Add(RaceGroupEnum.REPTILIAN);
                         break;
                     case RaceEnum.CHIMERA:
-                        groupsStrong.Add(RaceGroupEnum.FAUNA);
+                        groupsStrong.Add(RaceGroupEnum.ANIMAL);
                         break;
                     case RaceEnum.SPHINX:
                         groupsWeak.Add(RaceGroupEnum.MAMMAL);
@@ -183,11 +200,14 @@ namespace Main {
                         groupsWeak.Add(RaceGroupEnum.AQUATIC);
                         if (race == RaceEnum.SLIME) {
                             groupsWeak.Add(RaceGroupEnum.FLORA);
+                        } else {
+                            groupsStrong.Add(RaceGroupEnum.ANIMAL);
                         }
                         break;
                     case RaceEnum.FISH:
                     case RaceEnum.CEPHALOPOD:
                         groupsStrong.Add(RaceGroupEnum.AQUATIC);
+                        groupsStrong.Add(RaceGroupEnum.ANIMAL);
                         break;
                     case RaceEnum.INSECT:
                     case RaceEnum.SPIDER:
@@ -262,10 +282,35 @@ namespace Main {
                         break;
                 }
             }
+
+            groupsStrong.AddRange(DetermineRaceGroupsExtra(groupsStrong));
+            groupsWeak.AddRange(DetermineRaceGroupsExtra(groupsWeak));
+
+            if (groupsStrong.Contains(RaceGroupEnum.HUMAN)) {
+                if (groupsStrong.Contains(RaceGroupEnum.UNDEAD) || groupsWeak.Contains(RaceGroupEnum.UNDEAD)) {
+                    groupsStrong.RemoveAll(item => item == RaceGroupEnum.HUMAN);
+                    groupsWeak.Add(RaceGroupEnum.HUMAN);
+                }
+            }
+
             return new RaceGroupEnum[][] {
                 groupsStrong.Distinct().ToArray(),
                 groupsWeak.Distinct().ToArray()
             };
+        }
+
+        private static ICollection<RaceGroupEnum> DetermineRaceGroupsExtra(ICollection<RaceGroupEnum> raceGroups) {
+            List<RaceGroupEnum> groupsExtra = new List<RaceGroupEnum>();
+            foreach (RaceGroupEnum raceGroup in raceGroups) {
+                switch (raceGroup) {
+                    case RaceGroupEnum.MAMMAL:
+                    case RaceGroupEnum.REPTILIAN:
+                    case RaceGroupEnum.ARTHROPOD:
+                        groupsExtra.Add(RaceGroupEnum.ANIMAL);
+                        break;
+                }
+            }
+            return groupsExtra.Distinct().ToArray();
         }
     }
 }
