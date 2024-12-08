@@ -8,7 +8,7 @@ namespace UI {
 		private readonly Control[] cardsInHand = new Control[MAX_CARD_COUNT];
 
 		public bool Showing { get; private set; }
-		public Tile.PartitionType HoverPartition { get; private set; }
+		public Main.Tile.PartitionType HoverPartition { get; private set; }
 
 		private PackedScene cardBase;
 		private Sprite2D cardSleeve;
@@ -21,10 +21,10 @@ namespace UI {
 			cardSleeve = GetNode<Sprite2D>("Card Sleeve");
 
 			// Make the base stuff invisible.
-			GetNode<Control>("Card").Visible = false;
+			GetNode<Card>("Card").Visible = false;
 
 			hoveredCardIndex = -1;
-			HoverPartition = Tile.MAX_PARTITION;
+			HoverPartition = Main.Tile.MAX_PARTITION;
 			Hide();
 			cardCountSupposed = STARTING_CARD_COUNT;
 		}
@@ -86,7 +86,7 @@ namespace UI {
 					Control drawnCard = cardBase.Instantiate() as Control;
 					drawnCard.Position = new Vector2(
 						CARD_WIDTH * (i + 0.5F),
-						(viewPortRect.Size.Y + Tile.TILE_SIZE) / 2
+						(viewPortRect.Size.Y + Main.Tile.TILE_SIZE) / 2
 					);
 					drawnCard.Visible = true;
 					AddChild(drawnCard);

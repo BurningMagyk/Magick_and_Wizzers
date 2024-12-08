@@ -1,5 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://ctgrwf42n2e28"]
+[gd_scene load_steps=3 format=3 uid="uid://ctgrwf42n2e28"]
 
+[ext_resource type="Script" path="res://src/Card.cs" id="1_auth0"]
 [ext_resource type="Texture2D" uid="uid://bjw3r2hxa588f" path="res://resources/card_art/Trololololo_Road.png" id="1_d7j8h"]
 
 [node name="Card" type="Control"]
@@ -11,6 +12,7 @@ offset_right = -982.0
 offset_bottom = -424.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_auth0")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 0
@@ -18,20 +20,20 @@ offset_right = 170.0
 offset_bottom = 224.0
 color = Color(1, 0.878333, 0.27, 1)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="Foreground" type="VBoxContainer" parent="."]
 layout_mode = 0
 offset_right = 170.0
 offset_bottom = 250.0
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer"]
+[node name="Illustration" type="TextureRect" parent="Foreground"]
 layout_mode = 2
 texture = ExtResource("1_d7j8h")
 expand_mode = 4
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="Stats Top" type="HBoxContainer" parent="Foreground"]
 layout_mode = 2
 
-[node name="Level" type="Label" parent="VBoxContainer/HBoxContainer"]
+[node name="Level" type="Label" parent="Foreground/Stats Top"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.2
@@ -39,16 +41,16 @@ theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Level 1"
 horizontal_alignment = 1
 
-[node name="Element" type="ColorRect" parent="VBoxContainer/HBoxContainer"]
+[node name="Element" type="ColorRect" parent="Foreground/Stats Top"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.03
 color = Color(0, 0, 0, 1)
 
-[node name="Point Stats" type="HBoxContainer" parent="VBoxContainer"]
+[node name="Stats Bottom" type="HBoxContainer" parent="Foreground"]
 layout_mode = 2
 
-[node name="Action Points" type="Label" parent="VBoxContainer/Point Stats"]
+[node name="Action Points" type="Label" parent="Foreground/Stats Bottom"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0, 0, 0, 1)
@@ -56,7 +58,7 @@ text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Hit Points" type="Label" parent="VBoxContainer/Point Stats"]
+[node name="Hit Points" type="Label" parent="Foreground/Stats Bottom"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0, 0, 0, 1)

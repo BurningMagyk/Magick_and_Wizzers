@@ -64,7 +64,7 @@ namespace UI {
 		// 	}
 		}
 
-		public void HoverTile(Tile tile) {
+		public void HoverTile(Main.Tile tile) {
 			boardView.Hover(tile, handView.Showing);
 		}
 
@@ -74,7 +74,7 @@ namespace UI {
 			}
 			return boardView.GetHoverPoint(camera);
 		}
-		public Tile.PartitionType GetHoverPartition() {
+		public Main.Tile.PartitionType GetHoverPartition() {
 			if (handView.Showing) { return handView.HoverPartition; }
 			return boardView.HoverPartition;
 		}
