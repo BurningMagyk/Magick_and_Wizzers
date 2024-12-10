@@ -1,4 +1,5 @@
 using Godot;
+using Main;
 using System;
 
 namespace UI {
@@ -22,6 +23,7 @@ namespace UI {
 			camera = GetNode<Camera2D>("Camera");
 
 			handView.SetViewPortRect(camera.GetViewportRect());
+			handView.Drawn += GetParent<Main.Main>().OnHandDrawn;
 		}
 
 		// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -30,7 +32,10 @@ namespace UI {
 		}
 
 		public override void _PhysicsProcess(double delta) {
+			if (joystick[0] == new Vector2(0, 0)) { return; }
+
 			camera.Position += joystick[0] * CAMERA_SPEED;
+			EmitSignal(SignalName.Moved, camera.Position, boardView.HoveredTile);
 			camera.Align();
 		}
 
@@ -63,6 +68,9 @@ namespace UI {
 		// 		GD.Print("test");
 		// 	}
 		}
+
+		[Signal]
+		public delegate void MovedEventHandler(Vector2 newPosition, Tile oldHoveredTile);
 
 		public void HoverTile(Main.Tile tile) {
 			boardView.Hover(tile, handView.Showing);

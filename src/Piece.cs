@@ -11,8 +11,9 @@ using RaceEnum = Main.Stats.RaceEnum;
 using RaceGroupEnum = Main.Stats.RaceGroupEnum;
 
 namespace Main {
-    public partial class Creature : Node2D {
-        private Stats stats;
+    public partial class Piece : Node2D {
+        public Tile Tile { get; set; }
+        public Stats Stats { get; set; }
 
         // Called when the node enters the scene tree for the first time.
         public override void _Ready() {
@@ -20,14 +21,6 @@ namespace Main {
 
         // Called every frame. 'delta' is the elapsed time since the previous frame.
         public override void _Process(double delta) {
-        }
-
-        public void SetStats(
-            string name,
-            ElementEnum[] elements, ClassEnum[] classes, RaceEnum[] races,
-            int maxActionPoints, int maxHitPoints) {
-
-            stats = new Stats(name, elements, classes, races, maxActionPoints, maxHitPoints);
         }
     }
 }

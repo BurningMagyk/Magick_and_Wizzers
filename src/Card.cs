@@ -35,6 +35,9 @@ public partial class Card : Control {
 	public override void _Process(double delta) {
 	}
 
+	[Signal]
+	public delegate void SelectedEventHandler(Card card);
+
 	private static Color ToColor(Stats.ElementGroupEnum elementGroup) {
 		switch (elementGroup) {
 			case Stats.ElementGroupEnum.PURPLE:

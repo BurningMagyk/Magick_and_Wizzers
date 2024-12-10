@@ -41,7 +41,13 @@ namespace UI {
 			if (Input.IsActionJustPressed("ui_right")) {
 				HoverCard(DirectionEnum.RIGHT);
 			}
+			if (Input.IsActionJustPressed("ui_select")) {
+				PlayCard();
+			}
 		}
+
+		[Signal]
+		public delegate void DrawnEventHandler(Card card);
 
 		public void Show() {
 			// Count number of cards in hand currently.
@@ -130,6 +136,19 @@ namespace UI {
 			// Place the sleeve over the hovered card.
 			cardSleeve.Position = new Vector2(hoveredCard.Position.X - 10, hoveredCard.Position.Y - 10);
 			cardSleeve.Visible = true;
+		}
+
+		private void PlayCard() {
+			if (hoveredCardIndex == -1) { return; }
+			Card card = cardsInHand[hoveredCardIndex] as Card;
+
+			// Remove card from hand.
+			cardsInHand[hoveredCardIndex] = null;
+
+			// Play the card.
+
+			// Make no card hovered.
+			hoveredCardIndex = -1;
 		}
 	}
 }

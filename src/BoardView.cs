@@ -6,9 +6,9 @@ namespace UI {
 	public partial class BoardView : Node {
 		public bool Showing { get; private set; }
 		public Tile.PartitionType HoverPartition;
+		public Tile HoveredTile { get; private set;}
 		
 		private Sprite2D crosshair;
-		private Tile hoveredTile;
 
 		// Called when the node enters the scene tree for the first time.
 		public override void _Ready() {
@@ -38,9 +38,9 @@ namespace UI {
 
 		public void Hover(Tile tile, bool showingHand) {
 			Tile.HoverType hoverType = showingHand ? Tile.HoverType.CAST : Tile.HoverType.NORMAL;
-			if (hoveredTile != null) { hoveredTile.Unhover(hoverType); }
-			hoveredTile = tile;
-			if (hoveredTile != null) { hoveredTile.Hover(hoverType); }
+			if (HoveredTile != null) { HoveredTile.Unhover(hoverType); }
+			HoveredTile = tile;
+			if (HoveredTile != null) { HoveredTile.Hover(hoverType); }
 		}
 
 		public void Show() {

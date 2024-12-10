@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://bc5gmn57qtpie"]
+[gd_scene load_steps=11 format=3 uid="uid://bc5gmn57qtpie"]
 
 [ext_resource type="Script" path="res://src/Board.cs" id="1_3r2g8"]
 [ext_resource type="Script" path="res://src/Main.cs" id="1_d0b4a"]
@@ -6,8 +6,7 @@
 [ext_resource type="Script" path="res://src/UI.cs" id="4_j1k82"]
 [ext_resource type="Script" path="res://src/HandView.cs" id="4_o3qah"]
 [ext_resource type="PackedScene" uid="uid://ctgrwf42n2e28" path="res://scenes/card.tscn" id="4_of886"]
-[ext_resource type="PackedScene" uid="uid://bcccthspywgs4" path="res://scenes/creature.tscn" id="4_r73ob"]
-[ext_resource type="Script" path="res://src/Creature.cs" id="5_0stfl"]
+[ext_resource type="PackedScene" uid="uid://bcccthspywgs4" path="res://scenes/piece.tscn" id="4_r73ob"]
 [ext_resource type="Texture2D" uid="uid://b2q5vetsajba6" path="res://resources/card_sleeve.png" id="5_4m5vo"]
 [ext_resource type="Script" path="res://src/BoardView.cs" id="7_n5b21"]
 [ext_resource type="Texture2D" uid="uid://ca02dx33dsurg" path="res://resources/crosshair.png" id="8_17b01"]
@@ -20,8 +19,7 @@ script = ExtResource("1_3r2g8")
 
 [node name="Tile" parent="Board" instance=ExtResource("2_8d3qu")]
 
-[node name="Creature" parent="Board" instance=ExtResource("4_r73ob")]
-script = ExtResource("5_0stfl")
+[node name="Piece" parent="Board" instance=ExtResource("4_r73ob")]
 
 [node name="UI" type="Node" parent="."]
 script = ExtResource("4_j1k82")

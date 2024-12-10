@@ -10,11 +10,30 @@ namespace Main {
 		public override void _Ready() {
 			board = GetNode<Board>("Board");
 			ui = GetNode<UI.UI>("UI");
+
+			ui.Moved += OnUIMoved;
+
 		}
 
 		// Called every frame. 'delta' is the elapsed time since the previous frame.
 		public override void _Process(double delta) {
-			ui.HoverTile(board.GetTileAt(ui.GetHoverPoint(), ui.GetHoverPartition()));
+			
+		}
+
+		public void OnUIMoved(Vector2 newPosition, Tile oldHoveredTile) {
+			// Check if new position is hovering a different tile now.
+			Tile newTile = board.GetTileAt(ui.GetHoverPoint(), ui.GetHoverPartition());
+			if (newTile != oldHoveredTile) {
+				ui.HoverTile(newTile);
+			}
+		}
+
+		public void OnHandDrawn(Card card) {
+			card.Selected += OnCardSelected;
+		}
+
+		public void OnCardSelected(Card card) {
+			GD.Print("Card selected: " + card.Name);
 		}
 	}
 }

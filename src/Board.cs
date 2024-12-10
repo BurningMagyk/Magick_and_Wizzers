@@ -7,8 +7,12 @@ using System.Linq;
 namespace Main {
   public partial class Board : Node {
 	private const int BOARD_SIZE = 7;
+	private const string PIECE_TEMP_NAME = "piece_temp_name";
 
-	private List<Tile[,]> tiles = new List<Tile[,]>();
+	private readonly List<Tile[,]> tiles = new List<Tile[,]>();
+	private readonly HashSet<Piece> pieces = new HashSet<Piece>();
+
+	private PackedScene pieceScene;
 	private Tile hoveredTile;
 
 	// Called when the node enters the scene tree for the first time.
@@ -38,13 +42,29 @@ namespace Main {
 			}
 		}
 
-	  // Make the base stuff invisible.
-	  GetNode<Tile>("Tile").Visible = false;
+		pieceScene = ResourceLoader.Load<PackedScene>("res://scenes/piece.tscn");
+
+		// Make the base stuff invisible.
+		GetNode<Tile>("Tile").Visible = false;
+		GetNode<Piece>("Piece").Visible = false;
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta) {
 	  
+	}
+
+	public void AddPiece(Vector2I tileIndex, Tile.PartitionType tilePartitionType, Stats stats) {
+		// Create a new piece.
+		Sprite2D pieceSprite = pieceScene.Instantiate() as Sprite2D;
+		pieceSprite.Name = PIECE_TEMP_NAME;
+		AddChild(pieceSprite);
+
+		// Set the piece's stats.
+		Piece piece = GetNode<Piece>(PIECE_TEMP_NAME);
+		piece.Stats = stats;
+		piece.Tile = GetTileAt(tileIndex, tilePartitionType);
+		pieces.Add(piece);
 	}
 
 	public Tile GetTileAt(Vector2I index, Tile.PartitionType partitionType) {
