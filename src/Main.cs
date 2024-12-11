@@ -12,7 +12,8 @@ namespace Main {
 			ui = GetNode<UI.UI>("UI");
 
 			ui.Moved += OnUIMoved;
-
+			ui.ChangedHoverType += OnUIChangedHoverType;
+			ui.PlayedFromHand += OnPlayedFromHand;
 		}
 
 		// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -28,12 +29,17 @@ namespace Main {
 			}
 		}
 
-		public void OnHandDrawn(Card card) {
-			card.Selected += OnCardSelected;
+		public void OnUIChangedHoverType(Tile hoveredTile) {
+			ui.HoverTile(hoveredTile);
 		}
 
-		public void OnCardSelected(Card card) {
-			GD.Print("Card selected: " + card.Name);
+		public void OnPlayedFromHand(Card card) {
+			GD.Print("Card played: " + card.Name);
+			board.AddPiece(
+				board.GetTileAt(ui.GetHoverPoint(), ui.GetHoverPartition()),
+				card.Stats,
+				card.Illustration
+			);
 		}
 	}
 }

@@ -5,15 +5,16 @@ namespace UI {
 	public partial class HandView : Node {
 		private const float CARD_WIDTH = 170, CARD_HEIGHT = 224;
 		private const int STARTING_CARD_COUNT = 5, MAX_CARD_COUNT = 10;
-		private readonly Control[] cardsInHand = new Control[MAX_CARD_COUNT];
+		private readonly Card[] cardsInHand = new Card[MAX_CARD_COUNT];
 
 		public bool Showing { get; private set; }
 		public Main.Tile.PartitionType HoverPartition { get; private set; }
+		public int CardCountSupposed { get; private set; }
 
 		private PackedScene cardBase;
 		private Sprite2D cardSleeve;
 		private Rect2 viewPortRect;
-		private int cardCountSupposed, hoveredCardIndex;
+		private int hoveredCardIndex;
 
 		// Called when the node enters the scene tree for the first time.
 		public override void _Ready() {
@@ -26,7 +27,7 @@ namespace UI {
 			hoveredCardIndex = -1;
 			HoverPartition = Main.Tile.MAX_PARTITION;
 			Hide();
-			cardCountSupposed = STARTING_CARD_COUNT;
+			CardCountSupposed = STARTING_CARD_COUNT;
 		}
 
 		// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -47,26 +48,22 @@ namespace UI {
 		}
 
 		[Signal]
-		public delegate void DrawnEventHandler(Card card);
+		public delegate void PlayedEventHandler(Card card);
 
 		public void Show() {
-			// Count number of cards in hand currently.
-			int cardCountCurrent = 0;
 			for (int i = 0; i < cardsInHand.Length; i++) {
 				if (cardsInHand[i] != null) {
-					cardCountCurrent++;
 					cardsInHand[i].Visible = true;
 				}
 			}
 
 			// Only draw cards if we're supposed to have a higher amount than current.
-			int cardCountNeedToDraw = cardCountSupposed - cardCountCurrent;
+			int cardCountNeedToDraw = CardCountSupposed - GetCardCount();
 			if (cardCountNeedToDraw > 0) {
 				for (int i = 0; i < cardCountNeedToDraw; i++) { DrawCard(); }
 			}
 
-			cardSleeve.Visible = true;
-			HoverCard(DirectionEnum.NONE);
+			Unhover();
 
 			Showing = true;
 		}
@@ -95,60 +92,110 @@ namespace UI {
 						(viewPortRect.Size.Y + Main.Tile.TILE_SIZE) / 2
 					);
 					drawnCard.Visible = true;
+					drawnCard.Name = "Card " + i;
 					AddChild(drawnCard);
-					cardsInHand[i] = drawnCard;
+					cardsInHand[i] = GetNode<Card>("Card " + i);
 					break;
 				}
 			}
 		}
 
 		private void HoverCard(DirectionEnum direction) {
-			if (direction == DirectionEnum.NONE || cardsInHand[0] == null) {
-				// Unhover cards in hand or no cards in hand.
-				hoveredCardIndex = -1;
-				cardSleeve.Visible = false;
+			if (direction == DirectionEnum.NONE || GetCardCount() == 0) {
+				// Intend to unhover or no cards in hand.
+				Unhover();
 				return;
 			} else if (direction == DirectionEnum.LEFT) {
-				if (hoveredCardIndex == -1 || hoveredCardIndex == 0) {
+				if (hoveredCardIndex == -1 || hoveredCardIndex == GetLeftmostCardIndex()) {
 					// Start sleeve at right end.
-					for (int i = cardsInHand.Length - 1; i >= 0; i--) {
-						if (cardsInHand[i] != null) {
-							hoveredCardIndex = i;
-							break;
-						}
-					}
+					hoveredCardIndex = GetRightmostCardIndex();
 				} else {
 					// Move sleeve to the left.
-					hoveredCardIndex--;
+					hoveredCardIndex = GetRightmostCardIndex(hoveredCardIndex - 1);
+				}
+				if (hoveredCardIndex == -1) {
+					Unhover();
+					return;
 				}
 			} else if (direction == DirectionEnum.RIGHT) {
-				if (hoveredCardIndex == -1 || hoveredCardIndex == cardsInHand.Length - 1 || cardsInHand[hoveredCardIndex + 1] == null) {
+				if (hoveredCardIndex == -1 || hoveredCardIndex == GetRightmostCardIndex()) {
 					// Start sleeve at left end.
-					hoveredCardIndex = 0;
+					hoveredCardIndex = GetLeftmostCardIndex();
 				} else {
 					// Move sleeve to the right.
-					hoveredCardIndex++;
+					hoveredCardIndex = GetLeftmostCardIndex(hoveredCardIndex + 1);
+				}
+				if (hoveredCardIndex == -1) {
+					Unhover();
+					return;
 				}
 			}
 		
-			Control hoveredCard = cardsInHand[hoveredCardIndex];
+			Card hoveredCard = cardsInHand[hoveredCardIndex];
+
+			// Get difference in size between card and sleeve.
+			Vector2 sizeDifference = new Vector2(
+				cardSleeve.Texture.GetWidth() - CARD_WIDTH,
+				cardSleeve.Texture.GetHeight() - CARD_HEIGHT
+			);
 
 			// Place the sleeve over the hovered card.
-			cardSleeve.Position = new Vector2(hoveredCard.Position.X - 10, hoveredCard.Position.Y - 10);
+			cardSleeve.Position = hoveredCard.Position - sizeDifference / 2;
 			cardSleeve.Visible = true;
 		}
 
+		private void Unhover() {
+			hoveredCardIndex = -1;
+			cardSleeve.Visible = false;
+		}
+
 		private void PlayCard() {
-			if (hoveredCardIndex == -1) { return; }
+			if (hoveredCardIndex == -1
+				|| hoveredCardIndex >= cardsInHand.Length
+				|| cardsInHand[hoveredCardIndex] == null) {
+				return;
+			}
 			Card card = cardsInHand[hoveredCardIndex] as Card;
 
 			// Remove card from hand.
+			cardsInHand[hoveredCardIndex].Visible = false;
 			cardsInHand[hoveredCardIndex] = null;
 
 			// Play the card.
+			EmitSignal(SignalName.Played, card);
 
 			// Make no card hovered.
-			hoveredCardIndex = -1;
+			Unhover();
+		}
+
+		private int GetLeftmostCardIndex(int startIndex = 0) {
+			for (int i = startIndex; i < cardsInHand.Length; i++) {
+				if (cardsInHand[i] != null) {
+					return i;
+				}
+			}
+			return -1;
+		}
+		private int GetRightmostCardIndex(int startIndex) {
+			for (int i = startIndex; i >= 0; i--) {
+				if (cardsInHand[i] != null) {
+					return i;
+				}
+			}
+			return -1;
+		}
+		private int GetRightmostCardIndex() {
+			return GetRightmostCardIndex(cardsInHand.Length - 1);
+		}
+		
+		private int GetCardCount() {
+			int count = 0;
+			for (int i = 0; i < cardsInHand.Length; i++) {
+				if (cardsInHand[i] != null) {
+					count++;
+				}
+			}
+			return count;
 		}
 	}
 }

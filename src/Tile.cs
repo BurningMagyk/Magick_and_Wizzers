@@ -11,7 +11,8 @@ namespace Main {
 		public enum HoverType { NORMAL, MOVE, INTERACT, CAST }
 		public enum PartitionType { LAND, CARUCATE, VIRGATE, HECTARE, ACRE }
 
-		private Vector2 textureSize;
+		public Vector2 TextureSize { get; private set; }
+
 		private Tile[,] tiles = new Tile[2, 2];
 		private HoverType hoverType = HoverType.NORMAL;
 		private Sprite2D[] hoverSprites;
@@ -31,7 +32,7 @@ namespace Main {
 
 			// Saving texture size because texture can become null later.
 			if (Texture != null) {
-				textureSize = Texture.GetSize();
+				TextureSize = Texture.GetSize();
 			}
 		}
 
@@ -52,8 +53,8 @@ namespace Main {
 					tileSprite.Texture = null;
 					tileSprite.Scale = new Vector2(0.5F, 0.5F);
 					tileSprite.Position
-						= new Vector2(i, j) * tileSprite.Scale * textureSize
-						- textureSize * tileSprite.Scale / 2;
+						= new Vector2(i, j) * tileSprite.Scale * TextureSize
+						- TextureSize * tileSprite.Scale / 2;
 					
 					string childPartitionTypeName = Util.ToTitleCase(Enum.GetNames(typeof(PartitionType))[partitionLevel + 1]);
 					tileSprite.Name = childPartitionTypeName + " [" + i + ", " + j + "]";
@@ -62,7 +63,7 @@ namespace Main {
 					tiles[i, j].Coordinate = new Vector2I(Coordinate.X * 2 + i, Coordinate.Y * 2 + j);
 					tilesCollection[0][tiles[i, j].Coordinate.X, tiles[i, j].Coordinate.Y] = tiles[i, j];
 
-					tiles[i, j].textureSize = textureSize;
+					tiles[i, j].TextureSize = TextureSize;
 					tiles[i, j].Partition(tilesCollection.Skip(1).ToList());
 				}
 			}

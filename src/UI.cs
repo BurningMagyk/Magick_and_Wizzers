@@ -9,7 +9,6 @@ namespace UI {
 		private BoardView boardView;
 		private HandView handView;
 		private Camera2D camera;
-		
 
 		private Vector2[] joystick = new Vector2[] {
 			new Vector2(0, 0),
@@ -23,7 +22,7 @@ namespace UI {
 			camera = GetNode<Camera2D>("Camera");
 
 			handView.SetViewPortRect(camera.GetViewportRect());
-			handView.Drawn += GetParent<Main.Main>().OnHandDrawn;
+			handView.Played += OnPlayed;
 		}
 
 		// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -32,11 +31,14 @@ namespace UI {
 		}
 
 		public override void _PhysicsProcess(double delta) {
-			if (joystick[0] == new Vector2(0, 0)) { return; }
-
+			Vector2 oldCameraPosition = camera.Position;
 			camera.Position += joystick[0] * CAMERA_SPEED;
-			EmitSignal(SignalName.Moved, camera.Position, boardView.HoveredTile);
+			// It seems that calling Align repositions the camera.
 			camera.Align();
+
+			if (oldCameraPosition != camera.Position) {
+				EmitSignal(SignalName.Moved, camera.Position, boardView.HoveredTile);
+			}
 		}
 
 		public override void _Input(InputEvent @event) {
@@ -47,6 +49,7 @@ namespace UI {
 				else {
 					handView.Show();
 				}
+				EmitSignal(SignalName.ChangedHoverType, boardView.HoveredTile);
 			}
 
 			float horizontalPan = 0, verticalPan = 0;
@@ -70,7 +73,11 @@ namespace UI {
 		}
 
 		[Signal]
+		public delegate void ChangedHoverTypeEventHandler(Tile hoveredTile);
+		[Signal]
 		public delegate void MovedEventHandler(Vector2 newPosition, Tile oldHoveredTile);
+		[Signal]
+		public delegate void PlayedFromHandEventHandler(Card card);
 
 		public void HoverTile(Main.Tile tile) {
 			boardView.Hover(tile, handView.Showing);
@@ -85,6 +92,10 @@ namespace UI {
 		public Main.Tile.PartitionType GetHoverPartition() {
 			if (handView.Showing) { return handView.HoverPartition; }
 			return boardView.HoverPartition;
+		}
+
+		private void OnPlayed(Card card) {
+			EmitSignal(SignalName.PlayedFromHand, card);
 		}
 	}
 }

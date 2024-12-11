@@ -20,6 +20,7 @@ script = ExtResource("1_3r2g8")
 [node name="Tile" parent="Board" instance=ExtResource("2_8d3qu")]
 
 [node name="Piece" parent="Board" instance=ExtResource("4_r73ob")]
+z_index = 1
 
 [node name="UI" type="Node" parent="."]
 script = ExtResource("4_j1k82")

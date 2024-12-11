@@ -41,7 +41,6 @@ namespace Main {
 			HUMAN, ANIMAL, MAMMAL, REPTILIAN, AQUATIC, ARTHROPOD, FLORA, SPIRIT, HOLY, UNHOLY, UNDEAD, CONSTRUCT
 		}
 
-		private string name;
 		private ElementEnum[] elements;
 		private ElementGroupEnum[] elementGroups;
 		private ClassEnum[] classes;
@@ -50,6 +49,7 @@ namespace Main {
 		private RaceGroupEnum[] raceGroupsStrong, raceGroupsWeak;
 		private int maxActionPoints, maxHitPoints;
 
+		public String Name { get; private set;}
 		public int Level { get; private set; }
 		public int MaxActionPoints { get { return maxActionPoints; } }
 		public int MaxHitPoints { get { return maxHitPoints; } }
@@ -60,7 +60,7 @@ namespace Main {
 			ElementEnum[] elements, ClassEnum[] classes, RaceEnum[] races,
 			int maxActionPoints, int maxHitPoints) {
 
-			this.name = name;
+			Name = name;
 			this.elements = elements;
 			elementGroups = DetermineElementGroups(elements);
 

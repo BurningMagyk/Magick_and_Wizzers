@@ -9,19 +9,28 @@ using ClassEnum = Main.Stats.ClassEnum;
 using ClassGroupEnum = Main.Stats.ClassGroupEnum;
 using RaceEnum = Main.Stats.RaceEnum;
 using RaceGroupEnum = Main.Stats.RaceGroupEnum;
+using System.Drawing;
 
 namespace Main {
-    public partial class Piece : Node2D {
-        public Tile Tile { get; set; }
-        public Stats Stats { get; set; }
+	public partial class Piece : Sprite2D {
+		public Tile Tile {
+			get => tile;
+			set {
+				tile = value;
+				Position = tile.GlobalPosition;
+				Scale = value.GlobalScale * value.TextureSize / Texture.GetSize();
+			}
+		}
+		public Stats Stats { get; set; }
 
-        // Called when the node enters the scene tree for the first time.
-        public override void _Ready() {
-        }
+		private Tile tile;
 
-        // Called every frame. 'delta' is the elapsed time since the previous frame.
-        public override void _Process(double delta) {
-        }
-    }
+		// Called when the node enters the scene tree for the first time.
+		public override void _Ready() {
+		}
+
+		// Called every frame. 'delta' is the elapsed time since the previous frame.
+		public override void _Process(double delta) {
+		}
+	}
 }
-

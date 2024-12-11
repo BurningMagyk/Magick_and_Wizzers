@@ -7,14 +7,17 @@ public partial class Card : Control {
 		SUMMON, CHARM, MASTERY, TERRAFORM, NORMAL, TRAP
 	}
 
-	Label levelLabel, actionPointsLabel, hitPointsLabel;
-	ColorRect elementIcon;
-	CardTypeEnum cardType;
-	Stats stats;
+	public Stats Stats { get; private set; }
+	public Texture2D Illustration { get; private set; }
+
+	private Label levelLabel, actionPointsLabel, hitPointsLabel;
+	private ColorRect elementIcon;
+	private CardTypeEnum cardType;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready() {
 		VBoxContainer foreground = GetNode<VBoxContainer>("Foreground");
+		Illustration = foreground.GetNode<TextureRect>("Illustration").Texture;
 		HBoxContainer topContainer = foreground.GetNode<HBoxContainer>("Stats Top");
 		levelLabel = topContainer.GetNode<Label>("Level");
 		elementIcon = topContainer.GetNode<ColorRect>("Element");
@@ -23,20 +26,16 @@ public partial class Card : Control {
 		hitPointsLabel = bottomContainer.GetNode<Label>("Hit Points");
 
 		cardType = CardTypeEnum.SUMMON;
-		stats = Stats.CreateRandom();
+		Stats = Stats.CreateRandom();
 
-		levelLabel.Text = "Level " + stats.Level.ToString();
-		elementIcon.Color = ToColor(stats.ElementGroup);
-		actionPointsLabel.Text = stats.MaxActionPoints.ToString();
-		hitPointsLabel.Text = stats.MaxHitPoints.ToString();
+		levelLabel.Text = "Level " + Stats.Level.ToString();
+		elementIcon.Color = ToColor(Stats.ElementGroup);
+		actionPointsLabel.Text = Stats.MaxActionPoints.ToString();
+		hitPointsLabel.Text = Stats.MaxHitPoints.ToString();
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _Process(double delta) {
-	}
-
-	[Signal]
-	public delegate void SelectedEventHandler(Card card);
+	public override void _Process(double delta) { }
 
 	private static Color ToColor(Stats.ElementGroupEnum elementGroup) {
 		switch (elementGroup) {

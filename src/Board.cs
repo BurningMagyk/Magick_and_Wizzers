@@ -7,13 +7,13 @@ using System.Linq;
 namespace Main {
   public partial class Board : Node {
 	private const int BOARD_SIZE = 7;
-	private const string PIECE_TEMP_NAME = "piece_temp_name";
 
 	private readonly List<Tile[,]> tiles = new List<Tile[,]>();
 	private readonly HashSet<Piece> pieces = new HashSet<Piece>();
 
 	private PackedScene pieceScene;
 	private Tile hoveredTile;
+	private int pieceId = 0;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready() {
@@ -54,16 +54,17 @@ namespace Main {
 	  
 	}
 
-	public void AddPiece(Vector2I tileIndex, Tile.PartitionType tilePartitionType, Stats stats) {
+	public void AddPiece(Tile targetTile, Stats stats, Texture2D illustration) {
 		// Create a new piece.
 		Sprite2D pieceSprite = pieceScene.Instantiate() as Sprite2D;
-		pieceSprite.Name = PIECE_TEMP_NAME;
+		pieceSprite.Name = stats.Name + " " + pieceId++;
+		pieceSprite.Texture = illustration;
 		AddChild(pieceSprite);
 
 		// Set the piece's stats.
-		Piece piece = GetNode<Piece>(PIECE_TEMP_NAME);
+		Piece piece = GetNode<Piece>(pieceSprite.Name.ToString());
 		piece.Stats = stats;
-		piece.Tile = GetTileAt(tileIndex, tilePartitionType);
+		piece.Tile = targetTile;
 		pieces.Add(piece);
 	}
 
