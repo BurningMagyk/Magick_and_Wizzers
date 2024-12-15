@@ -49,13 +49,12 @@ namespace Main {
 						- TILE_SIZE * tileMeshInstance.Scale / 2;
 					
 					string childPartitionTypeName = Util.ToTitleCase(Enum.GetNames(typeof(PartitionType))[partitionLevel + 1]);
-					tileSprite.Name = childPartitionTypeName + " [" + i + ", " + j + "]";
-					AddChild(tileSprite);
-					tiles[i, j] = GetNode<Tile2D>(tileSprite.Name.ToString());
+					tileMeshInstance.Name = childPartitionTypeName + " [" + i + ", " + j + "]";
+					AddChild(tileMeshInstance);
+					tiles[i, j] = GetNode<Tile>(tileMeshInstance.Name.ToString());
 					tiles[i, j].Coordinate = new Vector2I(Coordinate.X * 2 + i, Coordinate.Y * 2 + j);
 					tilesCollection[0][tiles[i, j].Coordinate.X, tiles[i, j].Coordinate.Y] = tiles[i, j];
 
-					tiles[i, j].TextureSize = TextureSize;
 					tiles[i, j].Partition(tilesCollection.Skip(1).ToList());
 				}
 			}

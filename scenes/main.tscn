@@ -1,27 +1,38 @@
-[gd_scene load_steps=4 format=3 uid="uid://5h8krlppg2bv"]
+[gd_scene load_steps=10 format=3 uid="uid://5h8krlppg2bv"]
 
 [ext_resource type="Script" path="res://src/Main.cs" id="1_d0b4a"]
+[ext_resource type="Script" path="res://src/Board.cs" id="2_5w1h0"]
+[ext_resource type="PackedScene" uid="uid://b2yvn8v5igbcx" path="res://scenes/tile.tscn" id="2_bo870"]
 [ext_resource type="PackedScene" uid="uid://ctgrwf42n2e28" path="res://scenes/card.tscn" id="2_uvfj4"]
 [ext_resource type="Texture2D" uid="uid://b2q5vetsajba6" path="res://resources/card_sleeve.png" id="3_1ws8b"]
+[ext_resource type="PackedScene" uid="uid://i0ywuur1dk71" path="res://scenes/piece.tscn" id="3_af6yf"]
+[ext_resource type="Script" path="res://src/UI.cs" id="5_u8c0w"]
+[ext_resource type="Script" path="res://src/BoardView.cs" id="6_mhda3"]
+[ext_resource type="Script" path="res://src/HandView.cs" id="7_dvira"]
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_d0b4a")
 
 [node name="Board" type="Node3D" parent="."]
+script = ExtResource("2_5w1h0")
 
-[node name="Tile" type="MeshInstance3D" parent="Board"]
+[node name="Tile" parent="Board" instance=ExtResource("2_bo870")]
 
-[node name="Piece" type="MeshInstance3D" parent="Board"]
+[node name="Piece" parent="Board" instance=ExtResource("3_af6yf")]
 
 [node name="UI" type="Node" parent="."]
+script = ExtResource("5_u8c0w")
 
 [node name="Camera" type="Camera3D" parent="UI"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
 
 [node name="Board View" type="CanvasLayer" parent="UI"]
+script = ExtResource("6_mhda3")
 
 [node name="Crosshair" type="Sprite2D" parent="UI/Board View"]
 
 [node name="Hand View" type="CanvasLayer" parent="UI"]
+script = ExtResource("7_dvira")
 
 [node name="Card" parent="UI/Hand View" instance=ExtResource("2_uvfj4")]
 

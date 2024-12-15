@@ -2,13 +2,13 @@ using Godot;
 using System;
 
 namespace UI {
-	public partial class HandView : Node {
+	public partial class HandView : CanvasLayer {
 		private const float CARD_WIDTH = 170, CARD_HEIGHT = 224;
 		private const int STARTING_CARD_COUNT = 5, MAX_CARD_COUNT = 10;
 		private readonly Card[] cardsInHand = new Card[MAX_CARD_COUNT];
 
 		public bool Showing { get; private set; }
-		public Main.Tile2D.PartitionType HoverPartition { get; private set; }
+		public Main.Tile.PartitionType HoverPartition { get; private set; }
 		public int CardCountSupposed { get; private set; }
 
 		private PackedScene cardBase;
@@ -25,7 +25,7 @@ namespace UI {
 			GetNode<Card>("Card").Visible = false;
 
 			hoveredCardIndex = -1;
-			HoverPartition = Main.Tile2D.MAX_PARTITION;
+			HoverPartition = Main.Tile.MAX_PARTITION;
 			Hide();
 			CardCountSupposed = STARTING_CARD_COUNT;
 		}
@@ -50,7 +50,9 @@ namespace UI {
 		[Signal]
 		public delegate void PlayedEventHandler(Card card);
 
-		public void Show() {
+		public new void Show() {
+			base.Show();
+
 			for (int i = 0; i < cardsInHand.Length; i++) {
 				if (cardsInHand[i] != null) {
 					cardsInHand[i].Visible = true;
@@ -64,11 +66,12 @@ namespace UI {
 			}
 
 			Unhover();
-
 			Showing = true;
 		}
 
-		public void Hide() {
+		public new void Hide() {
+			base.Hide();
+
 			cardSleeve.Visible = false;
 			for (int i = 0; i < cardsInHand.Length; i++) {
 				if (cardsInHand[i] != null) {

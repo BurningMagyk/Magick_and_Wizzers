@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://i0ywuur1dk71"]
+
+[ext_resource type="Script" path="res://src/Piece.cs" id="1_vwei3"]
+
+[node name="Piece" type="MeshInstance3D"]
+script = ExtResource("1_vwei3")
