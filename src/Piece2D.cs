@@ -12,8 +12,8 @@ using RaceGroupEnum = Main.Stats.RaceGroupEnum;
 using System.Drawing;
 
 namespace Main {
-	public partial class Piece : Sprite2D {
-		public Tile Tile {
+	public partial class Piece2D : Sprite2D {
+		public Tile2D Tile {
 			get => tile;
 			set {
 				tile = value;
@@ -23,7 +23,7 @@ namespace Main {
 		}
 		public Stats Stats { get; set; }
 
-		private Tile tile;
+		private Tile2D tile;
 
 		// Called when the node enters the scene tree for the first time.
 		public override void _Ready() {

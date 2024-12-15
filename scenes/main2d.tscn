@@ -1,0 +1,45 @@
+[gd_scene load_steps=11 format=3 uid="uid://bc5gmn57qtpie"]
+
+[ext_resource type="Script" path="res://src/Board2D.cs" id="1_3r2g8"]
+[ext_resource type="Script" path="res://src/Main.cs" id="1_d0b4a"]
+[ext_resource type="PackedScene" uid="uid://dy4qvtdocn74e" path="res://scenes/tile2d.tscn" id="2_8d3qu"]
+[ext_resource type="Script" path="res://src/UI.cs" id="4_j1k82"]
+[ext_resource type="Script" path="res://src/HandView.cs" id="4_o3qah"]
+[ext_resource type="PackedScene" uid="uid://ctgrwf42n2e28" path="res://scenes/card.tscn" id="4_of886"]
+[ext_resource type="PackedScene" uid="uid://bcccthspywgs4" path="res://scenes/piece2d.tscn" id="4_r73ob"]
+[ext_resource type="Texture2D" uid="uid://b2q5vetsajba6" path="res://resources/card_sleeve.png" id="5_4m5vo"]
+[ext_resource type="Script" path="res://src/BoardView2D.cs" id="7_n5b21"]
+[ext_resource type="Texture2D" uid="uid://ca02dx33dsurg" path="res://resources/crosshair.png" id="8_17b01"]
+
+[node name="Main2D" type="Node2D"]
+script = ExtResource("1_d0b4a")
+
+[node name="Board" type="Node2D" parent="."]
+script = ExtResource("1_3r2g8")
+
+[node name="Tile" parent="Board" instance=ExtResource("2_8d3qu")]
+
+[node name="Piece" parent="Board" instance=ExtResource("4_r73ob")]
+z_index = 1
+
+[node name="UI" type="Node" parent="."]
+script = ExtResource("4_j1k82")
+
+[node name="Camera" type="Camera2D" parent="UI"]
+
+[node name="Board View" type="CanvasLayer" parent="UI"]
+script = ExtResource("7_n5b21")
+
+[node name="Crosshair" type="Sprite2D" parent="UI/Board View"]
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("8_17b01")
+
+[node name="Hand View" type="CanvasLayer" parent="UI"]
+script = ExtResource("4_o3qah")
+
+[node name="Card" parent="UI/Hand View" instance=ExtResource("4_of886")]
+
+[node name="Card Sleeve" type="Sprite2D" parent="UI/Hand View"]
+z_index = 1
+texture = ExtResource("5_4m5vo")
+centered = false

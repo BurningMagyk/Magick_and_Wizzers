@@ -3,12 +3,12 @@ using System;
 
 namespace Main {
 	public partial class Main : Node {
-		private Board board;
+		private Board2D board;
 		private UI.UI ui;
 
 		// Called when the node enters the scene tree for the first time.
 		public override void _Ready() {
-			board = GetNode<Board>("Board");
+			board = GetNode<Board2D>("Board");
 			ui = GetNode<UI.UI>("UI");
 
 			ui.Moved += OnUIMoved;
@@ -21,15 +21,15 @@ namespace Main {
 			
 		}
 
-		public void OnUIMoved(Vector2 newPosition, Tile oldHoveredTile) {
+		public void OnUIMoved(Vector2 newPosition, Tile2D oldHoveredTile) {
 			// Check if new position is hovering a different tile now.
-			Tile newTile = board.GetTileAt(ui.GetHoverPoint(), ui.GetHoverPartition());
+			Tile2D newTile = board.GetTileAt(ui.GetHoverPoint(), ui.GetHoverPartition());
 			if (newTile != oldHoveredTile) {
 				ui.HoverTile(newTile);
 			}
 		}
 
-		public void OnUIChangedHoverType(Tile hoveredTile) {
+		public void OnUIChangedHoverType(Tile2D hoveredTile) {
 			ui.HoverTile(hoveredTile);
 		}
 

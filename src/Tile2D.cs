@@ -4,28 +4,34 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Main {
-    public partial class Tile : MeshInstance3D
-    {
-        public const int TILE_SIZE = 128;
+	public partial class Tile2D : Sprite2D {
+		public const int TILE_SIZE = 128;
 		public const PartitionType MAX_PARTITION = PartitionType.VIRGATE;
 		public enum HoverType { NORMAL, MOVE, INTERACT, CAST }
 		public enum PartitionType { LAND, CARUCATE, VIRGATE, HECTARE, ACRE }
 
-		private Tile[,] tiles = new Tile[2, 2];
+		public Vector2 TextureSize { get; private set; }
+
+		private Tile2D[,] tiles = new Tile2D[2, 2];
 		private HoverType hoverType = HoverType.NORMAL;
-		private Sprite3D[] hoverSprites;
+		private Sprite2D[] hoverSprites;
 		private PartitionType partitionType;
 
 		// Called when the node enters the scene tree for the first time.
 		public override void _Ready() {
-			hoverSprites = new Sprite3D[Enum.GetNames(typeof(HoverType)).Length];
-			hoverSprites[(int) HoverType.NORMAL] = GetNode<Sprite3D>("Hover");
-			hoverSprites[(int) HoverType.MOVE] = GetNode<Sprite3D>("Hover Move");
-			hoverSprites[(int) HoverType.INTERACT] = GetNode<Sprite3D>("Hover Interact");
-			hoverSprites[(int) HoverType.CAST] = GetNode<Sprite3D>("Hover Cast");
+			hoverSprites = new Sprite2D[Enum.GetNames(typeof(HoverType)).Length];
+			hoverSprites[(int) HoverType.NORMAL] = GetNode<Sprite2D>("Hover");
+			hoverSprites[(int) HoverType.MOVE] = GetNode<Sprite2D>("Hover Move");
+			hoverSprites[(int) HoverType.INTERACT] = GetNode<Sprite2D>("Hover Interact");
+			hoverSprites[(int) HoverType.CAST] = GetNode<Sprite2D>("Hover Cast");
 
-			foreach (Sprite3D hoverSprite in hoverSprites) {
+			foreach (Sprite2D hoverSprite in hoverSprites) {
 				hoverSprite.Visible = false;
+			}
+
+			// Saving texture size because texture can become null later.
+			if (Texture != null) {
+				TextureSize = Texture.GetSize();
 			}
 		}
 
@@ -35,18 +41,19 @@ namespace Main {
 
 		public Vector2I Coordinate { get; set; }
 
-		public void Partition(List<Tile[,]> tilesCollection) {
+		public void Partition(List<Tile2D[,]> tilesCollection) {
 			int partitionLevel = (int) MAX_PARTITION - tilesCollection.Count;
 			if (tilesCollection.Count == 0) { return; }
 
-			PackedScene tileScene = ResourceLoader.Load<PackedScene>("res://scenes/tile.tscn");
+			PackedScene tileScene = ResourceLoader.Load<PackedScene>("res://scenes/tile2d.tscn");
 			for (int i = 0; i < 2; i++) {
 				for (int j = 0; j < 2; j++) {
-					MeshInstance3D tileMeshInstance = tileScene.Instantiate() as MeshInstance3D;
-					// tileMeshInstance.Scale = new Vector3(0.5F, 0.5F, 1);
-					tileMeshInstance.Position
-						= new Vector3(i, j, 0) * tileMeshInstance.Scale * TILE_SIZE
-						- TILE_SIZE * tileMeshInstance.Scale / 2;
+					Sprite2D tileSprite = tileScene.Instantiate() as Sprite2D;
+					tileSprite.Texture = null;
+					tileSprite.Scale = new Vector2(0.5F, 0.5F);
+					tileSprite.Position
+						= new Vector2(i, j) * tileSprite.Scale * TextureSize
+						- TextureSize * tileSprite.Scale / 2;
 					
 					string childPartitionTypeName = Util.ToTitleCase(Enum.GetNames(typeof(PartitionType))[partitionLevel + 1]);
 					tileSprite.Name = childPartitionTypeName + " [" + i + ", " + j + "]";
@@ -76,5 +83,5 @@ namespace Main {
 			hoverSprites[(int) hoverType].Visible = false;
 			this.hoverType = hoverType;
 		}
-    }
+	}
 }

@@ -3,7 +3,7 @@ using System;
 using Main;
 
 namespace UI {
-	public partial class BoardView : Node {
+	public partial class BoardView2D : Node {
 		public bool Showing { get; private set; }
 		public Tile2D.PartitionType HoverPartition;
 		public Tile2D HoveredTile { get; private set;}

@@ -73,13 +73,13 @@ namespace UI {
 		}
 
 		[Signal]
-		public delegate void ChangedHoverTypeEventHandler(Tile hoveredTile);
+		public delegate void ChangedHoverTypeEventHandler(Tile2D hoveredTile);
 		[Signal]
-		public delegate void MovedEventHandler(Vector2 newPosition, Tile oldHoveredTile);
+		public delegate void MovedEventHandler(Vector2 newPosition, Tile2D oldHoveredTile);
 		[Signal]
 		public delegate void PlayedFromHandEventHandler(Card card);
 
-		public void HoverTile(Main.Tile tile) {
+		public void HoverTile(Tile2D tile) {
 			boardView.Hover(tile, handView.Showing);
 		}
 
@@ -89,7 +89,7 @@ namespace UI {
 			}
 			return boardView.GetHoverPoint(camera);
 		}
-		public Main.Tile.PartitionType GetHoverPartition() {
+		public Main.Tile2D.PartitionType GetHoverPartition() {
 			if (handView.Showing) { return handView.HoverPartition; }
 			return boardView.HoverPartition;
 		}
