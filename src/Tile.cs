@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Main {
-    public partial class Tile : MeshInstance3D
-    {
-        public const int TILE_SIZE = 128;
-		public const PartitionType MAX_PARTITION = PartitionType.VIRGATE;
+	public partial class Tile : MeshInstance3D
+	{
+		public const int TILE_SIZE = 32;
+		public const PartitionType MAX_PARTITION = PartitionType.LAND;
 		public enum HoverType { NORMAL, MOVE, INTERACT, CAST }
-		public enum PartitionType { LAND, CARUCATE, VIRGATE, HECTARE, ACRE }
+		public enum PartitionType { LAND, CARUCATE, VIRGATE, BOVATE, HECTARE, ACRE }
 
 		private Tile[,] tiles = new Tile[2, 2];
 		private HoverType hoverType = HoverType.NORMAL;
@@ -27,6 +27,8 @@ namespace Main {
 			foreach (Sprite3D hoverSprite in hoverSprites) {
 				hoverSprite.Visible = false;
 			}
+
+			Scale = new Vector3(TILE_SIZE, TILE_SIZE, 1);
 		}
 
 		// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -75,5 +77,5 @@ namespace Main {
 			hoverSprites[(int) hoverType].Visible = false;
 			this.hoverType = hoverType;
 		}
-    }
+	}
 }

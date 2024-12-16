@@ -12,7 +12,6 @@ namespace Main {
         private readonly HashSet<Piece> pieces = new HashSet<Piece>();
 
         private PackedScene pieceScene;
-        private Tile2D hoveredTile;
         private int pieceId = 0;
 
         // Called when the node enters the scene tree for the first time.
