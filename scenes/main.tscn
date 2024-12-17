@@ -18,7 +18,7 @@ script = ExtResource("1_d0b4a")
 script = ExtResource("2_5w1h0")
 
 [node name="Tile" parent="Board" instance=ExtResource("2_bo870")]
-transform = Transform3D(32, 0, 0, 0, 32, 0, 0, 0, 32, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
 
 [node name="Piece" parent="Board" instance=ExtResource("3_af6yf")]
 
@@ -26,12 +26,13 @@ transform = Transform3D(32, 0, 0, 0, 32, 0, 0, 0, 32, 0, 0, 0)
 script = ExtResource("5_u8c0w")
 
 [node name="Camera" type="Camera3D" parent="UI"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 100)
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 100, 0)
 
 [node name="Board View" type="CanvasLayer" parent="UI"]
 script = ExtResource("6_mhda3")
 
 [node name="Crosshair" type="Sprite2D" parent="UI/Board View"]
+scale = Vector2(0.1, 0.1)
 texture = ExtResource("8_3qukr")
 
 [node name="Hand View" type="CanvasLayer" parent="UI"]

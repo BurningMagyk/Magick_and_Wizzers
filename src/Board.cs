@@ -27,8 +27,8 @@ namespace Main {
                     MeshInstance3D tileSprite = tileScene.Instantiate() as MeshInstance3D;
                     tileSprite.Position = new Vector3(
                         Tile.TILE_SIZE / 2 + Tile.TILE_SIZE * i,
-                        Tile.TILE_SIZE / 2 + Tile.TILE_SIZE * j,
-                        0
+                        0,
+                        Tile.TILE_SIZE / 2 + Tile.TILE_SIZE * j
                     );
                     tileSprite.Visible = true;
 
@@ -39,6 +39,8 @@ namespace Main {
                     tiles[0][i, j] = GetNode<Tile>(tileSprite.Name.ToString());
                     tiles[0][i, j].Coordinate = new Vector2I(i, j);
                     tiles[0][i, j].Partition(tiles.Skip(1).ToList());
+
+                    tiles[0][i, j].UseDebugMaterial((float) i / BOARD_SIZE, (float) j / BOARD_SIZE, 1 - (float) (i + j) / BOARD_SIZE / 2);
                 }
             }
 
@@ -69,6 +71,9 @@ namespace Main {
         }
 
         public Tile GetTileAt(Vector2I index, Tile.PartitionType partitionType) {
+            if (index.X < 0 || index.Y < 0 || index.X >= BOARD_SIZE || index.Y >= BOARD_SIZE) {
+                return null;
+            }
             return tiles[(int) partitionType][index.X, index.Y];
         }
     }

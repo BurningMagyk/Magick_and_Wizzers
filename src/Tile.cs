@@ -26,6 +26,7 @@ namespace Main {
 
 			foreach (Sprite3D hoverSprite in hoverSprites) {
 				hoverSprite.Visible = false;
+				hoverSprite.PixelSize = 1F / hoverSprite.Texture.GetSize().X;
 			}
 
 			Scale = new Vector3(TILE_SIZE, TILE_SIZE, 1);
@@ -45,7 +46,7 @@ namespace Main {
 			for (int i = 0; i < 2; i++) {
 				for (int j = 0; j < 2; j++) {
 					MeshInstance3D tileMeshInstance = tileScene.Instantiate() as MeshInstance3D;
-					// tileMeshInstance.Scale = new Vector3(0.5F, 0.5F, 1);
+					tileMeshInstance.Scale = new Vector3(TILE_SIZE, TILE_SIZE, 1);
 					tileMeshInstance.Position
 						= new Vector3(i, j, 0) * tileMeshInstance.Scale * TILE_SIZE
 						- TILE_SIZE * tileMeshInstance.Scale / 2;
@@ -76,6 +77,12 @@ namespace Main {
 			}
 			hoverSprites[(int) hoverType].Visible = false;
 			this.hoverType = hoverType;
+		}
+
+		public void UseDebugMaterial(float red, float green, float blue) {
+			StandardMaterial3D debugMaterial = new StandardMaterial3D();
+			debugMaterial.AlbedoColor = new Color(red, green, blue);
+			MaterialOverride = debugMaterial;
 		}
 	}
 }

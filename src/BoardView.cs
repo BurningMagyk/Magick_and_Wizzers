@@ -22,17 +22,17 @@ namespace UI {
 			
 		}
 
-		public Vector2I GetHoverPoint(Camera3D camera) {
-			return GetHoverPoint(camera, HoverPartition);
+		public void SetViewPortRect(Rect2 viewPortRect) {
+			crosshair.Position = new Vector2(viewPortRect.Size.X / 2, viewPortRect.Size.Y / 2);
 		}
-		public Vector2I GetHoverPoint(Camera3D camera, Tile.PartitionType partitionType) {
-			Rect2 viewPortRect = camera.GetViewport().GetVisibleRect();
-			Vector2 centerPoint = new Vector2(viewPortRect.Size.X / 2, viewPortRect.Size.Y / 2);
-			crosshair.Position = centerPoint;
-			
+
+		public Vector2I GetHoverCoordinate(Vector2 coordinate) {
+			return GetHoverCoordinate(coordinate, HoverPartition);
+		}
+		public Vector2I GetHoverCoordinate(Vector2 coordinate, Tile.PartitionType partitionType) {			
 			return new Vector2I(
-				(int) Math.Floor(centerPoint.X / Tile.TILE_SIZE * Mathf.Pow(2, (int) partitionType)),
-				(int) Math.Floor(centerPoint.Y / Tile.TILE_SIZE * Mathf.Pow(2, (int) partitionType))
+				(int) Math.Floor(coordinate.X / Tile.TILE_SIZE * Mathf.Pow(2, (int) partitionType)),
+				(int) Math.Floor(coordinate.Y / Tile.TILE_SIZE * Mathf.Pow(2, (int) partitionType))
 			);
 		}
 

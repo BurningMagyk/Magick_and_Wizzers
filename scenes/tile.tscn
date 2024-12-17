@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://b2yvn8v5igbcx"]
 
-[ext_resource type="Texture2D" uid="uid://vmp3gxj415t3" path="res://resources/terrain_textures/moss_block.png" id="1_s6j2k"]
+[ext_resource type="Texture2D" uid="uid://o2ai1gt3khc7" path="res://resources/terrain_textures/dirt.png" id="1_cvd0x"]
 [ext_resource type="Script" path="res://src/Tile.cs" id="1_sjmk6"]
 [ext_resource type="Texture2D" uid="uid://bead4uk1ia01d" path="res://resources/tile_hover.png" id="2_hbybe"]
 [ext_resource type="Texture2D" uid="uid://in0o0olq8fgr" path="res://resources/tile_hover_move.png" id="3_8btyx"]
@@ -10,22 +10,30 @@
 [sub_resource type="QuadMesh" id="QuadMesh_7nn58"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dp57m"]
-albedo_texture = ExtResource("1_s6j2k")
+albedo_texture = ExtResource("1_cvd0x")
 
 [node name="Tile" type="MeshInstance3D"]
-transform = Transform3D(32, 0, 0, 0, 32, 0, 0, 0, 1, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1.19249e-08, 1, 0, -1, 1.19249e-08, 0, 0, 0)
 mesh = SubResource("QuadMesh_7nn58")
 surface_material_override/0 = SubResource("StandardMaterial3D_dp57m")
 script = ExtResource("1_sjmk6")
 
 [node name="Hover" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.05)
+visible = false
 texture = ExtResource("2_hbybe")
 
 [node name="Hover Move" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.05)
+visible = false
 texture = ExtResource("3_8btyx")
 
 [node name="Hover Interact" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.05)
+visible = false
 texture = ExtResource("4_38s55")
 
 [node name="Hover Cast" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.05)
+visible = false
 texture = ExtResource("5_s16gb")

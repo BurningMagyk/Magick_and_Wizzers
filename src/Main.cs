@@ -23,7 +23,7 @@ namespace Main {
 
 	public void OnUIMoved(Vector2 newPosition, Tile oldHoveredTile) {
 	  // Check if new position is hovering a different tile now.
-	  Tile newTile = board.GetTileAt(ui.GetHoverPoint(), ui.GetHoverPartition());
+	  Tile newTile = board.GetTileAt(ui.GetHoverCoordinate(), ui.GetHoverPartition());
 	  if (newTile != oldHoveredTile) {
 		ui.HoverTile(newTile);
 	  }
@@ -36,7 +36,7 @@ namespace Main {
 	public void OnPlayedFromHand(Card card) {
 	  GD.Print("Card played: " + card.Name);
 	  board.AddPiece(
-		board.GetTileAt(ui.GetHoverPoint(), ui.GetHoverPartition()),
+		board.GetTileAt(ui.GetHoverCoordinate(), ui.GetHoverPartition()),
 		card.Stats,
 		card.Illustration
 	  );
