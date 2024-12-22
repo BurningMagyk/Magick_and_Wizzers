@@ -6,7 +6,7 @@ namespace UI {
 	public partial class BoardView : CanvasLayer {
 		public bool Showing { get; private set; }
 		public Tile.PartitionType HoverPartition;
-		public Tile HoveredTile { get; private set;}
+		public Tile HoveredTile { get; private set; }
 		
 		private Sprite2D crosshair;
 

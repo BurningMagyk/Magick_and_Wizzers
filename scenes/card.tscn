@@ -1,17 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://ctgrwf42n2e28"]
+[gd_scene load_steps=4 format=3 uid="uid://ctgrwf42n2e28"]
 
 [ext_resource type="Script" path="res://src/Card.cs" id="1_auth0"]
 [ext_resource type="Texture2D" uid="uid://bjw3r2hxa588f" path="res://resources/card_art/Trololololo_Road.png" id="1_d7j8h"]
+[ext_resource type="Texture2D" uid="uid://b2q5vetsajba6" path="res://resources/card_sleeve.png" id="3_k84ni"]
 
 [node name="Card" type="Control"]
 layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = -982.0
-offset_bottom = -424.0
-grow_horizontal = 2
-grow_vertical = 2
+anchors_preset = 0
+offset_right = 170.0
+offset_bottom = 224.0
 script = ExtResource("1_auth0")
 
 [node name="Background" type="ColorRect" parent="."]
@@ -23,7 +20,7 @@ color = Color(1, 0.878333, 0.27, 1)
 [node name="Foreground" type="VBoxContainer" parent="."]
 layout_mode = 0
 offset_right = 170.0
-offset_bottom = 250.0
+offset_bottom = 224.0
 
 [node name="Illustration" type="TextureRect" parent="Foreground"]
 layout_mode = 2
@@ -58,10 +55,14 @@ text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Hit Points" type="Label" parent="Foreground/Stats Bottom"]
+[node name="Life Points" type="Label" parent="Foreground/Stats Bottom"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "0"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Sleeve" type="Sprite2D" parent="."]
+z_index = 1
+texture = ExtResource("3_k84ni")

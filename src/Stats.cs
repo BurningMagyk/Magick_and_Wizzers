@@ -47,18 +47,18 @@ namespace Main {
 		private ClassGroupEnum[] classGroups;
 		private RaceEnum[] races;
 		private RaceGroupEnum[] raceGroupsStrong, raceGroupsWeak;
-		private int maxActionPoints, maxHitPoints;
+		private int maxActionPoints, maxLifePoints;
 
 		public String Name { get; private set;}
 		public int Level { get; private set; }
 		public int MaxActionPoints { get { return maxActionPoints; } }
-		public int MaxHitPoints { get { return maxHitPoints; } }
+		public int MaxLifePoints { get { return maxLifePoints; } }
 		public ElementGroupEnum ElementGroup { get { return elementGroups[0]; } }
 
 		public Stats(
 			string name,
 			ElementEnum[] elements, ClassEnum[] classes, RaceEnum[] races,
-			int maxActionPoints, int maxHitPoints) {
+			int maxActionPoints, int maxLifePoints) {
 
 			Name = name;
 			this.elements = elements;
@@ -69,9 +69,9 @@ namespace Main {
 
 			this.races = races;
 			this.maxActionPoints = maxActionPoints;
-			this.maxHitPoints = maxHitPoints;
+			this.maxLifePoints = maxLifePoints;
 
-			Level = DetermineLevel(maxActionPoints, maxHitPoints);
+			Level = DetermineLevel(maxActionPoints, maxLifePoints);
 		}
 
 		public static Stats CreateRandom() {
