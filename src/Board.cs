@@ -71,7 +71,8 @@ namespace Main {
         }
 
         public Tile GetTileAt(Vector2I index, Tile.PartitionType partitionType) {
-            if (index.X < 0 || index.Y < 0 || index.X >= BOARD_SIZE || index.Y >= BOARD_SIZE) {
+            int boardSizeTotal = BOARD_SIZE * (int) Math.Pow(2, (int) partitionType);
+            if (index.X < 0 || index.Y < 0 || index.X >= boardSizeTotal || index.Y >= boardSizeTotal) {
                 return null;
             }
             return tiles[(int) partitionType][index.X, index.Y];

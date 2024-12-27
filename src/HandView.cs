@@ -3,7 +3,6 @@ using System;
 
 namespace UI {
 	public partial class HandView : CanvasLayer {
-		private const float CARD_WIDTH = 170, CARD_HEIGHT = 224;
 		private const int STARTING_CARD_COUNT = 5, MAX_CARD_COUNT = 10;
 		private readonly Card[] cardsInHand = new Card[MAX_CARD_COUNT];
 
@@ -12,14 +11,12 @@ namespace UI {
 		public int CardCountSupposed { get; private set; }
 
 		private PackedScene cardBase;
-		private Sprite2D cardSleeve;
 		private Rect2 viewPortRect;
 		private int hoveredCardIndex;
 
 		// Called when the node enters the scene tree for the first time.
 		public override void _Ready() {
 			cardBase = ResourceLoader.Load<PackedScene>("res://scenes/card.tscn");
-			cardSleeve = GetNode<Sprite2D>("Card Sleeve");
 
 			// Make the base stuff invisible.
 			GetNode<Card>("Card").Visible = false;
@@ -72,7 +69,6 @@ namespace UI {
 		public new void Hide() {
 			base.Hide();
 
-			cardSleeve.Visible = false;
 			for (int i = 0; i < cardsInHand.Length; i++) {
 				if (cardsInHand[i] != null) {
 					cardsInHand[i].Visible = false;
@@ -87,23 +83,28 @@ namespace UI {
 		}
 
 		private void DrawCard() {
+			bool drewCard = false;
 			for (int i = 0; i < cardsInHand.Length; i++) {
-				if (cardsInHand[i] == null) {
+				if (cardsInHand[i] == null && !drewCard) {
 					Control drawnCard = cardBase.Instantiate() as Control;
-					drawnCard.Position = new Vector2(
-						CARD_WIDTH * (i + 0.5F),
-						(viewPortRect.Size.Y + Main.Tile2D.TILE_SIZE) / 2
-					);
 					drawnCard.Visible = true;
 					drawnCard.Name = "Card " + i;
 					AddChild(drawnCard);
 					cardsInHand[i] = GetNode<Card>("Card " + i);
-					break;
+					drewCard = true;
+				}
+				if (cardsInHand[i] != null) {
+					cardsInHand[i].Position = new Vector2(
+						viewPortRect.Size.X / 2 + cardsInHand[i].Size.X * (i - CardCountSupposed / 2F),
+						viewPortRect.Size.Y / 2
+					);
 				}
 			}
 		}
 
 		private void HoverCard(DirectionEnum direction) {
+			int hoveredCardIndexPrevious = hoveredCardIndex;
+
 			if (direction == DirectionEnum.NONE || GetCardCount() == 0) {
 				// Intend to unhover or no cards in hand.
 				Unhover();
@@ -135,21 +136,19 @@ namespace UI {
 			}
 		
 			Card hoveredCard = cardsInHand[hoveredCardIndex];
-
-			// Get difference in size between card and sleeve.
-			Vector2 sizeDifference = new Vector2(
-				cardSleeve.Texture.GetWidth() - CARD_WIDTH,
-				cardSleeve.Texture.GetHeight() - CARD_HEIGHT
-			);
+			if (hoveredCardIndexPrevious > -1) {
+				cardsInHand[hoveredCardIndexPrevious].Unhover();
+			}
 
 			// Place the sleeve over the hovered card.
-			cardSleeve.Position = hoveredCard.Position - sizeDifference / 2;
-			cardSleeve.Visible = true;
+			hoveredCard.Hover();
 		}
 
 		private void Unhover() {
+			if (hoveredCardIndex > -1) {
+				cardsInHand[hoveredCardIndex].Unhover();
+			}
 			hoveredCardIndex = -1;
-			cardSleeve.Visible = false;
 		}
 
 		private void PlayCard() {
