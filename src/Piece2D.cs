@@ -4,12 +4,12 @@ using System;
 namespace Main {
   public partial class Piece2D : Sprite2D {
   public Tile2D Tile {
-    get => tile;
-    set {
-    tile = value;
-    Position = tile.GlobalPosition;
-    Scale = value.GlobalScale * value.TextureSize / Texture.GetSize();
-    }
+	get => tile;
+	set {
+	tile = value;
+	Position = tile.GlobalPosition;
+	Scale = value.GlobalScale * value.TextureSize / Texture.GetSize();
+	}
   }
   public Stats Stats { get; set; }
 

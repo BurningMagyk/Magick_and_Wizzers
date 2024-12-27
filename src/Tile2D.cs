@@ -19,20 +19,20 @@ namespace Main {
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
-    hoverSprites = new Sprite2D[Enum.GetNames(typeof(HoverType)).Length];
-    hoverSprites[(int) HoverType.NORMAL] = GetNode<Sprite2D>("Hover");
-    hoverSprites[(int) HoverType.MOVE] = GetNode<Sprite2D>("Hover Move");
-    hoverSprites[(int) HoverType.INTERACT] = GetNode<Sprite2D>("Hover Interact");
-    hoverSprites[(int) HoverType.CAST] = GetNode<Sprite2D>("Hover Cast");
+	hoverSprites = new Sprite2D[Enum.GetNames(typeof(HoverType)).Length];
+	hoverSprites[(int) HoverType.NORMAL] = GetNode<Sprite2D>("Hover");
+	hoverSprites[(int) HoverType.MOVE] = GetNode<Sprite2D>("Hover Move");
+	hoverSprites[(int) HoverType.INTERACT] = GetNode<Sprite2D>("Hover Interact");
+	hoverSprites[(int) HoverType.CAST] = GetNode<Sprite2D>("Hover Cast");
 
-    foreach (Sprite2D hoverSprite in hoverSprites) {
-    hoverSprite.Visible = false;
-    }
+	foreach (Sprite2D hoverSprite in hoverSprites) {
+	hoverSprite.Visible = false;
+	}
 
-    // Saving texture size because texture can become null later.
-    if (Texture != null) {
-    TextureSize = Texture.GetSize();
-    }
+	// Saving texture size because texture can become null later.
+	if (Texture != null) {
+	TextureSize = Texture.GetSize();
+	}
   }
 
   // Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -42,46 +42,46 @@ namespace Main {
   public Vector2I Coordinate { get; set; }
 
   public void Partition(List<Tile2D[,]> tilesCollection) {
-    int partitionLevel = (int) MAX_PARTITION - tilesCollection.Count;
-    if (tilesCollection.Count == 0) { return; }
+	int partitionLevel = (int) MAX_PARTITION - tilesCollection.Count;
+	if (tilesCollection.Count == 0) { return; }
 
-    PackedScene tileScene = ResourceLoader.Load<PackedScene>("res://scenes/tile2d.tscn");
-    for (int i = 0; i < 2; i++) {
-    for (int j = 0; j < 2; j++) {
-      Sprite2D tileSprite = tileScene.Instantiate() as Sprite2D;
-      tileSprite.Texture = null;
-      tileSprite.Scale = new Vector2(0.5F, 0.5F);
-      tileSprite.Position
-      = new Vector2(i, j) * tileSprite.Scale * TextureSize
-      - TextureSize * tileSprite.Scale / 2;
-      
-      string childPartitionTypeName = Util.ToTitleCase(Enum.GetNames(typeof(PartitionType))[partitionLevel + 1]);
-      tileSprite.Name = childPartitionTypeName + " [" + i + ", " + j + "]";
-      AddChild(tileSprite);
-      tiles[i, j] = GetNode<Tile2D>(tileSprite.Name.ToString());
-      tiles[i, j].Coordinate = new Vector2I(Coordinate.X * 2 + i, Coordinate.Y * 2 + j);
-      tilesCollection[0][tiles[i, j].Coordinate.X, tiles[i, j].Coordinate.Y] = tiles[i, j];
+	PackedScene tileScene = ResourceLoader.Load<PackedScene>("res://scenes/tile2d.tscn");
+	for (int i = 0; i < 2; i++) {
+	for (int j = 0; j < 2; j++) {
+	  Sprite2D tileSprite = tileScene.Instantiate() as Sprite2D;
+	  tileSprite.Texture = null;
+	  tileSprite.Scale = new Vector2(0.5F, 0.5F);
+	  tileSprite.Position
+	  = new Vector2(i, j) * tileSprite.Scale * TextureSize
+	  - TextureSize * tileSprite.Scale / 2;
+	  
+	  string childPartitionTypeName = Util.ToTitleCase(Enum.GetNames(typeof(PartitionType))[partitionLevel + 1]);
+	  tileSprite.Name = childPartitionTypeName + " [" + i + ", " + j + "]";
+	  AddChild(tileSprite);
+	  tiles[i, j] = GetNode<Tile2D>(tileSprite.Name.ToString());
+	  tiles[i, j].Coordinate = new Vector2I(Coordinate.X * 2 + i, Coordinate.Y * 2 + j);
+	  tilesCollection[0][tiles[i, j].Coordinate.X, tiles[i, j].Coordinate.Y] = tiles[i, j];
 
-      tiles[i, j].TextureSize = TextureSize;
-      tiles[i, j].Partition(tilesCollection.Skip(1).ToList());
-    }
-    }
+	  tiles[i, j].TextureSize = TextureSize;
+	  tiles[i, j].Partition(tilesCollection.Skip(1).ToList());
+	}
+	}
   }
 
   public void Hover(HoverType hoverType) {
-    if (this.hoverType != hoverType) {
-    hoverSprites[(int) this.hoverType].Visible = false;
-    }
-    hoverSprites[(int) hoverType].Visible = true;
-    this.hoverType = hoverType;
+	if (this.hoverType != hoverType) {
+	hoverSprites[(int) this.hoverType].Visible = false;
+	}
+	hoverSprites[(int) hoverType].Visible = true;
+	this.hoverType = hoverType;
   }
 
   public void Unhover(HoverType hoverType) {
-    if (this.hoverType != hoverType) {
-    hoverSprites[(int) this.hoverType].Visible = false;
-    }
-    hoverSprites[(int) hoverType].Visible = false;
-    this.hoverType = hoverType;
+	if (this.hoverType != hoverType) {
+	hoverSprites[(int) this.hoverType].Visible = false;
+	}
+	hoverSprites[(int) hoverType].Visible = false;
+	this.hoverType = hoverType;
   }
   }
 }

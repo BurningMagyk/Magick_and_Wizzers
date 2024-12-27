@@ -72,6 +72,7 @@ namespace Main {
 			this.maxLifePoints = maxLifePoints;
 
 			Level = DetermineLevel(maxActionPoints, maxLifePoints);
+			TestLevelCalculationFlavor();
 		}
 
 		public static Stats CreateRandom() {
@@ -214,7 +215,7 @@ namespace Main {
 			DetermineLevel(950, 700, 3, "Alinsection");
 			DetermineLevel(1100, 700, 3, "Little D");
 			DetermineLevel(1000, 1200, 4, "Wilmee");
-			DetermineLevel(1250, 700, 4, "Oscillo Hero");
+			DetermineLevel(1250, 700, 3, "Oscillo Hero");
 			DetermineLevel(1050, 1200, 4, "Key Mace #2");
 			DetermineLevel(1300, 1100, 4, "Shining Friendship");
 			DetermineLevel(1700, 1400, 5, "Mabarrel");
@@ -240,7 +241,7 @@ namespace Main {
 			DetermineLevel(500, 750, 2, "Embryonic Beast");
 			DetermineLevel(1600, 800, 4, "Great White");
 			DetermineLevel(1300, 1100, 4, "Tiger Axe");
-			DetermineLevel(1200, 1000, 4, "The Witch Feeds on Life");
+			DetermineLevel(1200, 1000, 4, "The Which Feeds on Life");
 			DetermineLevel(1400, 1200, 4, "Spirit of the Books");
 			DetermineLevel(1200, 1700, 5, "LaMoon");
 			DetermineLevel(900, 1300, 4, "Temple of Skulls");
@@ -327,13 +328,23 @@ namespace Main {
 			// double resultFromPoints = (maxActionPoints * 1.1 + maxHitPoints) / 690;
 
 			// 2 Misses:
-			double resultFromPoints = (Math.Pow(maxActionPoints, 0.95) * 1.1 + Math.Pow(maxHitPoints, 0.95)) / 470;
+			// double resultFromPoints = (Math.Pow(maxActionPoints, 0.95) * 1.1 + Math.Pow(maxHitPoints, 0.95)) / 470;
 
 			// 2 Misses:
 			// double resultFromPoints = (Math.Pow(maxActionPoints, 0.97) * 1.1 + Math.Pow(maxHitPoints, 0.97)) / 545;
 
 			// 2 Misses:
 			// double resultFromPoints = (Math.Pow(maxActionPoints, 0.95) * 1.05 + Math.Pow(maxHitPoints, 0.95)) / 460;
+
+			// 15 Misses (new):
+			// double resultFromPoints = (Math.Pow(maxActionPoints, 0.95) * 1.04 + Math.Pow(maxHitPoints, 0.95) * 1.04) / 460;
+
+			// 12 Misses (new):
+			// double resultFromPoints = (Math.Pow(maxActionPoints, 0.93) * 1.1 + Math.Pow(maxHitPoints, 0.93) * 1.1) / 420;
+
+			// 6 Misses (new):
+			double resultFromPoints = (Math.Pow(maxActionPoints, 0.91) + Math.Pow(maxHitPoints, 0.91)) / 329.17;
+
 			int clampedResult = Math.Clamp((int) Math.Round(resultFromPoints), 1, 12);
 			if (expected > 0 && clampedResult != expected) {
 				GD.Print((name != null ? (name + " - ") : "") + "Expected: " + expected + ", Actual: " + resultFromPoints);
