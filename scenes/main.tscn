@@ -1,13 +1,13 @@
 [gd_scene load_steps=10 format=3 uid="uid://5h8krlppg2bv"]
 
-[ext_resource type="Script" path="res://src/Main.cs" id="1_d0b4a"]
-[ext_resource type="Script" path="res://src/Board.cs" id="2_5w1h0"]
+[ext_resource type="Script" path="res://src/Main/Main.cs" id="1_d0b4a"]
+[ext_resource type="Script" path="res://src/Game/Board.cs" id="2_5w1h0"]
 [ext_resource type="PackedScene" uid="uid://b2yvn8v5igbcx" path="res://scenes/tile.tscn" id="2_bo870"]
 [ext_resource type="PackedScene" uid="uid://ctgrwf42n2e28" path="res://scenes/card.tscn" id="2_uvfj4"]
 [ext_resource type="PackedScene" uid="uid://i0ywuur1dk71" path="res://scenes/piece.tscn" id="3_af6yf"]
-[ext_resource type="Script" path="res://src/UI.cs" id="5_u8c0w"]
-[ext_resource type="Script" path="res://src/BoardView.cs" id="6_mhda3"]
-[ext_resource type="Script" path="res://src/HandView.cs" id="7_dvira"]
+[ext_resource type="Script" path="res://src/UI/UI.cs" id="5_u8c0w"]
+[ext_resource type="Script" path="res://src/UI/BoardView.cs" id="6_mhda3"]
+[ext_resource type="Script" path="res://src/UI/HandView.cs" id="7_dvira"]
 [ext_resource type="Texture2D" uid="uid://ca02dx33dsurg" path="res://resources/crosshair.png" id="8_3qukr"]
 
 [node name="Main" type="Node3D"]

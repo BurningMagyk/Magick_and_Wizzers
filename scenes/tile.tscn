@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=3 uid="uid://b2yvn8v5igbcx"]
 
 [ext_resource type="Texture2D" uid="uid://o2ai1gt3khc7" path="res://resources/terrain_textures/dirt.png" id="1_cvd0x"]
-[ext_resource type="Script" path="res://src/Tile.cs" id="1_sjmk6"]
+[ext_resource type="Script" path="res://src/Game/Tile.cs" id="1_sjmk6"]
 [ext_resource type="Texture2D" uid="uid://bead4uk1ia01d" path="res://resources/tile_hover.png" id="2_hbybe"]
 [ext_resource type="Texture2D" uid="uid://in0o0olq8fgr" path="res://resources/tile_hover_move.png" id="3_8btyx"]
 [ext_resource type="Texture2D" uid="uid://cf1vh6x8d8ad0" path="res://resources/tile_hover_interact.png" id="4_38s55"]

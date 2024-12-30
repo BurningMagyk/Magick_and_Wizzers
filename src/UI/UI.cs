@@ -36,61 +36,67 @@ namespace UI {
 		camera.Position += new Vector3(joystick[0].X, 0, joystick[0].Y) * CAMERA_SPEED;
 
 		if (oldCameraPosition != camera.Position) {
-		Vector3 hoverPoint3D = GetPlaneIntersection(camera.Position, camera.GlobalTransform.Basis.Z);
-		hoverPoint = new Vector2(hoverPoint3D.X, hoverPoint3D.Z);
+			Vector3 hoverPoint3D = GetPlaneIntersection(camera.Position, camera.GlobalTransform.Basis.Z);
+			hoverPoint = new Vector2(hoverPoint3D.X, hoverPoint3D.Z);
 
-		EmitSignal(SignalName.Moved, camera.Position, boardView.HoveredTile);
+			EmitSignal(SignalName.Moved, camera.Position, boardView.HoveredTile);
 		}
 	}
 
 	public override void _Input(InputEvent @event) {
-		if (Input.IsActionJustPressed("ui_hand")) {
-		if (handView.Showing) {
-			handView.Hide();
-		} else {
-			handView.Show();
+		if (Input.IsActionJustPressed("toggle_hand")) {
+			if (handView.Showing) {
+				handView.Hide();
+			} else {
+				handView.Show();
+			}
+	  	}
+	  	EmitSignal(SignalName.ChangedHoverType, boardView.HoveredTile);
+
+		if (Input.IsActionJustPressed("ui_pass")) {
+			EmitSignal(SignalName.PassTurn);
 		}
-	  }
-	  EmitSignal(SignalName.ChangedHoverType, boardView.HoveredTile);
 
-	  int horizontalPan = 0, verticalPan = 0;
-	  if (Input.IsActionPressed("left")) {		
-		horizontalPan -= 1;
-	  }
-	  if (Input.IsActionPressed("right")) {
-		horizontalPan += 1;
-	  }
-	  if (Input.IsActionPressed("up")) {
-		verticalPan -= 1;
-	  }
-	  if (Input.IsActionPressed("down")) {
-		verticalPan += 1;
-	  }
-	  joystick[0] = new Vector2I(horizontalPan, verticalPan);
+		int horizontalPan = 0, verticalPan = 0;
+		if (Input.IsActionPressed("left")) {
+			horizontalPan -= 1;
+		}
+		if (Input.IsActionPressed("right")) {
+			horizontalPan += 1;
+		}
+		if (Input.IsActionPressed("up")) {
+			verticalPan -= 1;
+		}
+		if (Input.IsActionPressed("down")) {
+			verticalPan += 1;
+		}
+		joystick[0] = new Vector2I(horizontalPan, verticalPan);
 
-	  // 	if (Input.IsKeyPressed(Key.F)) {
-	  // 		GD.Print("test");
-	  // 	}
+		// 	if (Input.IsKeyPressed(Key.F)) {
+		// 		GD.Print("test");
+		// 	}
 	}
 
 	[Signal]
-	public delegate void ChangedHoverTypeEventHandler(Tile hoveredTile);
+	public delegate void ChangedHoverTypeEventHandler(Game.Tile hoveredTile);
 	[Signal]
-	public delegate void MovedEventHandler(Vector2 newPosition, Tile oldHoveredTile);
+	public delegate void MovedEventHandler(Vector2 newPosition, Game.Tile oldHoveredTile);
 	[Signal]
 	public delegate void PlayedFromHandEventHandler(Card card);
+	[Signal]
+	public delegate void PassTurnEventHandler();
 
-	public void HoverTile(Tile tile) {
+	public void HoverTile(Game.Tile tile) {
 		boardView.Hover(tile, handView.Showing);
 	}
 
 	public Vector2I GetHoverCoordinate() {
 		if (handView.Showing) {
-		return boardView.GetHoverCoordinate(hoverPoint, handView.HoverPartition);
+			return boardView.GetHoverCoordinate(hoverPoint, handView.HoverPartition);
 		}
 		return boardView.GetHoverCoordinate(hoverPoint);
 	}
-	public Tile.PartitionType GetHoverPartition() {
+	public Game.Tile.PartitionType GetHoverPartition() {
 		if (handView.Showing) { return handView.HoverPartition; }
 		return boardView.HoverPartition;
 	}

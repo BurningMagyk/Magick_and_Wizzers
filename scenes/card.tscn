@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://ctgrwf42n2e28"]
 
-[ext_resource type="Script" path="res://src/Card.cs" id="1_auth0"]
+[ext_resource type="Script" path="res://src/UI/Card.cs" id="1_auth0"]
 [ext_resource type="Texture2D" uid="uid://bjw3r2hxa588f" path="res://resources/card_art/Trololololo_Road.png" id="1_d7j8h"]
 [ext_resource type="Texture2D" uid="uid://b2q5vetsajba6" path="res://resources/card_sleeve.png" id="3_k84ni"]
 
