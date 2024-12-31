@@ -6,13 +6,13 @@ using System.Linq;
 
 namespace Game {
 public partial class Board : Node3D {
-	private const int BOARD_SIZE = 7;
+	public const int BOARD_SIZE = 7;
 
 	private readonly List<Tile[,]> tiles = new List<Tile[,]>();
 	private readonly HashSet<Piece> pieces = new HashSet<Piece>();
 
 	private PackedScene pieceScene;
-	private int pieceId = 0;
+	private int nextIdForPiece = 0;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready() {
@@ -40,7 +40,11 @@ public partial class Board : Node3D {
 				tiles[0][i, j].Coordinate = new Vector2I(i, j);
 				tiles[0][i, j].Partition(tiles.Skip(1).ToList());
 
-				tiles[0][i, j].UseDebugMaterial((float) i / BOARD_SIZE, (float) j / BOARD_SIZE, 1 - (float) (i + j) / BOARD_SIZE / 2);
+				tiles[0][i, j].UseDebugMaterial(
+					(float) i / BOARD_SIZE,
+					(float) j / BOARD_SIZE,
+					1 - (float) (i + j) / BOARD_SIZE / 2
+				);
 			}
 		}
 
@@ -74,7 +78,7 @@ public partial class Board : Node3D {
 	public void AddPiece(Tile targetTile, Main.Stats stats, Texture2D illustration) {
 		// Create a new piece.
 		MeshInstance3D pieceMesh = pieceScene.Instantiate() as MeshInstance3D;
-		pieceMesh.Name = stats.Name + " " + pieceId++;
+		pieceMesh.Name = stats.Name + " " + nextIdForPiece++;
 		StandardMaterial3D pieceMaterial = new StandardMaterial3D();
 		pieceMaterial.AlbedoTexture = illustration;
 		pieceMesh.MaterialOverride = pieceMaterial;

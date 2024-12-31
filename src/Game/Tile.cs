@@ -31,10 +31,6 @@ public partial class Tile : MeshInstance3D {
 		Scale = new Vector3(TILE_SIZE, TILE_SIZE, 1);
 	}
 
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _Process(double delta) {
-	}
-
 	public Vector2I Coordinate { get; set; }
 
 	public void Partition(List<Tile[,]> tilesCollection) {

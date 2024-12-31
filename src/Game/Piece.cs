@@ -15,6 +15,7 @@ public partial class Piece : MeshInstance3D
 	public Main.Stats Stats { get; set; }
 
 	private Tile tile;
+	private Command command;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready() {
@@ -24,6 +25,18 @@ public partial class Piece : MeshInstance3D
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta) {
+	}
+
+	public void FollowCommand() {
+		switch (command.Type) {
+			case Command.CommandType.MOVE:
+				// Move the piece to the new tile.
+				// Tile = Tile.GetNeighbor(command.Direction);
+				break;
+			default:
+				// throw new NotImplementedException();
+				break;
+		}
 	}
 }
 }

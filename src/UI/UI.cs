@@ -53,7 +53,7 @@ namespace UI {
 	  	}
 	  	EmitSignal(SignalName.ChangedHoverType, boardView.HoveredTile);
 
-		if (Input.IsActionJustPressed("ui_pass")) {
+		if (Input.IsActionJustPressed("pass_turn")) {
 			EmitSignal(SignalName.PassTurn);
 		}
 
