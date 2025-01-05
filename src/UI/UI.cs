@@ -1,3 +1,5 @@
+using Display;
+using Game;
 using Godot;
 using Main;
 using System;
@@ -37,9 +39,10 @@ namespace UI {
 
 		if (oldCameraPosition != camera.Position) {
 			Vector3 hoverPoint3D = GetPlaneIntersection(camera.Position, camera.GlobalTransform.Basis.Z);
+			Vector2 oldHoverPoint = hoverPoint;
 			hoverPoint = new Vector2(hoverPoint3D.X, hoverPoint3D.Z);
 
-			EmitSignal(SignalName.Moved, camera.Position, boardView.HoveredTile);
+			EmitSignal(SignalName.Moved, oldHoverPoint, hoverPoint);
 		}
 	}
 
@@ -51,7 +54,7 @@ namespace UI {
 				handView.Show();
 			}
 	  	}
-	  	EmitSignal(SignalName.ChangedHoverType, boardView.HoveredTile);
+	  	EmitSignal(SignalName.ChangedHoverType, GetHoverCoordinate(), (int) GetHoverPartition());
 
 		if (Input.IsActionJustPressed("pass_turn")) {
 			EmitSignal(SignalName.PassTurn);
@@ -78,9 +81,11 @@ namespace UI {
 	}
 
 	[Signal]
-	public delegate void ChangedHoverTypeEventHandler(Game.Tile hoveredTile);
+	public delegate void ChangedHoverTypeEventHandler(
+		Vector2I hoveredTileCoordinate,
+		int hoveredTilePartitionType);
 	[Signal]
-	public delegate void MovedEventHandler(Vector2 newPosition, Game.Tile oldHoveredTile);
+	public delegate void MovedEventHandler(Vector2 oldPoint, Vector2 newPoint);
 	[Signal]
 	public delegate void PlayedFromHandEventHandler(Card card);
 	[Signal]
@@ -91,12 +96,15 @@ namespace UI {
 	}
 
 	public Vector2I GetHoverCoordinate() {
-		if (handView.Showing) {
-			return boardView.GetHoverCoordinate(hoverPoint, handView.HoverPartition);
-		}
 		return boardView.GetHoverCoordinate(hoverPoint);
 	}
-	public Game.Tile.PartitionType GetHoverPartition() {
+	public Vector2I GetHoverCoordinate(Vector2 point) {
+		if (handView.Showing) {
+			return boardView.GetHoverCoordinate(point, handView.HoverPartition);
+		}
+		return boardView.GetHoverCoordinate(point);
+	}
+	public Game.Tile.PartitionTypeEnum GetHoverPartition() {
 		if (handView.Showing) { return handView.HoverPartition; }
 		return boardView.HoverPartition;
 	}

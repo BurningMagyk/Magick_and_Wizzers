@@ -1,30 +1,28 @@
 using Godot;
+using Main;
 using System;
 
 namespace Game {
-public partial class Piece : MeshInstance3D
-{
+public partial class Piece {
 	public Tile Tile {
 		get => tile;
 		set {
 			tile = value;
-			Position = tile.GlobalPosition;
+			// Position = tile.GlobalPosition;
 			// Scale = value.GlobalScale;
 		}
 	}
 	public Main.Stats Stats { get; set; }
 
+	private static int sNextIdForPiece = 0;
+
+	public string Name { get; private set;}
 	private Tile tile;
 	private Command command;
 
 	// Called when the node enters the scene tree for the first time.
-	public override void _Ready() {
-		float size = Tile.TILE_SIZE / (float) Math.Pow(2, (int) Tile.MAX_PARTITION);
-		Scale = new Vector3(size, size, size);
-	}
-
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
-	public override void _Process(double delta) {
+	public Piece(Stats stats) {
+		Name = stats.Name + " " + sNextIdForPiece++;
 	}
 
 	public void FollowCommand() {

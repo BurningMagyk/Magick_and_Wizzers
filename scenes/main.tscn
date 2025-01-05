@@ -1,8 +1,8 @@
 [gd_scene load_steps=10 format=3 uid="uid://5h8krlppg2bv"]
 
 [ext_resource type="Script" path="res://src/Main/Main.cs" id="1_d0b4a"]
-[ext_resource type="Script" path="res://src/Game/Board.cs" id="2_5w1h0"]
 [ext_resource type="PackedScene" uid="uid://b2yvn8v5igbcx" path="res://scenes/tile.tscn" id="2_bo870"]
+[ext_resource type="Script" path="res://src/Display/Board.cs" id="2_luuvt"]
 [ext_resource type="PackedScene" uid="uid://ctgrwf42n2e28" path="res://scenes/card.tscn" id="2_uvfj4"]
 [ext_resource type="PackedScene" uid="uid://i0ywuur1dk71" path="res://scenes/piece.tscn" id="3_af6yf"]
 [ext_resource type="Script" path="res://src/UI/UI.cs" id="5_u8c0w"]
@@ -14,7 +14,7 @@
 script = ExtResource("1_d0b4a")
 
 [node name="Board" type="Node3D" parent="."]
-script = ExtResource("2_5w1h0")
+script = ExtResource("2_luuvt")
 
 [node name="Tile" parent="Board" instance=ExtResource("2_bo870")]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)

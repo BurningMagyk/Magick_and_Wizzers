@@ -8,7 +8,7 @@ public partial class HandView : CanvasLayer {
 	private readonly Card[] cardsInHand = new Card[MAX_CARD_COUNT];
 
 	public bool Showing { get; private set; }
-	public Tile.PartitionType HoverPartition { get; private set; }
+	public Tile.PartitionTypeEnum HoverPartition { get; private set; }
 	public int CardCountSupposed { get; private set; }
 
 	private PackedScene cardBase;

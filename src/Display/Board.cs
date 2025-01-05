@@ -4,8 +4,10 @@ using System;
 namespace Display {
 public partial class Board : Node3D {
 	public enum HoverType { NORMAL, MOVE, INTERACT, CAST }
+	private Game.Board representedBoard;
 	private HoverType currentHoverType = HoverType.NORMAL;
 	private Sprite3D[] hoverSprites;
+	private PackedScene pieceScene;
 	public override void _Ready() {
 		hoverSprites = new Sprite3D[Enum.GetNames(typeof(HoverType)).Length];
 		hoverSprites[(int) HoverType.NORMAL] = GetNode<Sprite3D>("Hover");
@@ -17,9 +19,18 @@ public partial class Board : Node3D {
 			hoverSprite.Visible = false;
 			hoverSprite.PixelSize = 1F / hoverSprite.Texture.GetSize().X;
 		}
+
+		pieceScene = ResourceLoader.Load<PackedScene>("res://scenes/piece.tscn");
+
+		// Make the base stuff invisible.
+		GetNode<Tile>("Tile").Visible = false;
+		GetNode<Piece>("Piece").Visible = false;
 	}
 
-	public void SetTiles(Game.Tile[,] tiles) {
+	public void SetRepresentedBoard(Game.Board board) {
+		representedBoard = board;
+		Game.Tile[,] tiles = board.Tiles[0];
+		
 		PackedScene tileScene = ResourceLoader.Load<PackedScene>("res://scenes/tile.tscn");
 		for (int i = 0; i < tiles.GetLength(0); i++) {
 			for (int j = 0; j < tiles.GetLength(1); j++) {
@@ -40,6 +51,15 @@ public partial class Board : Node3D {
 				);
 			}
 		}
+	}
+
+	public void AddPiece(Game.Piece representedPiece, Texture2D illustration) {
+		MeshInstance3D pieceMesh = pieceScene.Instantiate() as MeshInstance3D;
+		pieceMesh.Name = representedPiece.Name;
+		StandardMaterial3D pieceMaterial = new StandardMaterial3D();
+		pieceMaterial.AlbedoTexture = illustration;
+		pieceMesh.MaterialOverride = pieceMaterial;
+		AddChild(pieceMesh);
 	}
 
 	public void Hover(Tile tile, HoverType hoverType) {

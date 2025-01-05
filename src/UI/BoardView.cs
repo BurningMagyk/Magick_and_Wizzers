@@ -6,7 +6,7 @@ using Game;
 namespace UI {
 public partial class BoardView : CanvasLayer {
 	public bool Showing { get; private set; }
-	public Tile.PartitionType HoverPartition;
+	public Tile.PartitionTypeEnum HoverPartition;
 	public Tile HoveredTile { get; private set; }
 	
 	private Sprite2D crosshair;
@@ -30,7 +30,7 @@ public partial class BoardView : CanvasLayer {
 	public Vector2I GetHoverCoordinate(Vector2 coordinate) {
 		return GetHoverCoordinate(coordinate, HoverPartition);
 	}
-	public Vector2I GetHoverCoordinate(Vector2 coordinate, Tile.PartitionType partitionType) {			
+	public Vector2I GetHoverCoordinate(Vector2 coordinate, Tile.PartitionTypeEnum partitionType) {			
 		return new Vector2I(
 			(int) Math.Floor(coordinate.X / Tile.TILE_SIZE * Mathf.Pow(2, (int) partitionType)),
 			(int) Math.Floor(coordinate.Y / Tile.TILE_SIZE * Mathf.Pow(2, (int) partitionType))
