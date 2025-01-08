@@ -1,15 +1,12 @@
-using Display;
-using Game;
 using Godot;
-using Main;
 using System;
 
 namespace UI {
 	public partial class UI : Node {
 	  private const float CAMERA_SPEED = 1F;
 
-	  private BoardView boardView;
-	  private HandView handView;
+	  private BoardView mBoardView;
+	  private HandView mHandView;
 	  private Camera3D camera;
 
 	  private Vector2I[] joystick = new Vector2I[] {
@@ -21,13 +18,13 @@ namespace UI {
 
 	  // Called when the node enters the scene tree for the first time.
 	  public override void _Ready() {
-	  boardView = GetNode<BoardView>("Board View");
-		handView = GetNode<HandView>("Hand View");
+	  	mBoardView = GetNode<BoardView>("Board View");
+		mHandView = GetNode<HandView>("Hand View");
 		camera = GetNode<Camera3D>("Camera");
 
-		boardView.SetViewPortRect(camera.GetViewport().GetVisibleRect());
-		handView.SetViewPortRect(camera.GetViewport().GetVisibleRect());
-		handView.Played += OnPlayed;
+		mBoardView.SetViewPortRect(camera.GetViewport().GetVisibleRect());
+		mHandView.SetViewPortRect(camera.GetViewport().GetVisibleRect());
+		mHandView.Played += OnPlayed;
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -48,10 +45,10 @@ namespace UI {
 
 	public override void _Input(InputEvent @event) {
 		if (Input.IsActionJustPressed("toggle_hand")) {
-			if (handView.Showing) {
-				handView.Hide();
+			if (mHandView.Showing) {
+				mHandView.Hide();
 			} else {
-				handView.Show();
+				mHandView.Show();
 			}
 	  	}
 	  	EmitSignal(SignalName.ChangedHoverType, GetHoverCoordinate(), (int) GetHoverPartition());
@@ -92,21 +89,21 @@ namespace UI {
 	public delegate void PassTurnEventHandler();
 
 	public void HoverTile(Game.Tile tile) {
-		boardView.Hover(tile, handView.Showing);
+		mBoardView.Hover(tile, mHandView.Showing);
 	}
 
 	public Vector2I GetHoverCoordinate() {
-		return boardView.GetHoverCoordinate(hoverPoint);
+		return mBoardView.GetHoverCoordinate(hoverPoint);
 	}
 	public Vector2I GetHoverCoordinate(Vector2 point) {
-		if (handView.Showing) {
-			return boardView.GetHoverCoordinate(point, handView.HoverPartition);
+		if (mHandView.Showing) {
+			return mBoardView.GetHoverCoordinate(point, mHandView.HoverPartition);
 		}
-		return boardView.GetHoverCoordinate(point);
+		return mBoardView.GetHoverCoordinate(point);
 	}
 	public Game.Tile.PartitionTypeEnum GetHoverPartition() {
-		if (handView.Showing) { return handView.HoverPartition; }
-		return boardView.HoverPartition;
+		if (mHandView.Showing) { return mHandView.HoverPartition; }
+		return mBoardView.HoverPartition;
 	}
 
 	private void OnPlayed(Card card) {

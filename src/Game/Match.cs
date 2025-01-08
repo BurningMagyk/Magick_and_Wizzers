@@ -3,37 +3,43 @@ using System;
 
 namespace Game {
 public partial class Match {
+	private readonly Board mBoard;
+	private readonly UI.UI mUi;
+
     public Match(Display.Board displayBoard, UI.UI ui) {
+		mBoard = new Board(displayBoard);
+
 		ui.Moved += OnUIMoved;
 		ui.ChangedHoverType += OnUIChangedHoverType;
 		ui.PlayedFromHand += OnPlayedFromHand;
 		ui.PassTurn += OnPassTurn;
+		mUi = ui;
     }
 
-    	public void OnUIMoved(Vector2 newPoint, Vector2 oldPoint) {
+    public void OnUIMoved(Vector2 newPoint, Vector2 oldPoint) {
 		// Check if new position is hovering a different tile now.
-		Game.Tile newTile = board.GetTileAt(ui.GetHoverCoordinate(), ui.GetHoverPartition()),
-			oldHoveredTile = board.GetTileAt(ui.GetHoverCoordinate(oldPoint), ui.GetHoverPartition());
+		Tile newTile = mBoard.GetTileAt(mUi.GetHoverCoordinate(), mUi.GetHoverPartition()),
+			oldHoveredTile = mBoard.GetTileAt(mUi.GetHoverCoordinate(oldPoint), mUi.GetHoverPartition());
 		if (newTile != oldHoveredTile) {
-			ui.HoverTile(newTile);
+			mUi.HoverTile(newTile);
 		}
 	}
 
 	public void OnUIChangedHoverType(Vector2I hoveredTileCoordinate, int hoveredTilePartitionType) {
-		ui.HoverTile(board.GetTileAt(hoveredTileCoordinate, (Game.Tile.PartitionTypeEnum) hoveredTilePartitionType));
+		mUi.HoverTile(mBoard.GetTileAt(hoveredTileCoordinate, (Tile.PartitionTypeEnum) hoveredTilePartitionType));
 	}
 
 	public void OnPlayedFromHand(UI.Card card) {
 		GD.Print("Card played: " + card.Name);
-		displayBoard.AddPiece(
-			displayBoard.GetTileAt(ui.GetHoverCoordinate(), ui.GetHoverPartition()),
-			card.Stats,
+		mBoard.AddPiece(
+			new Piece(card.Stats), // Create a new piece.
+			mBoard.GetTileAt(mUi.GetHoverCoordinate(), mUi.GetHoverPartition()),
 			card.Illustration
 		);
 	}
 
 	public void OnPassTurn() {
-		board.Resolve();
+		mBoard.Resolve();
 	}
 }
 }

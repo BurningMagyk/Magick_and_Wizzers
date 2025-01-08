@@ -5,15 +5,32 @@ using Game;
 
 namespace UI {
 public partial class BoardView : CanvasLayer {
+	private enum HoverType { NORMAL, MOVE, INTERACT, CAST }
+	private const float HOVER_SPRITE_LIFT = 0.1F;
+
 	public bool Showing { get; private set; }
 	public Tile.PartitionTypeEnum HoverPartition;
 	public Tile HoveredTile { get; private set; }
 	
 	private Sprite2D crosshair;
+	private HoverType hoverType = HoverType.NORMAL;
+	private Sprite3D[] hoverSprites;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready() {
 		crosshair = GetNode<Sprite2D>("Crosshair");
+
+		hoverSprites = new Sprite3D[Enum.GetNames(typeof(HoverType)).Length];
+		hoverSprites[(int) HoverType.NORMAL] = GetNode<Sprite3D>("Hover");
+		hoverSprites[(int) HoverType.MOVE] = GetNode<Sprite3D>("Hover Move");
+		hoverSprites[(int) HoverType.INTERACT] = GetNode<Sprite3D>("Hover Interact");
+		hoverSprites[(int) HoverType.CAST] = GetNode<Sprite3D>("Hover Cast");
+
+		foreach (Sprite3D hoverSprite in hoverSprites) {
+			hoverSprite.Visible = false;
+			hoverSprite.PixelSize = 1F / hoverSprite.Texture.GetSize().X;
+		}
+
 		HoverPartition = Tile.MAX_PARTITION;
 		Show();
 	}
@@ -38,10 +55,20 @@ public partial class BoardView : CanvasLayer {
 	}
 
 	public void Hover(Tile tile, bool showingHand) {
-		Tile.HoverType hoverType = showingHand ? Tile.HoverType.CAST : Tile.HoverType.NORMAL;
-		if (HoveredTile != null) { HoveredTile.Unhover(hoverType); }
-		HoveredTile = tile;
-		if (HoveredTile != null) { HoveredTile.Hover(hoverType); }
+		if (tile == null) {
+			hoverSprites[(int) this.hoverType].Visible = false;
+			return;
+		}
+
+		HoverType hoverType = showingHand ? HoverType.CAST : HoverType.NORMAL;
+		if (this.hoverType != hoverType) {
+			hoverSprites[(int) this.hoverType].Visible = false;
+			hoverSprites[(int) hoverType].Visible = true;
+			this.hoverType = hoverType;
+		}
+
+		hoverSprites[(int) hoverType].GlobalPosition = tile.DisplayPosition
+			+ new Vector3(0, HOVER_SPRITE_LIFT, 0);
 	}
 
 	public new void Show() {

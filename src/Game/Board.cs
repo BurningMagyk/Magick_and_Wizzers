@@ -7,7 +7,7 @@ using System.Linq;
 namespace Game {
 public partial class Board {
 	public const int BOARD_SIZE = 7;
-	private readonly Display.Board displayNode;
+	private readonly Display.Board mDisplayNode;
 	public readonly List<Tile[,]> Tiles = new List<Tile[,]>();
 	private readonly HashSet<Piece> pieces = new HashSet<Piece>();
 
@@ -19,13 +19,14 @@ public partial class Board {
 
 		for (int i = 0; i < BOARD_SIZE; i++) {
 			for (int j = 0; j < BOARD_SIZE; j++) {
-				Tile tile = new Tile(i, j);
+				Tile tile = new Tile(new Vector2I(i, j), Tile.PartitionTypeEnum.CARUCATE);
 				tile.Partition(Tiles.Skip(1).ToList());
 				Tiles[0][i, j] = tile;
 			}
 		}
 
-		this.displayNode = displayNode;
+		displayNode.SetRepresentedTiles(Tiles[0]);
+		mDisplayNode = displayNode;
 	}
 
 	public void Resolve() {
@@ -43,11 +44,9 @@ public partial class Board {
 		}
 	}
 
-	public void AddPiece(Tile targetTile, Main.Stats stats, Texture2D illustration) {
-		// Create a new piece.
-		Piece piece = new Piece(stats);
+	public void AddPiece(Piece piece, Tile targetTile, Texture2D illustration) {
 		piece.Tile = targetTile;
-		displayNode.AddPiece(piece, illustration);
+		mDisplayNode.AddPiece(piece, illustration);
 	}
 
 	public Tile GetTileAt(Vector2I index, Tile.PartitionTypeEnum partitionType) {

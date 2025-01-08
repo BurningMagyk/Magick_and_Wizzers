@@ -4,6 +4,8 @@ using System;
 
 namespace Game {
 public partial class Piece {
+	private static int sNextIdForPiece = 0;
+
 	public Tile Tile {
 		get => tile;
 		set {
@@ -13,10 +15,9 @@ public partial class Piece {
 		}
 	}
 	public Main.Stats Stats { get; set; }
-
-	private static int sNextIdForPiece = 0;
-
 	public string Name { get; private set;}
+
+	private readonly Display.Piece mDisplayNode;
 	private Tile tile;
 	private Command command;
 
