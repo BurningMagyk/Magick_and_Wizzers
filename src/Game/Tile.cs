@@ -5,21 +5,22 @@ using System.Linq;
 
 namespace Game {
 public partial class Tile {
-	public const int TILE_SIZE = 32;
 	public const PartitionTypeEnum MAX_PARTITION = PartitionTypeEnum.VIRGATE;
 	public enum PartitionTypeEnum { CARUCATE, VIRGATE, BOVATE, HECTARE, ACRE }
 
 	public Display.Tile DisplayTile { get; private set; }
 	public string Name { get; private set; }
-	public PartitionTypeEnum PartitionType { get; private set; }
 	private Tile[,] tiles = new Tile[2, 2];
 
-	public Vector2I Coordinate { get; private set; }
-	public Vector3 DisplayPosition { get; private set; }
+	public readonly Vector2I Coordinate;
+	public readonly Vector3 DisplayPosition;
+	public readonly float DisplaySize;
+	public readonly PartitionTypeEnum PartitionType;
 
 	public Tile(Vector2I coordinate, PartitionTypeEnum partitionType) {
 		Coordinate = coordinate;
 		DisplayPosition = Display.Tile.CalculatePosition(coordinate, partitionType);
+		DisplaySize = Display.Tile.MESH_SIZE / (int) Math.Pow(2, (int) partitionType);
 		PartitionType = partitionType;
 	}
 

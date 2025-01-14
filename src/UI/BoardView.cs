@@ -44,13 +44,13 @@ public partial class BoardView : CanvasLayer {
 		crosshair.Position = new Vector2(viewPortRect.Size.X / 2, viewPortRect.Size.Y / 2);
 	}
 
-	public Vector2I GetHoverCoordinate(Vector2 coordinate) {
-		return GetHoverCoordinate(coordinate, HoverPartition);
+	public Vector2I GetHoverCoordinate(Vector2 point) {
+		return GetHoverCoordinate(point, HoverPartition);
 	}
-	public Vector2I GetHoverCoordinate(Vector2 coordinate, Tile.PartitionTypeEnum partitionType) {			
+	public Vector2I GetHoverCoordinate(Vector2 point, Tile.PartitionTypeEnum partitionType) {
 		return new Vector2I(
-			(int) Math.Floor(coordinate.X / Tile.TILE_SIZE * Mathf.Pow(2, (int) partitionType)),
-			(int) Math.Floor(coordinate.Y / Tile.TILE_SIZE * Mathf.Pow(2, (int) partitionType))
+			(int) Math.Floor(point.X / Display.Tile.MESH_SIZE * Mathf.Pow(2, (int) partitionType)),
+			(int) Math.Floor(point.Y / Display.Tile.MESH_SIZE * Mathf.Pow(2, (int) partitionType))
 		);
 	}
 
@@ -61,14 +61,15 @@ public partial class BoardView : CanvasLayer {
 		}
 
 		HoverType hoverType = showingHand ? HoverType.CAST : HoverType.NORMAL;
+		hoverSprites[(int) hoverType].Visible = true;
 		if (this.hoverType != hoverType) {
 			hoverSprites[(int) this.hoverType].Visible = false;
-			hoverSprites[(int) hoverType].Visible = true;
 			this.hoverType = hoverType;
 		}
 
 		hoverSprites[(int) hoverType].GlobalPosition = tile.DisplayPosition
 			+ new Vector3(0, HOVER_SPRITE_LIFT, 0);
+		hoverSprites[(int) hoverType].Scale = new Vector3(tile.DisplaySize, tile.DisplaySize, 1);
 	}
 
 	public new void Show() {

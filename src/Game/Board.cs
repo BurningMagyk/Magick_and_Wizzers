@@ -1,4 +1,5 @@
 using Godot;
+using Main;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -44,9 +45,9 @@ public partial class Board {
 		}
 	}
 
-	public void AddPiece(Piece piece, Tile targetTile, Texture2D illustration) {
+	public void AddPiece(Stats stats, Tile targetTile, Texture2D illustration, int uniqueId) {
+		Piece piece = new Piece(stats, mDisplayNode.CreatePiece(uniqueId + '-' + stats.Name, illustration));
 		piece.Tile = targetTile;
-		mDisplayNode.AddPiece(piece, illustration);
 	}
 
 	public Tile GetTileAt(Vector2I index, Tile.PartitionTypeEnum partitionType) {

@@ -39,7 +39,9 @@ namespace UI {
 			Vector2 oldHoverPoint = hoverPoint;
 			hoverPoint = new Vector2(hoverPoint3D.X, hoverPoint3D.Z);
 
-			EmitSignal(SignalName.Moved, oldHoverPoint, hoverPoint);
+			if (oldHoverPoint != hoverPoint) {
+				EmitSignal(SignalName.Moved, hoverPoint, oldHoverPoint);
+			}
 		}
 	}
 
@@ -50,8 +52,8 @@ namespace UI {
 			} else {
 				mHandView.Show();
 			}
+			EmitSignal(SignalName.ChangedHoverType, GetHoverCoordinate(), (int) GetHoverPartition());
 	  	}
-	  	EmitSignal(SignalName.ChangedHoverType, GetHoverCoordinate(), (int) GetHoverPartition());
 
 		if (Input.IsActionJustPressed("pass_turn")) {
 			EmitSignal(SignalName.PassTurn);

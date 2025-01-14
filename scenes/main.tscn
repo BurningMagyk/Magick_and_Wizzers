@@ -39,22 +39,22 @@ scale = Vector2(0.1, 0.1)
 texture = ExtResource("8_3qukr")
 
 [node name="Hover" type="Sprite3D" parent="UI/Board View"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.05)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0.05)
 visible = false
 texture = ExtResource("8_a5pjv")
 
 [node name="Hover Move" type="Sprite3D" parent="UI/Board View"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.05)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0.05)
 visible = false
 texture = ExtResource("9_lgre4")
 
 [node name="Hover Interact" type="Sprite3D" parent="UI/Board View"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.05)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0.05)
 visible = false
 texture = ExtResource("10_qaoui")
 
 [node name="Hover Cast" type="Sprite3D" parent="UI/Board View"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.05)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0.05)
 visible = false
 texture = ExtResource("11_4ppjd")
 

@@ -10,8 +10,8 @@ public partial class Piece {
 		get => tile;
 		set {
 			tile = value;
-			// Position = tile.GlobalPosition;
-			// Scale = value.GlobalScale;
+			mDisplayNode.Position = value.DisplayPosition;
+			mDisplayNode.Scale = new Vector3(value.DisplaySize, value.DisplaySize, value.DisplaySize);
 		}
 	}
 	public Main.Stats Stats { get; set; }
@@ -22,8 +22,9 @@ public partial class Piece {
 	private Command command;
 
 	// Called when the node enters the scene tree for the first time.
-	public Piece(Stats stats) {
+	public Piece(Stats stats, Display.Piece displayNode) {
 		Name = stats.Name + " " + sNextIdForPiece++;
+		mDisplayNode = displayNode;
 	}
 
 	public void FollowCommand() {

@@ -21,9 +21,9 @@ public partial class Board : Node3D {
 			for (int j = 0; j < tiles.GetLength(1); j++) {
 				MeshInstance3D tileMesh = tileScene.Instantiate() as MeshInstance3D;
 				tileMesh.Position = new Vector3(
-					Game.Tile.TILE_SIZE / 2 + Game.Tile.TILE_SIZE * i,
+					Tile.MESH_SIZE / 2 + Tile.MESH_SIZE * i,
 					0,
-					Game.Tile.TILE_SIZE / 2 + Game.Tile.TILE_SIZE * j
+					Tile.MESH_SIZE / 2 + Tile.MESH_SIZE * j
 				);
 				tileMesh.Visible = true;
 				tileMesh.Name = "Tile [" + i + ", " + j + "]";
@@ -38,13 +38,14 @@ public partial class Board : Node3D {
 		}
 	}
 
-	public void AddPiece(Game.Piece representedPiece, Texture2D illustration) {
+	public Piece CreatePiece(String uniqueName, Texture2D illustration) {
 		MeshInstance3D pieceMesh = mPieceScene.Instantiate() as MeshInstance3D;
-		pieceMesh.Name = representedPiece.Name;
 		StandardMaterial3D pieceMaterial = new StandardMaterial3D();
 		pieceMaterial.AlbedoTexture = illustration;
 		pieceMesh.MaterialOverride = pieceMaterial;
+		pieceMesh.Name = uniqueName;
 		AddChild(pieceMesh);
+		return GetNode<Piece>(uniqueName);
 	}
 }
 }

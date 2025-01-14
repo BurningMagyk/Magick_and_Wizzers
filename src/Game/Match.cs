@@ -6,6 +6,8 @@ public partial class Match {
 	private readonly Board mBoard;
 	private readonly UI.UI mUi;
 
+	private int uniqueId = 0;
+
     public Match(Display.Board displayBoard, UI.UI ui) {
 		mBoard = new Board(displayBoard);
 
@@ -30,11 +32,11 @@ public partial class Match {
 	}
 
 	public void OnPlayedFromHand(UI.Card card) {
-		GD.Print("Card played: " + card.Name);
 		mBoard.AddPiece(
-			new Piece(card.Stats), // Create a new piece.
+			card.Stats,
 			mBoard.GetTileAt(mUi.GetHoverCoordinate(), mUi.GetHoverPartition()),
-			card.Illustration
+			card.Illustration,
+			uniqueId++
 		);
 	}
 
