@@ -1,8 +1,8 @@
 using Godot;
 using System;
 
-namespace Game {
-public partial class Match {
+namespace Match {
+public class Match {
 	private readonly Board mBoard;
 	private readonly UI.UI mUi;
 

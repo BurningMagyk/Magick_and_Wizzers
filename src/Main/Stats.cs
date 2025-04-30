@@ -8,7 +8,7 @@ public class Stats {
 	public enum ElementEnum {
 		BLACK, DREAM, UNHOLY,
 		RAY, LIGHTNING, HOLY,
-		WATER, MIST, FROST,
+		WATER, MIST, FROST, POISON,
 		FIRE, LASER, LAVA,
 		DIRT, METAL, WOOD, FLESH,
 		WIND, THUNDER
@@ -29,7 +29,7 @@ public class Stats {
 	public enum RaceEnum {
 		DRAGON, DINOSAUR, CHIMERA, SPHINX,
 		APE, RODENT, FELINE, CANINE, BEAR, OVID, HORSE, BAT, CETACEAN,
-		REPTILE, AMPHIBIAN, FISH, CEPHALOPOD,
+		SERPENT, LIZARD, TORTOISE, AMPHIBIAN, FISH, CEPHALOPOD,
 		INSECT, SPIDER, CRUSTACEAN, WORM, SLUG, JELLYFISH,
 		SLIME, PLANT, FUNGUS, BACTERIA,
 		MAN, ELF, GNOME, GIANT, HOMUNCULUS, ORC,
@@ -38,7 +38,7 @@ public class Stats {
 		ILLUSION, DOLL, GOLEM, MACHINE
 	}
 	public enum RaceGroupEnum {
-		HUMAN, ANIMAL, MAMMAL, REPTILIAN, AQUATIC, ARTHROPOD, FLORA, SPIRIT, HOLY, UNHOLY, UNDEAD, CONSTRUCT
+		HUMAN, MAMMAL, FEATHERED, REPTILIAN, AQUATIC, ARTHROPOD, FLORA, SPIRIT, HOLY, UNHOLY, UNDEAD, CONSTRUCT
 	}
 
 	private ElementEnum[] elements;
@@ -448,11 +448,13 @@ public class Stats {
 					groupsWeak.Add(RaceGroupEnum.REPTILIAN);
 					break;
 				case RaceEnum.DINOSAUR:
-				case RaceEnum.REPTILE:
+				case RaceEnum.SERPENT:
+				case RaceEnum.LIZARD:
+				case RaceEnum.TORTOISE:
 					groupsStrong.Add(RaceGroupEnum.REPTILIAN);
 					break;
 				case RaceEnum.CHIMERA:
-					groupsStrong.Add(RaceGroupEnum.ANIMAL);
+					// groupsStrong.Add(RaceGroupEnum.ANIMAL);
 					break;
 				case RaceEnum.SPHINX:
 					groupsWeak.Add(RaceGroupEnum.MAMMAL);
@@ -479,13 +481,13 @@ public class Stats {
 					if (race == RaceEnum.SLIME) {
 						groupsWeak.Add(RaceGroupEnum.FLORA);
 					} else {
-						groupsStrong.Add(RaceGroupEnum.ANIMAL);
+						// groupsStrong.Add(RaceGroupEnum.ANIMAL);
 					}
 					break;
 				case RaceEnum.FISH:
 				case RaceEnum.CEPHALOPOD:
 					groupsStrong.Add(RaceGroupEnum.AQUATIC);
-					groupsStrong.Add(RaceGroupEnum.ANIMAL);
+					// groupsStrong.Add(RaceGroupEnum.ANIMAL);
 					break;
 				case RaceEnum.INSECT:
 				case RaceEnum.SPIDER:
@@ -584,7 +586,7 @@ public class Stats {
 				case RaceGroupEnum.MAMMAL:
 				case RaceGroupEnum.REPTILIAN:
 				case RaceGroupEnum.ARTHROPOD:
-					groupsExtra.Add(RaceGroupEnum.ANIMAL);
+					// groupsExtra.Add(RaceGroupEnum.ANIMAL);
 					break;
 			}
 		}

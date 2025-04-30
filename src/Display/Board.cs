@@ -15,7 +15,7 @@ public partial class Board : Node3D {
 		GetNode<Piece>("Piece").Visible = false;
 	}
 
-	public void SetRepresentedTiles(Game.Tile[,] tiles) {		
+	public void SetRepresentedTiles(Match.Tile[,] tiles) {		
 		PackedScene tileScene = ResourceLoader.Load<PackedScene>("res://scenes/tile.tscn");
 		for (int i = 0; i < tiles.GetLength(0); i++) {
 			for (int j = 0; j < tiles.GetLength(1); j++) {
@@ -30,9 +30,9 @@ public partial class Board : Node3D {
 				AddChild(tileMesh);
 
 				GetNode<Tile>(tileMesh.Name.ToString()).UseDebugMaterial(
-					(float) i / Game.Board.BOARD_SIZE,
-					(float) j / Game.Board.BOARD_SIZE,
-					1 - (float) (i + j) / Game.Board.BOARD_SIZE / 2
+					(float) i / Match.Board.BOARD_SIZE,
+					(float) j / Match.Board.BOARD_SIZE,
+					1 - (float) (i + j) / Match.Board.BOARD_SIZE / 2
 				);
 			}
 		}

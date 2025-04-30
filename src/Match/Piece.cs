@@ -2,8 +2,8 @@ using Godot;
 using Main;
 using System;
 
-namespace Game {
-public partial class Piece {
+namespace Match {
+public class Piece {
 	private static int sNextIdForPiece = 0;
 
 	public Tile Tile {
@@ -28,15 +28,15 @@ public partial class Piece {
 	}
 
 	public void FollowCommand() {
-		switch (command.Type) {
-			case Command.CommandType.MOVE:
-				// Move the piece to the new tile.
-				// Tile = Tile.GetNeighbor(command.Direction);
-				break;
-			default:
-				// throw new NotImplementedException();
-				break;
-		}
+		// switch (command.Type) {
+		// 	case Command.CommandType.MOVE:
+		// 		// Move the piece to the new tile.
+		// 		// Tile = Tile.GetNeighbor(command.Direction);
+		// 		break;
+		// 	default:
+		// 		// throw new NotImplementedException();
+		// 		break;
+		// }
 	}
 }
 }

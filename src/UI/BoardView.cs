@@ -1,7 +1,6 @@
 using Godot;
 using System;
-using Main;
-using Game;
+using Match;
 
 namespace UI {
 public partial class BoardView : CanvasLayer {

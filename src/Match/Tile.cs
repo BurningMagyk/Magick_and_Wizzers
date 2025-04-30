@@ -3,8 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Game {
-public partial class Tile {
+namespace Match {
+public class Tile {
 	public const PartitionTypeEnum MAX_PARTITION = PartitionTypeEnum.VIRGATE;
 	public enum PartitionTypeEnum { CARUCATE, VIRGATE, BOVATE, HECTARE, ACRE }
 

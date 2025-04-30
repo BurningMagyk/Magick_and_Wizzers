@@ -90,7 +90,7 @@ namespace UI {
 	[Signal]
 	public delegate void PassTurnEventHandler();
 
-	public void HoverTile(Game.Tile tile) {
+	public void HoverTile(Match.Tile tile) {
 		mBoardView.Hover(tile, mHandView.Showing);
 	}
 
@@ -103,7 +103,7 @@ namespace UI {
 		}
 		return mBoardView.GetHoverCoordinate(point);
 	}
-	public Game.Tile.PartitionTypeEnum GetHoverPartition() {
+	public Match.Tile.PartitionTypeEnum GetHoverPartition() {
 		if (mHandView.Showing) { return mHandView.HoverPartition; }
 		return mBoardView.HoverPartition;
 	}

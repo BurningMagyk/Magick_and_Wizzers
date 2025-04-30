@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Game {
+namespace Match {
 public partial class Board {
 	public const int BOARD_SIZE = 7;
 	private readonly Display.Board mDisplayNode;

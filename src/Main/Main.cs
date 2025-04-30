@@ -7,7 +7,7 @@ public partial class Main : Node {
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready() {
-		new Game.Match(GetNode<Display.Board>("Board"), GetNode<UI.UI>("UI"));
+		new Match.Match(GetNode<Display.Board>("Board"), GetNode<UI.UI>("UI"));
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.

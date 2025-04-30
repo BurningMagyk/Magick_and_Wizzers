@@ -1,6 +1,6 @@
 using Godot;
 using System;
-using Game;
+using Match;
 
 namespace UI {
 public partial class HandView : CanvasLayer {
