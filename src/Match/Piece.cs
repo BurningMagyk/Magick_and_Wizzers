@@ -16,10 +16,11 @@ public class Piece {
 	}
 	public Main.Stats Stats { get; set; }
 	public string Name { get; private set;}
+	public Player MasteringPlayer { get; set; }
 
 	private readonly Display.Piece mDisplayNode;
 	private Tile tile;
-	private Command command;
+	public Command Command { get; private set; }
 
 	// Called when the node enters the scene tree for the first time.
 	public Piece(Stats stats, Display.Piece displayNode) {

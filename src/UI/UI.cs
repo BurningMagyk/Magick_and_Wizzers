@@ -55,8 +55,8 @@ namespace UI {
 			EmitSignal(SignalName.ChangedHoverType, GetHoverCoordinate(), (int) GetHoverPartition());
 	  	}
 
-		if (Input.IsActionJustPressed("pass_turn")) {
-			EmitSignal(SignalName.PassTurn);
+		if (Input.IsActionJustPressed("pass_round")) {
+			EmitSignal(SignalName.PassRound);
 		}
 
 		int horizontalPan = 0, verticalPan = 0;
@@ -88,7 +88,7 @@ namespace UI {
 	[Signal]
 	public delegate void PlayedFromHandEventHandler(Card card);
 	[Signal]
-	public delegate void PassTurnEventHandler();
+	public delegate void PassRoundEventHandler();
 
 	public void HoverTile(Match.Tile tile) {
 		mBoardView.Hover(tile, mHandView.Showing);

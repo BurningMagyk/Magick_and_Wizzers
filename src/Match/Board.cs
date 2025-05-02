@@ -45,17 +45,21 @@ public partial class Board {
 		}
 	}
 
-	public void AddPiece(Stats stats, Tile targetTile, Texture2D illustration, int uniqueId) {
+	public Piece AddPiece(Stats stats, Tile targetTile, Texture2D illustration, int uniqueId) {
 		Piece piece = new Piece(stats, mDisplayNode.CreatePiece(uniqueId + '-' + stats.Name, illustration));
 		piece.Tile = targetTile;
+		return piece;
 	}
 
-	public Tile GetTileAt(Vector2I index, Tile.PartitionTypeEnum partitionType) {
+	public Tile GetTileAt(int xPos, int yPos, Tile.PartitionTypeEnum partitionType) {
 		int boardSizeTotal = BOARD_SIZE * (int) Math.Pow(2, (int) partitionType);
-		if (index.X < 0 || index.Y < 0 || index.X >= boardSizeTotal || index.Y >= boardSizeTotal) {
+		if (xPos < 0 || yPos < 0 || xPos >= boardSizeTotal || yPos >= boardSizeTotal) {
 			return null;
 		}
-		return Tiles[(int) partitionType][index.X, index.Y];
+		return Tiles[(int) partitionType][xPos, yPos];
+	}
+	public Tile GetTileAt(Vector2I pos, Tile.PartitionTypeEnum partitionType) {
+		return GetTileAt(pos.X, pos.Y, partitionType);
 	}
 }
 }

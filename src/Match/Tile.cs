@@ -5,7 +5,8 @@ using System.Linq;
 
 namespace Match {
 public class Tile {
-	public const PartitionTypeEnum MAX_PARTITION = PartitionTypeEnum.VIRGATE;
+	public const PartitionTypeEnum MAX_PARTITION = PartitionTypeEnum.VIRGATE; // smallest
+	public const PartitionTypeEnum MIN_PARTITION = PartitionTypeEnum.CARUCATE; // largest
 	public enum PartitionTypeEnum { CARUCATE, VIRGATE, BOVATE, HECTARE, ACRE }
 
 	public Display.Tile DisplayTile { get; private set; }
