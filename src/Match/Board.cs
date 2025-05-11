@@ -96,54 +96,91 @@ public partial class Board {
 	}
 
 	/**
-	 * Does not find the optimally most spread out positions, because such an algorithm would be too inefficient.
-	 * Instead, uses random sampling to approximate positions that are hopefully well spread out.
+	 * Free-for-all
 	*/
 	public Vector2I[] GetStartingPositions(int playerCount) {
-		if (playerCount < 2 || playerCount > Match.MAX_PLAYER_COUNT) {
-			throw new ArgumentOutOfRangeException(
-				$"Player count must be between 2 and {Match.MAX_PLAYER_COUNT}."
-			);
-		}
-
-		int boardSizeTotal = BOARD_SIZE * (int) Math.Pow(2, (int) Tile.PartitionTypeEnum.CARUCATE);
+		int boardSizeTotal = BOARD_SIZE * (int) Math.Pow(2, (int) Tile.MAX_PARTITION);
 		int boardSpace = boardSizeTotal * boardSizeTotal;
 
 		if (playerCount > boardSpace) {
 			throw new ArgumentOutOfRangeException(
-				$"Player count must be less than or equal to {boardSpace}."
+				$"Player count must be less than or equal to the board space ({boardSpace})."
 			);
 		}
-	
-		Vector2I[] possibleStartingPositions;
-		Random random = new Random();
 
-		if (RANDOM_POSSIBLE_STARTING_POSITION_COUNT < boardSpace) {
-			possibleStartingPositions = new Vector2I[RANDOM_POSSIBLE_STARTING_POSITION_COUNT];
-			for (int i = 0; i < playerCount; i++) {
-				int xPos = random.Next(0, boardSizeTotal);
-				int yPos = random.Next(0, boardSizeTotal);
-				possibleStartingPositions[i] = new Vector2I(xPos, yPos);
-			}
-		} else {
-			possibleStartingPositions = new Vector2I[boardSpace];
-			for (int i = 0; i < boardSizeTotal; i++) {
-				for (int j = 0; j < boardSizeTotal; j++) {
-					possibleStartingPositions[i * boardSizeTotal + j] = new Vector2I(i, j);
-				}
-			}
+		if (playerCount == 2) {
+			return new Vector2I[] {
+				new Vector2I(boardSizeTotal / 4, boardSizeTotal / 4),
+				new Vector2I(boardSizeTotal * 3 / 4, boardSizeTotal * 3 / 4)
+			};
+		} else if (playerCount == 3) {
+			return new Vector2I[] {
+				new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
+				new Vector2I(boardSizeTotal / 2, boardSizeTotal / 2),
+				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6)
+			};
+		} else if (playerCount == 4) {
+			return new Vector2I[] {
+				new Vector2I(boardSizeTotal / 4, boardSizeTotal / 4),
+				new Vector2I(boardSizeTotal * 3 / 4, boardSizeTotal / 4),
+				new Vector2I(boardSizeTotal / 4, boardSizeTotal * 3 / 4),
+				new Vector2I(boardSizeTotal * 3 / 4, boardSizeTotal * 3 / 4)
+			};
+		} else if (playerCount == 5) {
+			return new Vector2I[] {
+				new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
+				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 6),
+				new Vector2I(boardSizeTotal / 2, boardSizeTotal / 2),
+				new Vector2I(boardSizeTotal / 6, boardSizeTotal * 5 / 6),
+				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6)
+			};
+		} else if (playerCount == 6) {
+			return new Vector2I[] {
+				new Vector2I(boardSizeTotal / 3, boardSizeTotal / 6),
+				new Vector2I(boardSizeTotal * 2 / 3, boardSizeTotal / 6),
+				new Vector2I(boardSizeTotal / 3, boardSizeTotal / 2),
+				new Vector2I(boardSizeTotal * 2 / 3, boardSizeTotal / 2),
+				new Vector2I(boardSizeTotal / 3, boardSizeTotal * 5 / 6),
+				new Vector2I(boardSizeTotal * 2 / 3, boardSizeTotal * 5 / 6)
+			};
+		} else if (playerCount == 7) {
+			return new Vector2I[] {
+				new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
+				new Vector2I(boardSizeTotal / 2, boardSizeTotal / 2),
+				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6),
+				new Vector2I(boardSizeTotal / 4, boardSizeTotal / 3),
+				new Vector2I(boardSizeTotal / 3, boardSizeTotal / 4),
+				new Vector2I(boardSizeTotal / 3, boardSizeTotal * 3 / 4),
+				new Vector2I(boardSizeTotal * 3 / 4, boardSizeTotal * 2 / 3),
+			};
+		} else if (playerCount == 8) {
+			return new Vector2I[] {
+				new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
+				new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6),
+				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 6),
+				new Vector2I(boardSizeTotal / 6, boardSizeTotal / 2),
+				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 2),
+				new Vector2I(boardSizeTotal / 6, boardSizeTotal * 5 / 6),
+				new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6),
+				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6),
+			};
+		} else if (playerCount == 9) {
+			return new Vector2I[] {
+				new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
+				new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6),
+				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 6),
+				new Vector2I(boardSizeTotal / 6, boardSizeTotal / 2),
+				new Vector2I(boardSizeTotal / 2, boardSizeTotal / 2),
+				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 2),
+				new Vector2I(boardSizeTotal / 6, boardSizeTotal * 5 / 6),
+				new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6),
+				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6),
+			};
 		}
-
-		Vector2I[] startingPositions = new Vector2I[playerCount];
-		startingPositions[0] = new Vector2I(random.Next(0, boardSizeTotal), random.Next(0, boardSizeTotal));
 		
-		for (int i = 1; i < playerCount; i++) {
-			Vector2I[] startingPositionsSoFar = new Vector2I[i];
-			Array.Copy(startingPositions, startingPositionsSoFar, i);
-			startingPositions[i] = GetFarthestPositionFrom(startingPositionsSoFar, possibleStartingPositions);
-		}
-
-		return startingPositions;
+		throw new ArgumentOutOfRangeException(
+			$"Player count must not exceed {9}."
+		);
 	}
 
 	public Vector2I GetFarthestPositionFrom(Vector2I[] positions, Vector2I[] choices) {
