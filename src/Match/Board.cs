@@ -43,6 +43,7 @@ public partial class Board {
 		// Nones (ninth hour, 3 p.m.)
 		// Vespers (sunset, approximately 6 p.m.)
 		// Compline (end of the day before retiring, approximately 7 p.m.)
+		// Twilight (to make it 10 hours)
 		foreach (Piece piece in pieces) {
 
 		}
@@ -98,7 +99,7 @@ public partial class Board {
 	/**
 	 * Free-for-all
 	*/
-	public Vector2I[] GetStartingPositions(int playerCount) {
+	public Vector2I[] GetStartingPositions(Match.MatchType matchType, int playerCount) {
 		int boardSizeTotal = BOARD_SIZE * (int) Math.Pow(2, (int) Tile.MAX_PARTITION);
 		int boardSpace = boardSizeTotal * boardSizeTotal;
 
@@ -108,74 +109,76 @@ public partial class Board {
 			);
 		}
 
-		if (playerCount == 2) {
+		if (matchType == Match.MatchType.FREE_FOR_ALL) {
+			if (playerCount == 2) {
 			return new Vector2I[] {
 				new Vector2I(boardSizeTotal / 4, boardSizeTotal / 4),
 				new Vector2I(boardSizeTotal * 3 / 4, boardSizeTotal * 3 / 4)
 			};
-		} else if (playerCount == 3) {
-			return new Vector2I[] {
-				new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
-				new Vector2I(boardSizeTotal / 2, boardSizeTotal / 2),
-				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6)
-			};
-		} else if (playerCount == 4) {
-			return new Vector2I[] {
-				new Vector2I(boardSizeTotal / 4, boardSizeTotal / 4),
-				new Vector2I(boardSizeTotal * 3 / 4, boardSizeTotal / 4),
-				new Vector2I(boardSizeTotal / 4, boardSizeTotal * 3 / 4),
-				new Vector2I(boardSizeTotal * 3 / 4, boardSizeTotal * 3 / 4)
-			};
-		} else if (playerCount == 5) {
-			return new Vector2I[] {
-				new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
-				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 6),
-				new Vector2I(boardSizeTotal / 2, boardSizeTotal / 2),
-				new Vector2I(boardSizeTotal / 6, boardSizeTotal * 5 / 6),
-				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6)
-			};
-		} else if (playerCount == 6) {
-			return new Vector2I[] {
-				new Vector2I(boardSizeTotal / 3, boardSizeTotal / 6),
-				new Vector2I(boardSizeTotal * 2 / 3, boardSizeTotal / 6),
-				new Vector2I(boardSizeTotal / 3, boardSizeTotal / 2),
-				new Vector2I(boardSizeTotal * 2 / 3, boardSizeTotal / 2),
-				new Vector2I(boardSizeTotal / 3, boardSizeTotal * 5 / 6),
-				new Vector2I(boardSizeTotal * 2 / 3, boardSizeTotal * 5 / 6)
-			};
-		} else if (playerCount == 7) {
-			return new Vector2I[] {
-				new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
-				new Vector2I(boardSizeTotal / 2, boardSizeTotal / 2),
-				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6),
-				new Vector2I(boardSizeTotal / 4, boardSizeTotal / 3),
-				new Vector2I(boardSizeTotal / 3, boardSizeTotal / 4),
-				new Vector2I(boardSizeTotal / 3, boardSizeTotal * 3 / 4),
-				new Vector2I(boardSizeTotal * 3 / 4, boardSizeTotal * 2 / 3),
-			};
-		} else if (playerCount == 8) {
-			return new Vector2I[] {
-				new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
-				new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6),
-				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 6),
-				new Vector2I(boardSizeTotal / 6, boardSizeTotal / 2),
-				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 2),
-				new Vector2I(boardSizeTotal / 6, boardSizeTotal * 5 / 6),
-				new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6),
-				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6),
-			};
-		} else if (playerCount == 9) {
-			return new Vector2I[] {
-				new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
-				new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6),
-				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 6),
-				new Vector2I(boardSizeTotal / 6, boardSizeTotal / 2),
-				new Vector2I(boardSizeTotal / 2, boardSizeTotal / 2),
-				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 2),
-				new Vector2I(boardSizeTotal / 6, boardSizeTotal * 5 / 6),
-				new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6),
-				new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6),
-			};
+			} else if (playerCount == 3) {
+				return new Vector2I[] {
+					new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
+					new Vector2I(boardSizeTotal / 2, boardSizeTotal / 2),
+					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6)
+				};
+			} else if (playerCount == 4) {
+				return new Vector2I[] {
+					new Vector2I(boardSizeTotal / 4, boardSizeTotal / 4),
+					new Vector2I(boardSizeTotal * 3 / 4, boardSizeTotal / 4),
+					new Vector2I(boardSizeTotal / 4, boardSizeTotal * 3 / 4),
+					new Vector2I(boardSizeTotal * 3 / 4, boardSizeTotal * 3 / 4)
+				};
+			} else if (playerCount == 5) {
+				return new Vector2I[] {
+					new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
+					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 6),
+					new Vector2I(boardSizeTotal / 2, boardSizeTotal / 2),
+					new Vector2I(boardSizeTotal / 6, boardSizeTotal * 5 / 6),
+					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6)
+				};
+			} else if (playerCount == 6) {
+				return new Vector2I[] {
+					new Vector2I(boardSizeTotal / 3, boardSizeTotal / 6),
+					new Vector2I(boardSizeTotal * 2 / 3, boardSizeTotal / 6),
+					new Vector2I(boardSizeTotal / 3, boardSizeTotal / 2),
+					new Vector2I(boardSizeTotal * 2 / 3, boardSizeTotal / 2),
+					new Vector2I(boardSizeTotal / 3, boardSizeTotal * 5 / 6),
+					new Vector2I(boardSizeTotal * 2 / 3, boardSizeTotal * 5 / 6)
+				};
+			} else if (playerCount == 7) {
+				return new Vector2I[] {
+					new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
+					new Vector2I(boardSizeTotal / 2, boardSizeTotal / 2),
+					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6),
+					new Vector2I(boardSizeTotal / 4, boardSizeTotal / 3),
+					new Vector2I(boardSizeTotal / 3, boardSizeTotal / 4),
+					new Vector2I(boardSizeTotal / 3, boardSizeTotal * 3 / 4),
+					new Vector2I(boardSizeTotal * 3 / 4, boardSizeTotal * 2 / 3),
+				};
+			} else if (playerCount == 8) {
+				return new Vector2I[] {
+					new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
+					new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6),
+					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 6),
+					new Vector2I(boardSizeTotal / 6, boardSizeTotal / 2),
+					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 2),
+					new Vector2I(boardSizeTotal / 6, boardSizeTotal * 5 / 6),
+					new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6),
+					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6),
+				};
+			} else if (playerCount == 9) {
+				return new Vector2I[] {
+					new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
+					new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6),
+					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 6),
+					new Vector2I(boardSizeTotal / 6, boardSizeTotal / 2),
+					new Vector2I(boardSizeTotal / 2, boardSizeTotal / 2),
+					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 2),
+					new Vector2I(boardSizeTotal / 6, boardSizeTotal * 5 / 6),
+					new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6),
+					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6),
+				};
+			}
 		}
 		
 		throw new ArgumentOutOfRangeException(

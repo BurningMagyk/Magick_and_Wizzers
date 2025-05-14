@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://bcccthspywgs4"]
-
-[ext_resource type="Script" path="res://src/Piece2D.cs" id="1_k7w2n"]
-
-[node name="Piece" type="Sprite2D"]
-script = ExtResource("1_k7w2n")

@@ -8,22 +8,17 @@ public class Command {
         TARRY, // Stay put
         APPROACH, // Enter range of target
         AVOID, // Leave range of target
-        ATTACK, // Attack the target
-        CAST, // Cast a spell
+        INTERACT, // Interact with the target
 
         // Reactive commands
         INTERCEPT, // Execute command when actor enters range of recipient
         LINGER, // Execute command when actor leaves range of recipient
-        DEFEND, // Execute command when actor attacks recipient
-        BRIDLE, // Execute command when actor casts a spell
+        BRIDLE, // Execute command when actor interacts with recipient
         
         // Passive commands
         AMBLE, // Move slowly
         SKULK, // Move stealthily
-        SURFACE, // Move to the surface
-        FLY, // Move into the air
-        SWIM, // Move into the water
-        BORE, // Move into the ground
+        LAYER // Move through particular layer
     }
 
     public enum RangeType {
@@ -77,8 +72,8 @@ public class Command {
         return new Command(CommandType.AVOID, null, target, rangeType, 0, duration);
     }
 
-    public static Command Attack(Target target, int duration = -1) {
-        return new Command(CommandType.ATTACK, null, target, RangeType.COMBAT, 0, duration);
+    public static Command Interact(Target target, int duration = -1) {
+        return new Command(CommandType.INTERACT, null, target, RangeType.COMBAT, 0, duration);
     }
 
     public static Command Cast(Spell spell) {
@@ -88,7 +83,7 @@ public class Command {
         } else {
             target = new Target(spell);
         }
-        return new Command(CommandType.CAST, null, target, RangeType.INFLUENCE, 0, 0);
+        return new Command(CommandType.INTERACT, null, target, RangeType.INFLUENCE, 0, 0);
     }
 
     public static Command Intercept(
@@ -110,7 +105,7 @@ public class Command {
     }
 
     public static Command Defend(Piece actor, Target recipient) {
-        return new Command(CommandType.DEFEND, actor, recipient, RangeType.COMBAT, 0, 0);
+        return new Command(CommandType.BRIDLE, actor, recipient, RangeType.COMBAT, 0, 0);
     }
 
     public static Command Bridle(Piece actor, Spell spell) {
@@ -131,20 +126,8 @@ public class Command {
         return new Command(CommandType.SKULK, null, null, RangeType.DISTANCE, 0, -1);
     }
 
-    public static Command Surface() {
-        return new Command(CommandType.SURFACE, null, null, RangeType.DISTANCE, 0, -1);
-    }
-
-    public static Command Fly() {
-        return new Command(CommandType.FLY, null, null, RangeType.DISTANCE, 0, -1);
-    }
-
-    public static Command Swim() {
-        return new Command(CommandType.SWIM, null, null, RangeType.DISTANCE, 0, -1);
-    }
-
-    public static Command Bore() {
-        return new Command(CommandType.BORE, null, null, RangeType.DISTANCE, 0, -1);
+    public static Command Layer() {
+        return new Command(CommandType.LAYER, null, null, RangeType.DISTANCE, 0, -1);
     }
 }
 }

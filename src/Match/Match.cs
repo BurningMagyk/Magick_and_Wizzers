@@ -3,6 +3,9 @@ using System;
 
 namespace Match {
 public class Match {
+    public enum MatchType {
+      FREE_FOR_ALL
+    }
     private const int STARTING_LIFE_POINTS = 8000;
 
     public const int MAX_PLAYER_COUNT = 16;
@@ -17,12 +20,12 @@ public class Match {
 
       ui.Moved += OnUIMoved;
       ui.ChangedHoverType += OnUIChangedHoverType;
-      ui.PlayedFromHand += OnPlayedFromHand;
+      ui.Played += OnPlayed;
       ui.PassRound += OnPassRound;
       mUi = ui;
 
       // Set up players.
-      Vector2I[] startingPositions = mBoard.GetStartingPositions(players.Length);
+      Vector2I[] startingPositions = mBoard.GetStartingPositions(MatchType.FREE_FOR_ALL, players.Length);
       for (int i = 0; i < players.Length; i++) {
           Player player = players[i];
           player.AddMaster(GenerateDefaultMaster(player.Name, player.MasterCard, startingPositions[i]));
@@ -42,7 +45,7 @@ public class Match {
       mUi.HoverTile(mBoard.GetTileAt(hoveredTileCoordinate, (Tile.PartitionTypeEnum) hoveredTilePartitionType));
     }
 
-    public void OnPlayedFromHand(UI.Card card) {
+    public void OnPlayed(UI.Card card) {
       mBoard.AddPiece(
           card.Stats,
           mBoard.GetTileAt(mUi.GetHoverCoordinate(), mUi.GetHoverPartition()),
