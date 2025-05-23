@@ -216,7 +216,7 @@ public partial class HandView : CanvasLayer {
     // Set the mode to SELECTED.
     Mode = HandViewMode.SELECTED;
 
-    // Emit the signal after the mode is changed.
+    // Emits signal to call HandView.Selected, defined in UI class.
     EmitSignal(SignalName.Selected, cardsInHand[hoveredCardIndex]);
   }
 

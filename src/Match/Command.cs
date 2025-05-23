@@ -79,7 +79,7 @@ public class Command {
     public static Command Cast(Spell spell) {
         Target target;
         if (spell == null) {
-            target = new Target(TargetType.SPELL);
+            target = new Target(Target.TargetType.SPELL);
         } else {
             target = new Target(spell);
         }
@@ -111,7 +111,7 @@ public class Command {
     public static Command Bridle(Piece actor, Spell spell) {
         Target target;
         if (spell == null) {
-            target = new Target(TargetType.SPELL);
+            target = new Target(Target.TargetType.SPELL);
         } else {
             target = new Target(spell);
         }

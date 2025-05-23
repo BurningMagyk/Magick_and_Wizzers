@@ -2,12 +2,12 @@ using Godot;
 using System;
 
 namespace Match {
+public class Target {
     public enum TargetType {
         SPELL,
         PIECE,
         TILE
     }
-public class Target {
     public TargetType Type { get; private set; }
     public Spell Spell { get; private set; }
     public Piece Piece { get; private set; }
