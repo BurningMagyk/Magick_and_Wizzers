@@ -1,13 +1,18 @@
+using Display;
 using Godot;
+using Match;
 using System;
+using System.Diagnostics;
 
 namespace UI {
 public partial class UI : Node {
 	private const float CAMERA_SPEED = 1F;
 
-	private ViewState mViewState = ViewState.MEANDER_BOARD;
+	private ViewState mViewState = new ViewState(ViewStateEnum.MEANDER_BOARD);
 	private BoardView mBoardView;
+	private CommandView mCommandView;
 	private HandView mHandView;
+	private DetailView mDetailView;
 	private Camera3D camera;
 
 	private Vector2I[] joystick = new Vector2I[] {
@@ -19,14 +24,24 @@ public partial class UI : Node {
 
   	// Called when the node enters the scene tree for the first time.
   	public override void _Ready() {
-		mBoardView = GetNode<BoardView>("Board View");
-		mHandView = GetNode<HandView>("Hand View");
 		camera = GetNode<Camera3D>("Camera");
 
+		mBoardView = GetNode<BoardView>("Board View");
+		mHandView = GetNode<HandView>("Hand View");
+		mCommandView = GetNode<CommandView>("Command View");
+		mDetailView = GetNode<DetailView>("Detail View");
+
 		mBoardView.SetViewPortRect(camera.GetViewport().GetVisibleRect());
-		mBoardView.Played += OnPlayed;
 		mHandView.SetViewPortRect(camera.GetViewport().GetVisibleRect());
-		mHandView.Selected += OnSelected;
+		mCommandView.SetViewPortRect(camera.GetViewport().GetVisibleRect());
+		mDetailView.SetViewPortRect(camera.GetViewport().GetVisibleRect());
+
+		mBoardView.SelectPiece += OnSelectPiece;
+		mBoardView.SelectTile += OnSelectTile;
+		mBoardView.SelectActivity += OnSelectActivity;
+		mHandView.SelectCard += OnSelectCard;
+		mCommandView.SelectCommand += OnSelectCommand;
+		mDetailView.SelectItem += OnSelectItem; // only for spook purposes
   	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -121,13 +136,36 @@ public partial class UI : Node {
 		return mBoardView.HoverPartition;
 	}
 
-	private void OnSelected(Card card) {
-		// Does anything need to go in here?
+	private void OnSelectPiece(Display.Piece piece) {
+		
+	}
+	private void OnSelectTile(Display.Tile tile) {
+			
+	}
+	private void OnSelectActivity(Match.Activity activity) {
+		
+	}
+	private void OnSelectCard(Card card){
+
+	}
+	private void OnSelectCommand(Command command) {
+		
+	}
+	private void OnSelectItem() {
+		
 	}
 
-	private void OnPlayed(Card card) {
-		EmitSignal(SignalName.Played, card);
-	}
+	private class ViewState
+		{
+			ViewState prev;
+			ViewStateEnum viewStateEnum;
+
+			public ViewState(ViewStateEnum viewStateEnum, ViewState prev = null)
+			{
+				this.prev = prev;
+				this.viewStateEnum = viewStateEnum;
+			}
+		}
 
 	private static Vector3 GetPlaneIntersection(Vector3 origin, Vector3 direction) {
 		Vector3 planeNormal = new Vector3(0, 1, 0);

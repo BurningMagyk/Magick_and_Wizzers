@@ -39,12 +39,17 @@ public partial class BoardView : CanvasLayer {
 	
   }
 
-  [Signal]
-  public delegate void PlayedEventHandler(Card card);
+  public delegate void SelectPieceDelegate(Display.Piece piece);
+  public SelectPieceDelegate SelectPiece;
+  public delegate void SelectTileDelegate(Display.Tile tile);
+  public SelectTileDelegate SelectTile;
+  public delegate void SelectActivityDelegate(Activity activity);
+  public SelectActivityDelegate SelectActivity;
 
-  public void SetViewPortRect(Rect2 viewPortRect) {
-	crosshair.Position = new Vector2(viewPortRect.Size.X / 2, viewPortRect.Size.Y / 2);
-  }
+  public void SetViewPortRect(Rect2 viewPortRect)
+		{
+			crosshair.Position = new Vector2(viewPortRect.Size.X / 2, viewPortRect.Size.Y / 2);
+		}
 
   public Vector2I GetHoverCoordinate(Vector2 point) {
 	return GetHoverCoordinate(point, HoverPartition);

@@ -76,12 +76,12 @@ public class Command {
         return new Command(CommandType.INTERACT, null, target, RangeType.COMBAT, 0, duration);
     }
 
-    public static Command Cast(Spell spell) {
+    public static Command Act(Activity activity) {
         Target target;
-        if (spell == null) {
-            target = new Target(Target.TargetType.SPELL);
+        if (activity == null) {
+            target = new Target(Target.TargetType.ACTIVITY);
         } else {
-            target = new Target(spell);
+            target = new Target(activity);
         }
         return new Command(CommandType.INTERACT, null, target, RangeType.INFLUENCE, 0, 0);
     }
@@ -108,12 +108,12 @@ public class Command {
         return new Command(CommandType.BRIDLE, actor, recipient, RangeType.COMBAT, 0, 0);
     }
 
-    public static Command Bridle(Piece actor, Spell spell) {
+    public static Command Bridle(Piece actor, Activity activity) {
         Target target;
-        if (spell == null) {
-            target = new Target(Target.TargetType.SPELL);
+        if (activity == null) {
+            target = new Target(Target.TargetType.ACTIVITY);
         } else {
-            target = new Target(spell);
+            target = new Target(activity);
         }
         return new Command(CommandType.BRIDLE, actor, target, RangeType.INFLUENCE, 0, 0);
     }

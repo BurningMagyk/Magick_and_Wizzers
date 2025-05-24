@@ -369,6 +369,7 @@ public class Stats {
 		case ElementEnum.WATER:
 		case ElementEnum.MIST:
 		case ElementEnum.FROST:
+		case ElementEnum.POISON:
 		  groups.Add(ElementGroupEnum.CYAN);
 		  break;
 		case ElementEnum.FIRE:

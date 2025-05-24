@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://5h8krlppg2bv"]
+[gd_scene load_steps=16 format=3 uid="uid://5h8krlppg2bv"]
 
 [ext_resource type="Script" path="res://src/Main/Main.cs" id="1_d0b4a"]
 [ext_resource type="PackedScene" uid="uid://b2yvn8v5igbcx" path="res://scenes/tile.tscn" id="2_bo870"]
@@ -13,6 +13,8 @@
 [ext_resource type="Texture2D" uid="uid://in0o0olq8fgr" path="res://resources/tile_hover_move.png" id="9_lgre4"]
 [ext_resource type="Texture2D" uid="uid://cf1vh6x8d8ad0" path="res://resources/tile_hover_interact.png" id="10_qaoui"]
 [ext_resource type="Texture2D" uid="uid://dl0k6wr2iw0uy" path="res://resources/tile_hover_cast.png" id="11_4ppjd"]
+[ext_resource type="Script" path="res://src/UI/CommandView.cs" id="14_xwtol"]
+[ext_resource type="Script" path="res://src/UI/DetailView.cs" id="15_14yq0"]
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_d0b4a")
@@ -62,3 +64,9 @@ texture = ExtResource("11_4ppjd")
 script = ExtResource("7_dvira")
 
 [node name="Card" parent="UI/Hand View" instance=ExtResource("2_uvfj4")]
+
+[node name="Command View" type="CanvasLayer" parent="UI"]
+script = ExtResource("14_xwtol")
+
+[node name="Detail View" type="CanvasLayer" parent="UI"]
+script = ExtResource("15_14yq0")

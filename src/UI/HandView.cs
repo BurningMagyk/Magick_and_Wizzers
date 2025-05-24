@@ -85,32 +85,36 @@ public partial class HandView : CanvasLayer {
       HoverCard(Main.DirectionEnum.RIGHT);
     }
     if (Input.IsActionJustPressed("ui_select")) {
-      SelectCard();
+      SelectHoveredCard();
     }
   }
 
-  [Signal]
-  public delegate void SelectedEventHandler(Card card);
+  public delegate void SelectCardDelegate(Card card);
+  public SelectCardDelegate SelectCard;
 
-  public new void Show() {
-    base.Show();
+  public new void Show()
+    {
+      base.Show();
 
-    for (int i = 0; i < cardsInHand.Length; i++) {
-      if (cardsInHand[i] != null) {
-        cardsInHand[i].SendToBrowsePosition();
-        cardsInHand[i].Visible = true;
+      for (int i = 0; i < cardsInHand.Length; i++)
+      {
+        if (cardsInHand[i] != null)
+        {
+          cardsInHand[i].SendToBrowsePosition();
+          cardsInHand[i].Visible = true;
+        }
       }
-    }
 
-    // Only draw cards if we're supposed to have a higher amount than current.
-    int cardCountNeedToDraw = CardCountSupposed - GetCardCount();
-    if (cardCountNeedToDraw > 0) {
-      for (int i = 0; i < cardCountNeedToDraw; i++) { DrawCard(); }
-    }
+      // Only draw cards if we're supposed to have a higher amount than current.
+      int cardCountNeedToDraw = CardCountSupposed - GetCardCount();
+      if (cardCountNeedToDraw > 0)
+      {
+        for (int i = 0; i < cardCountNeedToDraw; i++) { DrawCard(); }
+      }
 
-    Unhover();
-    Showing = true;
-  }
+      Unhover();
+      Showing = true;
+    }
 
   public new void Hide() {
     base.Hide();
@@ -206,7 +210,7 @@ public partial class HandView : CanvasLayer {
     }
   }
 
-  private void SelectCard() {
+  private void SelectHoveredCard() {
     if (hoveredCardIndex == -1
       || hoveredCardIndex >= cardsInHand.Length
       || cardsInHand[hoveredCardIndex] == null) {
@@ -217,7 +221,7 @@ public partial class HandView : CanvasLayer {
     Mode = HandViewMode.SELECTED;
 
     // Emits signal to call HandView.Selected, defined in UI class.
-    EmitSignal(SignalName.Selected, cardsInHand[hoveredCardIndex]);
+    // EmitSignal(SignalName.Selected, cardsInHand[hoveredCardIndex]);
   }
 
   public void RemoveHoveredCard() {
