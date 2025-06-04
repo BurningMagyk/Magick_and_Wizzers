@@ -10,8 +10,9 @@ public class Piece {
 		get => tile;
 		set {
 			tile = value;
-			mDisplayNode.Position = value.DisplayPosition;
-			mDisplayNode.Scale = new Vector3(value.DisplaySize, value.DisplaySize, value.DisplaySize);
+			mDisplayNode.Position = value.DisplayTile.Position;
+			float size = value.DisplayTile.Size;
+			mDisplayNode.Scale = new Vector3(size, size, size);
 		}
 	}
 	public Main.Stats Stats { get; set; }

@@ -110,15 +110,12 @@ public partial class UI : Node {
 	[Signal]
 	public delegate void PassRoundEventHandler();
 
-	public void HoverTile(Match.Tile tile) {
+	public void HoverTile(Display.Tile tile) {
 		if (mHandView.Showing) {
-			if (mHandView.Mode == HandView.HandViewMode.SELECTED) {
-				mBoardView.Hover(tile, true); // Make hovered tile show up as ready to cast.
-			} else {
-				mBoardView.Hover(null, true); // Hovered tile doesn't show up.
-			}
+			mBoardView.Hover(null, true); // Hovered tile doesn't show up.
 		} else {
 			mBoardView.Hover(tile, false); // Hovered tile shows up as normal.
+			// mBoardView.Hover(tile, true); // Make hovered tile show up as ready to cast.
 		}
 	}
 
@@ -155,17 +152,16 @@ public partial class UI : Node {
 		
 	}
 
-	private class ViewState
-		{
-			ViewState prev;
-			ViewStateEnum viewStateEnum;
+	private class ViewState {
+		ViewState prev;
+		ViewStateEnum viewStateEnum;
 
-			public ViewState(ViewStateEnum viewStateEnum, ViewState prev = null)
-			{
-				this.prev = prev;
-				this.viewStateEnum = viewStateEnum;
-			}
+		public ViewState(ViewStateEnum viewStateEnum, ViewState prev = null)
+		{
+			this.prev = prev;
+			this.viewStateEnum = viewStateEnum;
 		}
+	}
 
 	private static Vector3 GetPlaneIntersection(Vector3 origin, Vector3 direction) {
 		Vector3 planeNormal = new Vector3(0, 1, 0);

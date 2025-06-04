@@ -9,7 +9,7 @@ public partial class BoardView : CanvasLayer {
 
   public bool Showing { get; private set; }
   public Tile.PartitionTypeEnum HoverPartition;
-  public Tile HoveredTile { get; private set; }
+  public Display.Tile HoveredTile { get; private set; }
   
   private Sprite2D crosshair;
   private HoverType hoverType = HoverType.NORMAL;
@@ -39,6 +39,20 @@ public partial class BoardView : CanvasLayer {
 	
   }
 
+  public override void _Input(InputEvent @event) {
+	if (Showing == false) { return; }
+
+	if (Input.IsActionJustPressed("ui_left")) {
+	  
+	}
+	if (Input.IsActionJustPressed("ui_right")) {
+	  
+	}
+	if (Input.IsActionJustPressed("ui_select")) {
+	  SelectTile?.Invoke(HoveredTile);
+	}
+  }
+
   public delegate void SelectPieceDelegate(Display.Piece piece);
   public SelectPieceDelegate SelectPiece;
   public delegate void SelectTileDelegate(Display.Tile tile);
@@ -46,10 +60,9 @@ public partial class BoardView : CanvasLayer {
   public delegate void SelectActivityDelegate(Activity activity);
   public SelectActivityDelegate SelectActivity;
 
-  public void SetViewPortRect(Rect2 viewPortRect)
-		{
-			crosshair.Position = new Vector2(viewPortRect.Size.X / 2, viewPortRect.Size.Y / 2);
-		}
+  public void SetViewPortRect(Rect2 viewPortRect) {
+	crosshair.Position = new Vector2(viewPortRect.Size.X / 2, viewPortRect.Size.Y / 2);
+}
 
   public Vector2I GetHoverCoordinate(Vector2 point) {
 	return GetHoverCoordinate(point, HoverPartition);
@@ -61,11 +74,13 @@ public partial class BoardView : CanvasLayer {
 	);
   }
 
-  public void Hover(Tile tile, bool readyToCast) {
+  public void Hover(Display.Tile tile, bool readyToCast) {
 	if (tile == null) {
 	  hoverSprites[(int) this.hoverType].Visible = false;
 	  return;
 	}
+
+	HoveredTile = tile;
 
 	HoverType hoverType = readyToCast ? HoverType.CAST : HoverType.NORMAL;
 	hoverSprites[(int) hoverType].Visible = true;
@@ -74,9 +89,9 @@ public partial class BoardView : CanvasLayer {
 	  this.hoverType = hoverType;
 	}
 
-	hoverSprites[(int) hoverType].GlobalPosition = tile.DisplayPosition
+	hoverSprites[(int) hoverType].GlobalPosition = tile.Position
 	  + new Vector3(0, HOVER_SPRITE_LIFT, 0);
-	hoverSprites[(int) hoverType].Scale = new Vector3(tile.DisplaySize, tile.DisplaySize, 1);
+	hoverSprites[(int) hoverType].Scale = new Vector3(tile.Size, tile.Size, 1);
   }
 
   public new void Show() {

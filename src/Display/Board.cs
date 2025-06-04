@@ -15,10 +15,12 @@ public partial class Board : Node3D {
 		GetNode<Piece>("Piece").Visible = false;
 	}
 
-	public void SetRepresentedTiles(Match.Tile[,] tiles) {		
+	public void SetRepresentedTiles(Match.Tile[,] tiles) {
 		PackedScene tileScene = ResourceLoader.Load<PackedScene>("res://scenes/tile.tscn");
-		for (int i = 0; i < tiles.GetLength(0); i++) {
-			for (int j = 0; j < tiles.GetLength(1); j++) {
+		for (int i = 0; i < tiles.GetLength(0); i++)
+		{
+			for (int j = 0; j < tiles.GetLength(1); j++)
+			{
 				MeshInstance3D tileMesh = tileScene.Instantiate() as MeshInstance3D;
 				tileMesh.Position = new Vector3(
 					Tile.MESH_SIZE / 2 + Tile.MESH_SIZE * i,
@@ -29,11 +31,18 @@ public partial class Board : Node3D {
 				tileMesh.Name = "Tile [" + i + ", " + j + "]";
 				AddChild(tileMesh);
 
-				GetNode<Tile>(tileMesh.Name.ToString()).UseDebugMaterial(
-					(float) i / Match.Board.BOARD_SIZE,
-					(float) j / Match.Board.BOARD_SIZE,
-					1 - (float) (i + j) / Match.Board.BOARD_SIZE / 2
+				Tile displayTile = GetNode<Tile>(tileMesh.Name.ToString());
+
+				displayTile.Position = Tile.CalculatePosition(tiles[i, j].Coordinate, tiles[i, j].PartitionType);
+				displayTile.Size = Tile.MESH_SIZE / (int)Math.Pow(2, (int)tiles[i, j].PartitionType);
+
+				displayTile.UseDebugMaterial(
+					(float)i / Match.Board.BOARD_SIZE,
+					(float)j / Match.Board.BOARD_SIZE,
+					1 - (float)(i + j) / Match.Board.BOARD_SIZE / 2
 				);
+
+				tiles[i, j].DisplayTile = displayTile;
 			}
 		}
 	}

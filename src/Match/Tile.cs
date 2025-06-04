@@ -9,19 +9,15 @@ public class Tile {
 	public const PartitionTypeEnum MIN_PARTITION = PartitionTypeEnum.CARUCATE; // largest
 	public enum PartitionTypeEnum { CARUCATE, VIRGATE, BOVATE, HECTARE, ACRE }
 
-	public Display.Tile DisplayTile { get; private set; }
+	public Display.Tile DisplayTile { get; set; }
 	public string Name { get; private set; }
 	private Tile[,] tiles = new Tile[2, 2];
 
 	public readonly Vector2I Coordinate;
-	public readonly Vector3 DisplayPosition;
-	public readonly float DisplaySize;
 	public readonly PartitionTypeEnum PartitionType;
 
 	public Tile(Vector2I coordinate, PartitionTypeEnum partitionType) {
 		Coordinate = coordinate;
-		DisplayPosition = Display.Tile.CalculatePosition(coordinate, partitionType);
-		DisplaySize = Display.Tile.MESH_SIZE / (int) Math.Pow(2, (int) partitionType);
 		PartitionType = partitionType;
 	}
 
