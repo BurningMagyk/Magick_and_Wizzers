@@ -114,73 +114,73 @@ public partial class Board {
 
 		if (matchType == Match.MatchType.FREE_FOR_ALL) {
 			if (playerCount == 2) {
-			return new Vector2I[] {
+			return [
 				new Vector2I(boardSizeTotal / 4, boardSizeTotal / 4),
 				new Vector2I(boardSizeTotal * 3 / 4, boardSizeTotal * 3 / 4)
-			};
+			];
 			} else if (playerCount == 3) {
-				return new Vector2I[] {
+				return [
 					new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
 					new Vector2I(boardSizeTotal / 2, boardSizeTotal / 2),
 					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6)
-				};
+				];
 			} else if (playerCount == 4) {
-				return new Vector2I[] {
+				return [
 					new Vector2I(boardSizeTotal / 4, boardSizeTotal / 4),
 					new Vector2I(boardSizeTotal * 3 / 4, boardSizeTotal / 4),
 					new Vector2I(boardSizeTotal / 4, boardSizeTotal * 3 / 4),
 					new Vector2I(boardSizeTotal * 3 / 4, boardSizeTotal * 3 / 4)
-				};
+				];
 			} else if (playerCount == 5) {
-				return new Vector2I[] {
+				return [
 					new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
 					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 6),
 					new Vector2I(boardSizeTotal / 2, boardSizeTotal / 2),
 					new Vector2I(boardSizeTotal / 6, boardSizeTotal * 5 / 6),
 					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6)
-				};
+				];
 			} else if (playerCount == 6) {
-				return new Vector2I[] {
+				return [
 					new Vector2I(boardSizeTotal / 3, boardSizeTotal / 6),
 					new Vector2I(boardSizeTotal * 2 / 3, boardSizeTotal / 6),
 					new Vector2I(boardSizeTotal / 3, boardSizeTotal / 2),
 					new Vector2I(boardSizeTotal * 2 / 3, boardSizeTotal / 2),
 					new Vector2I(boardSizeTotal / 3, boardSizeTotal * 5 / 6),
 					new Vector2I(boardSizeTotal * 2 / 3, boardSizeTotal * 5 / 6)
-				};
+				];
 			} else if (playerCount == 7) {
-				return new Vector2I[] {
-					new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
+				return [
+					new Vector2I(boardSizeTotal / 2, boardSizeTotal / 6),
+					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 6),
+					new Vector2I(boardSizeTotal / 6, boardSizeTotal / 2),
 					new Vector2I(boardSizeTotal / 2, boardSizeTotal / 2),
-					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6),
-					new Vector2I(boardSizeTotal / 4, boardSizeTotal / 3),
-					new Vector2I(boardSizeTotal / 3, boardSizeTotal / 4),
-					new Vector2I(boardSizeTotal / 3, boardSizeTotal * 3 / 4),
-					new Vector2I(boardSizeTotal * 3 / 4, boardSizeTotal * 2 / 3),
-				};
+					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 2),
+					new Vector2I(boardSizeTotal / 6, boardSizeTotal * 5 / 6),
+					new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6)
+				];
 			} else if (playerCount == 8) {
-				return new Vector2I[] {
+				return [
 					new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
-					new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6),
+					new Vector2I(boardSizeTotal / 2, boardSizeTotal / 6),
 					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 6),
 					new Vector2I(boardSizeTotal / 6, boardSizeTotal / 2),
 					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 2),
 					new Vector2I(boardSizeTotal / 6, boardSizeTotal * 5 / 6),
 					new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6),
-					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6),
-				};
+					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6)
+				];
 			} else if (playerCount == 9) {
-				return new Vector2I[] {
+				return [
 					new Vector2I(boardSizeTotal / 6, boardSizeTotal / 6),
-					new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6),
+					new Vector2I(boardSizeTotal / 2, boardSizeTotal / 6),
 					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 6),
 					new Vector2I(boardSizeTotal / 6, boardSizeTotal / 2),
 					new Vector2I(boardSizeTotal / 2, boardSizeTotal / 2),
 					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal / 2),
 					new Vector2I(boardSizeTotal / 6, boardSizeTotal * 5 / 6),
 					new Vector2I(boardSizeTotal / 2, boardSizeTotal * 5 / 6),
-					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6),
-				};
+					new Vector2I(boardSizeTotal * 5 / 6, boardSizeTotal * 5 / 6)
+				];
 			}
 		}
 		

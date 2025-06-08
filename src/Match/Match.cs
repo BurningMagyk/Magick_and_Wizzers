@@ -29,11 +29,11 @@ public class Match {
 	
 	  // Set up players.
 	  Vector2I[] startingPositions = mBoard.GetStartingPositions(MatchType.FREE_FOR_ALL, mPlayers.Length);
-		for (int i = 0; i < mPlayers.Length; i++) {
-		  Player player = mPlayers[i];
-		  player.AddMaster(GenerateDefaultMaster(player.Name, player.MasterCard, startingPositions[i]));
-		}
+	  for (int i = 0; i < mPlayers.Length; i++) {
+		Player player = mPlayers[i];
+		player.AddMaster(GenerateDefaultMaster(player.Name, player.MasterCard, startingPositions[i]));
 	  }
+	}
 
 	public void OnUIMoved(Vector2 newPoint, Vector2 oldPoint) {
 	  // I don't know why all three Tile objects here are sometimes different. Hacky way to make it work right.
