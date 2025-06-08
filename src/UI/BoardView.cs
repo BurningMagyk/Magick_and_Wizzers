@@ -9,7 +9,7 @@ public partial class BoardView : CanvasLayer {
 
   public bool Showing { get; private set; }
   public Tile.PartitionTypeEnum HoverPartition;
-  public Display.Tile HoveredTile { get; private set; }
+  public Display.ITile HoveredTile { get; private set; }
   
   private Sprite2D crosshair;
   private HoverType hoverType = HoverType.NORMAL;
@@ -55,7 +55,7 @@ public partial class BoardView : CanvasLayer {
 
   public delegate void SelectPieceDelegate(Display.Piece piece);
   public SelectPieceDelegate SelectPiece;
-  public delegate void SelectTileDelegate(Display.Tile tile);
+  public delegate void SelectTileDelegate(Display.ITile tile);
   public SelectTileDelegate SelectTile;
   public delegate void SelectActivityDelegate(Activity activity);
   public SelectActivityDelegate SelectActivity;
@@ -69,12 +69,12 @@ public partial class BoardView : CanvasLayer {
   }
   public Vector2I GetHoverCoordinate(Vector2 point, Tile.PartitionTypeEnum partitionType) {
 	return new Vector2I(
-	  (int) Math.Floor(point.X / Display.Tile.MESH_SIZE * Mathf.Pow(2, (int) partitionType)),
-	  (int) Math.Floor(point.Y / Display.Tile.MESH_SIZE * Mathf.Pow(2, (int) partitionType))
+	  (int) Math.Floor(point.X / Display.TileWithMesh.MESH_SIZE * Mathf.Pow(2, (int) partitionType)),
+	  (int) Math.Floor(point.Y / Display.TileWithMesh.MESH_SIZE * Mathf.Pow(2, (int) partitionType))
 	);
   }
 
-  public void Hover(Display.Tile tile, bool readyToCast) {
+  public void Hover(Display.ITile tile, bool readyToCast) {
 	if (tile == null) {
 	  hoverSprites[(int) this.hoverType].Visible = false;
 	  return;

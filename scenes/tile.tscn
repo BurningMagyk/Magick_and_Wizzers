@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://b2yvn8v5igbcx"]
 
 [ext_resource type="Texture2D" uid="uid://o2ai1gt3khc7" path="res://resources/terrain_textures/dirt.png" id="1_cvd0x"]
-[ext_resource type="Script" path="res://src/Display/Tile.cs" id="2_m6hmi"]
+[ext_resource type="Script" uid="uid://cqatx88igfuuh" path="res://src/Display/TileWithMesh.cs" id="2_ywnoi"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_7nn58"]
 
@@ -12,4 +12,4 @@ albedo_texture = ExtResource("1_cvd0x")
 transform = Transform3D(1, 0, 0, 0, 1.19249e-08, 1, 0, -1, 1.19249e-08, 0, 0, 0)
 mesh = SubResource("QuadMesh_7nn58")
 surface_material_override/0 = SubResource("StandardMaterial3D_dp57m")
-script = ExtResource("2_m6hmi")
+script = ExtResource("2_ywnoi")

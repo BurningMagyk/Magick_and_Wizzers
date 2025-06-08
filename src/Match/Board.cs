@@ -29,7 +29,10 @@ public partial class Board {
 			}
 		}
 
-		displayNode.SetRepresentedTiles(Tiles[0]);
+		displayNode.SetRepresentedTiles(Tiles[0], true);
+		for (int i = 1; i < Tiles.Count; i++) {
+		  displayNode.SetRepresentedTiles(Tiles[i], false);
+		}
 		mDisplayNode = displayNode;
 	}
 
