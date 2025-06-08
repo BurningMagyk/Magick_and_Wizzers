@@ -36,12 +36,15 @@ public class Match {
 	  }
 
 	public void OnUIMoved(Vector2 newPoint, Vector2 oldPoint) {
-	  // Check if new position is hovering a different tile now.
-	  Tile newTile = mBoard.GetTileAt(mUi.GetHoverCoordinate(), mUi.GetHoverPartition()),
+	  // I don't know why all three Tile objects here are sometimes different. Hacky way to make it work right.
+	  Tile hoveredTile = mBoard.GetTileAt(mUi.GetHoverCoordinate(), mUi.GetHoverPartition()),
+		newHoveredTile = mBoard.GetTileAt(mUi.GetHoverCoordinate(newPoint), mUi.GetHoverPartition()),
 		oldHoveredTile = mBoard.GetTileAt(mUi.GetHoverCoordinate(oldPoint), mUi.GetHoverPartition());
-	  if (newTile != oldHoveredTile)
-	  {
-		mUi.HoverTile(newTile.DisplayTile);
+	  if (newHoveredTile == null && hoveredTile == null) {
+		mUi.HoverTile(null);
+	  // Check if new position is hovering a different tile now.
+	  } else if (hoveredTile != null && newHoveredTile != oldHoveredTile) {
+		mUi.HoverTile(hoveredTile.DisplayTile);
 	  }
 	}
 

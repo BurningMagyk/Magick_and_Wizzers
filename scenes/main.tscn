@@ -1,11 +1,10 @@
-[gd_scene load_steps=17 format=3 uid="uid://5h8krlppg2bv"]
+[gd_scene load_steps=16 format=3 uid="uid://5h8krlppg2bv"]
 
 [ext_resource type="Script" uid="uid://duq8otfh4ux1r" path="res://src/Main/Main.cs" id="1_d0b4a"]
 [ext_resource type="PackedScene" uid="uid://b2yvn8v5igbcx" path="res://scenes/tile.tscn" id="2_bo870"]
 [ext_resource type="Script" uid="uid://dpn6bi4h6tda4" path="res://src/Display/Board.cs" id="2_luuvt"]
 [ext_resource type="PackedScene" uid="uid://ctgrwf42n2e28" path="res://scenes/card.tscn" id="2_uvfj4"]
 [ext_resource type="PackedScene" uid="uid://i0ywuur1dk71" path="res://scenes/piece.tscn" id="3_af6yf"]
-[ext_resource type="Script" uid="uid://cqatx88igfuuh" path="res://src/Display/TileWithMesh.cs" id="4_jbj1t"]
 [ext_resource type="Script" uid="uid://cilnaome7q3t8" path="res://src/UI/UI.cs" id="5_u8c0w"]
 [ext_resource type="Script" uid="uid://cec0e4t13w2t0" path="res://src/UI/BoardView.cs" id="6_mhda3"]
 [ext_resource type="Script" uid="uid://d3bwjcmohx4a0" path="res://src/UI/HandView.cs" id="7_dvira"]
@@ -25,7 +24,6 @@ script = ExtResource("2_luuvt")
 
 [node name="Tile" parent="Board" instance=ExtResource("2_bo870")]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
-script = ExtResource("4_jbj1t")
 
 [node name="Piece" parent="Board" instance=ExtResource("3_af6yf")]
 

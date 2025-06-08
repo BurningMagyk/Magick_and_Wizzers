@@ -127,7 +127,7 @@ public partial class UI : Node {
 	if (mHandView.Showing) {
       return mBoardView.GetHoverCoordinate(point, mHandView.HoverPartition);
 	}
-	  return mBoardView.GetHoverCoordinate(point);
+	return mBoardView.GetHoverCoordinate(point);
   }
   public Match.Tile.PartitionTypeEnum GetHoverPartition() {
 	if (mHandView.Showing) { return mHandView.HoverPartition; }
