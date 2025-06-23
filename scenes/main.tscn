@@ -80,7 +80,7 @@ offset_right = 224.0
 offset_bottom = 76.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Placeholder Text"
+text = "Placeholder Text for Command View"
 
 [node name="Detail View" type="CanvasLayer" parent="UI"]
 script = ExtResource("15_14yq0")
@@ -97,4 +97,4 @@ offset_right = 224.0
 offset_bottom = 76.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Placeholder Text"
+text = "Placeholder Text for Detail View"

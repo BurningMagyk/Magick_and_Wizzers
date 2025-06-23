@@ -1,17 +1,43 @@
 using Godot;
 using System;
 
+namespace UI {
 public partial class DetailView : CanvasLayer {
-    public delegate void SelectItemDelegate();
-    public SelectItemDelegate SelectItem;
+  public delegate void SelectItemDelegate();
+  public SelectItemDelegate SelectItem;
+  public bool Showing { get; private set; }
 
-    // Called when the node enters the scene tree for the first time.
-    public override void _Ready() {
-        Hide();
+  public delegate void GoBackDelegate();
+  public GoBackDelegate GoBack;
+
+  // Called when the node enters the scene tree for the first time.
+  public override void _Ready() {
+    Hide();
+  }
+
+  public override void _Input(InputEvent @event) {
+    if (!Showing) { return; }
+
+    if (Input.IsActionJustPressed("detail") || Input.IsActionJustPressed("back")) {
+      GoBack?.Invoke();
     }
+  }
 
-    public void SetViewPortRect(Rect2 viewPortRect)
-    {
+  public new void Show() {
+    base.Show();
 
-    }
+    Showing = true;
+  }
+
+  public new void Hide() {
+    base.Hide();
+
+    Showing = false;
+  }
+
+  public void SetViewPortRect(Rect2 viewPortRect) {
+
+  }
 }
+}
+
