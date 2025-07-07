@@ -8,7 +8,7 @@ namespace UI {
 public partial class UI : Node {
   private const float CAMERA_SPEED = 1F;
 
-  private ViewState mViewState = new ViewState(ViewStateEnum.MEANDER_BOARD);
+  private ViewState mViewState = new();
   private BoardView mBoardView;
   private CommandView mCommandView;
   private HandView mHandView;
@@ -41,8 +41,8 @@ public partial class UI : Node {
 		mBoardView.SelectActivity += OnSelectActivity;
 		mHandView.SelectCard += OnSelectCard;
 		mCommandView.SelectCommand += OnSelectCommand;
-		mDetailView.SelectItem += OnSelectItem; // only for spook purposes
-		mDetailView.GoBack += OnGoBack;
+		mDetailView.SelectItem += OnSelectItem; // doing this in DETAIL only for spook purposes
+		mDetailView.GoBack += RegressViewState;
   }
 
   // Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -64,37 +64,40 @@ public partial class UI : Node {
   }
 
   public override void _Input(InputEvent @event) {
-		if (Input.IsActionJustPressed("toggle_hand")) {
-			if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_HAND) {
-				SetViewState(ViewStateEnum.MEANDER_BOARD);
-				// mHandView.Hide();
+		// TODO: These should be handled in the BoardView, not here.
+		if (Input.IsActionJustPressed("hand")) {
+			if (
+				mViewState.ViewStateEnum == ViewStateEnum.MEANDER_HAND
+				|| mViewState.ViewStateEnum == ViewStateEnum.COMMAND_HAND
+				|| mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_HAND
+			) {
+				RegressViewState();
 			} else if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
-				SetViewState(ViewStateEnum.MEANDER_HAND);
-				// mHandView.Show();
+				ProgressViewState(ViewStateEnum.MEANDER_HAND);
 			}
 			ChangedHoverType?.Invoke(GetHoverCoordinate(), (int) GetHoverPartition());
 		}
 
-		if (Input.IsActionJustPressed("pass_round")) {
+		if (Input.IsActionJustPressed("pass")) {
 			PassRound?.Invoke();
 		}
 
 		int horizontalPan = 0, verticalPan = 0;
-		if (Input.IsActionPressed("left")) {
+		if (Input.IsActionPressed("pan_left")) {
 			horizontalPan -= 1;
 		}
-		if (Input.IsActionPressed("right")) {
+		if (Input.IsActionPressed("pan_right")) {
 			horizontalPan += 1;
 		}
-		if (Input.IsActionPressed("up")) {
+		if (Input.IsActionPressed("pan_up")) {
 			verticalPan -= 1;
 		}
-		if (Input.IsActionPressed("down")) {
+		if (Input.IsActionPressed("pan_down")) {
 			verticalPan += 1;
 		}
 		joystick[0] = new Vector2I(horizontalPan, verticalPan);
 
-		// 	if (Input.IsKeyPressed(Key.F)) {
+		// 	if (Input.IsKeyPressed(Key.G)) {
 		// 		GD.Print("test");
 		// 	}
   }
@@ -137,113 +140,255 @@ public partial class UI : Node {
 	  return mBoardView.HoverPartition;
   }
 
-
-  private void OnSelectPiece(Display.Piece piece) {
+	/// <summary> Called from BoardView using SelectPiece?.Invoke </summary>
+	/// <returns> True if the selection was successful </returns>
+  private bool OnSelectPiece(Display.Piece piece) {
 		if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
-
-		} else if (mViewState.ViewStateEnum == ViewStateEnum.COMMAND_BOARD) {		
-			
-		} else if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
-			
-		}
-  }
-  private void OnSelectTile(ITile tile) {
-		if (mViewState.ViewStateEnum == ViewStateEnum.COMMAND_BOARD) {
-			
-		} else if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
-			
-		}
-  }
-  private void OnSelectActivity(Match.Activity activity) {
-		if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
-			
-		}
-  }
-  private bool OnSelectCard(Card card, SelectTypeEnum selectTypeEnum) {
-		GD.Print("test");
-		if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_HAND) {
-			SetViewState(ViewStateEnum.DETAIL);
 			return true;
-		} else if (mViewState.ViewStateEnum == ViewStateEnum.COMMAND_HAND) {
-			
+		} else if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
+			return true;
 		}
 		return false;
   }
-  private void OnSelectCommand(Command command) {
-		if (mViewState.ViewStateEnum == ViewStateEnum.COMMAND_HAND) {
-			
-		} else if (mViewState.ViewStateEnum == ViewStateEnum.COMMAND_BOARD) {
-			
-		}
-  }
-  private void OnSelectItem() {
-		
-  }
 
-	public void OnGoBack() {
+	/// <summary> Called from BoardView using SelectTile?.Invoke </summary>
+	/// <returns> True if the selection was successful </returns>
+  private bool OnSelectTile(ITile tile) {
 		if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
-			// Play invalid back sound.
-	} else {
-			if (mViewState.ViewStateEnum == ViewStateEnum.DETAIL) {
-				mDetailView.Hide();
-				// Don't need to show previous view because showing detail doesn't involve hiding the prev.
-			}
-			SetViewState(mViewState.Prev.ViewStateEnum);
+			return true;
+		} else if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
+			return true;
 		}
+		return false;
   }
 
-  public void SetViewState(ViewStateEnum viewStateEnum) {
-		ViewStateEnum prevViewStateEnum = mViewState.ViewStateEnum;
-		mViewState = new ViewState(viewStateEnum, mViewState);
+	/// <summary> Called from BoardView using SelectActivity?.Invoke </summary>
+	/// <returns> True if the selection was successful </returns>
+  private bool OnSelectActivity(Match.Activity activity) {
+		if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
+			return true;
+		}
+		return false;
+  }
+
+	/// <summary> Called from HandView using SelectCard?.Invoke </summary>
+	/// <returns> True if the selection was successful </returns>
+  private bool OnSelectCard(Card card, SelectTypeEnum selectTypeEnum) {
+		if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_HAND) {
+			ProgressViewState(ViewStateEnum.DETAIL);
+			return true;
+		} else if (mViewState.ViewStateEnum == ViewStateEnum.COMMAND_HAND) {
+			if (selectTypeEnum == SelectTypeEnum.DETAIL) {
+				ProgressViewState(ViewStateEnum.DETAIL);
+			} else {
+				// Go either to DESIGNATE_HAND or DESIGNATE_BOARD.
+			}
+			return true;
+		}
+		return false;
+  }
+
+	/// <summary> Called from CommandView using SelectCommand?.Invoke </summary>
+	/// <returns> True if the selection was successful </returns>
+  private bool OnSelectCommand(Command command) {
+		if (mViewState.ViewStateEnum == ViewStateEnum.COMMAND_LIST) {
+			return true;
+		}
+		return false;
+  }
+
+	/// <summary> Called from DetailView using SelectItem?.Invoke </summary>
+	/// <returns> True if the selection was successful </returns>
+  private bool OnSelectItem() {
+		if (mViewState.ViewStateEnum == ViewStateEnum.SURRENDER) {
+			return true;
+		}
+		return false;
+  }
+
+  public void ProgressViewState(ViewStateEnum viewStateEnum) {
+		mViewState = mViewState.Append(viewStateEnum);
 
 		if (viewStateEnum == ViewStateEnum.DETAIL) {
+			GetViewForState(mViewState.Prev.ViewStateEnum).InputEnabled = false;
 			mDetailView.Show();
-		} else if (viewStateEnum == ViewStateEnum.MEANDER_BOARD) {
-			mBoardView.Show();
-			mCommandView.Hide();
-			mHandView.Hide();
-			mDetailView.Hide();
+		} else if (viewStateEnum == ViewStateEnum.SURRENDER) {
+			// mSurrenderView.Show();
 		} else if (viewStateEnum == ViewStateEnum.MEANDER_HAND) {
 			mHandView.Show();
-		} else if (viewStateEnum == ViewStateEnum.COMMAND_BOARD) {
+			mBoardView.Hide();
+		} else if (viewStateEnum == ViewStateEnum.COMMAND_LIST) {
 			mCommandView.Show();
+			mBoardView.Hide();
 		} else if (viewStateEnum == ViewStateEnum.COMMAND_HAND) {
 			mCommandView.Show();
-		} else if (viewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
-			mBoardView.Show();
+			mHandView.Hide();
 		} else if (viewStateEnum == ViewStateEnum.DESIGNATE_HAND) {
 			mHandView.Show();
-		}
-
-		if (prevViewStateEnum == ViewStateEnum.DETAIL) {
-			mDetailView.Hide();
-		} else if (prevViewStateEnum == ViewStateEnum.COMMAND_BOARD) {
 			mCommandView.Hide();
-		} else if (prevViewStateEnum == ViewStateEnum.COMMAND_HAND) {
+		} else if (viewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
+			mBoardView.Show();
 			mCommandView.Hide();
-		} else if (prevViewStateEnum == ViewStateEnum.DESIGNATE_HAND) {
 			mHandView.Hide();
 		}
   }
 
-  public void RevertViewState() {
+	public bool RegressViewState() {
+		if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
+			return false;
+		}
+
+		ViewStateEnum fromViewState = mViewState.ViewStateEnum;
 		mViewState = mViewState.Revert();
+
+		if (fromViewState == ViewStateEnum.DETAIL) {
+			GetViewForState(mViewState.ViewStateEnum).InputEnabled = true;
+			mDetailView.Hide();
+		} else if (fromViewState == ViewStateEnum.SURRENDER) {
+			// mSurrenderView.Hide();
+		} else if (fromViewState == ViewStateEnum.MEANDER_HAND) {
+			mHandView.Hide();
+			mBoardView.Show();
+		} else if (fromViewState == ViewStateEnum.COMMAND_LIST) {
+			mCommandView.Hide();
+			mBoardView.Show();
+		} else if (fromViewState == ViewStateEnum.COMMAND_HAND) {
+			mHandView.Hide();
+			mCommandView.Show();
+		} else if (
+			fromViewState == ViewStateEnum.DESIGNATE_HAND
+			&& mViewState.ViewStateEnum == ViewStateEnum.COMMAND_LIST
+		) {
+			mHandView.Hide();
+			mCommandView.Show();
+		} else if (fromViewState == ViewStateEnum.DESIGNATE_BOARD) {
+			mBoardView.Hide();
+			if (mViewState.ViewStateEnum == ViewStateEnum.COMMAND_LIST) {
+				mCommandView.Show();
+			} else { // mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_HAND || ViewStateEnum.COMMAND_HAND
+				mHandView.Show();
+			}			
+		}
+		return true;
+	}
+
+	private IView GetViewForState(ViewStateEnum viewStateEnum) {
+		if (viewStateEnum == ViewStateEnum.DETAIL) {
+			return mDetailView;
+		} else if (viewStateEnum == ViewStateEnum.SURRENDER) {
+			return null; // Surrender view is not implemented yet.
+		} else if (viewStateEnum == ViewStateEnum.MEANDER_BOARD || viewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
+			return mBoardView;
+		} else if (
+			viewStateEnum == ViewStateEnum.MEANDER_HAND
+			|| viewStateEnum == ViewStateEnum.COMMAND_HAND
+			|| viewStateEnum == ViewStateEnum.DESIGNATE_HAND
+		) {
+			return mHandView;
+		} else if (viewStateEnum == ViewStateEnum.COMMAND_LIST) {
+			return mCommandView;
+		} else {
+			GD.PrintErr("Unknown ViewStateEnum: " + viewStateEnum.ToString() + ".");
+			return null;
+		}
 	}
 
   class ViewState {
 		public readonly ViewState Prev;
 		public readonly ViewStateEnum ViewStateEnum;
 
-		public ViewState(ViewStateEnum viewStateEnum, ViewState prev = null) {
-			if (prev != null && prev.ViewStateEnum != ViewStateEnum.DETAIL) {
-				Prev = prev;
+		private ViewState(ViewStateEnum viewStateEnum, ViewState prev) {
+			ViewStateEnum = viewStateEnum;
+			Prev = prev;
+
+			if (prev.ViewStateEnum == viewStateEnum) {
+				GD.PrintErr("The ViewState " + viewStateEnum.ToString() + " is already the current ViewState.");
+			}
+			if (prev.ViewStateEnum == ViewStateEnum.SURRENDER || prev.ViewStateEnum == ViewStateEnum.DETAIL) {
+				GD.PrintErr(
+					"The previous ViewState " + prev.ViewStateEnum.ToString() + " is not a valid previous ViewState for "
+					+ viewStateEnum.ToString() + "."
+				);
+				Prev = null;
 			}
 
-			ViewStateEnum = viewStateEnum;
+			switch (viewStateEnum) {
+				case ViewStateEnum.MEANDER_BOARD:
+					if (prev != null) {
+						GD.PrintErr(prev + "There should be no previous ViewState " + prev + " for MEANDER_BOARD.");
+						Prev = null;
+					}
+					break;
+				case ViewStateEnum.DETAIL:
+					if (prev == null) {
+						GD.PrintErr("Missing previous ViewState for " + viewStateEnum.ToString() + ".");
+					}
+					break;
+				case ViewStateEnum.SURRENDER:
+				case ViewStateEnum.MEANDER_HAND:
+				case ViewStateEnum.COMMAND_LIST:
+					if (prev == null) {
+						GD.PrintErr("Missing previous ViewState for " + viewStateEnum.ToString() + ".");
+					} else if (prev.ViewStateEnum != ViewStateEnum.MEANDER_BOARD) {
+						GD.PrintErr(
+							"The previous ViewState should be MEANDER_BOARD, but it's " + prev.ViewStateEnum.ToString() + " instead."
+						);
+					}
+					break;
+				case ViewStateEnum.COMMAND_HAND:
+					if (prev == null) {
+						GD.PrintErr("Missing previous ViewState for " + viewStateEnum.ToString() + ".");
+					} else if (prev.ViewStateEnum != ViewStateEnum.COMMAND_LIST) {
+						GD.PrintErr(
+							"The previous ViewState should be COMMAND_LIST, but it's " + prev.ViewStateEnum.ToString() + " instead."
+						);
+					}
+					break;
+				case ViewStateEnum.DESIGNATE_HAND:
+					if (prev == null) {
+						GD.PrintErr("Missing previous ViewState for " + viewStateEnum.ToString() + ".");
+					} else if (
+						prev.ViewStateEnum != ViewStateEnum.COMMAND_HAND
+						&& prev.ViewStateEnum != ViewStateEnum.COMMAND_LIST
+					) {
+						GD.PrintErr(
+							"The previous ViewState should be DESIGNATE_HAND, but it's " + prev.ViewStateEnum.ToString() + " instead."
+						);
+					}
+					break;
+				case ViewStateEnum.DESIGNATE_BOARD:
+					if (prev == null) {
+						GD.PrintErr("Missing previous ViewState for " + viewStateEnum.ToString() + ".");
+					} else if (
+						prev.ViewStateEnum != ViewStateEnum.DESIGNATE_HAND
+						&& prev.ViewStateEnum != ViewStateEnum.COMMAND_HAND
+						&& prev.ViewStateEnum != ViewStateEnum.COMMAND_LIST) {
+						GD.PrintErr(
+							"The previous ViewState should be COMMAND_HAND or COMMAND_LIST, but it's " + prev.ViewStateEnum.ToString() + " instead."
+						);
+					}
+					break;
+				default:
+					GD.PrintErr("Unknown ViewStateEnum: " + viewStateEnum.ToString() + ".");
+					break;
+			}
+		}
+
+		public ViewState() {
+			ViewStateEnum = ViewStateEnum.MEANDER_BOARD;
+			Prev = null;
+		}
+
+		public ViewState Append(ViewStateEnum viewStateEnum) {
+			return new ViewState(viewStateEnum, this);
 		}
 
 		public ViewState Revert() {
-			return new ViewState(Prev.ViewStateEnum, Prev.Prev);
+			if (Prev == null) {
+				GD.PrintErr("Cannot revert to a previous ViewState, as there is no previous ViewState.");
+				return this;
+			}
+			return Prev;
 		}
 	}
 

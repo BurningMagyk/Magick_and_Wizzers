@@ -1,11 +1,13 @@
 namespace UI {
 public enum ViewStateEnum {
+    SURRENDER,
     DETAIL,
     MEANDER_BOARD,
     MEANDER_HAND,
-    COMMAND_BOARD,
     COMMAND_HAND,
+    COMMAND_LIST,
     DESIGNATE_BOARD,
-    DESIGNATE_HAND
+    DESIGNATE_HAND,
+    DESIGNATE_LIST
 }
 }

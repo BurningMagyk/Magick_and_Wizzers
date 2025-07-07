@@ -3,11 +3,12 @@ using System;
 using Match;
 
 namespace UI {
-public partial class BoardView : CanvasLayer {
+public partial class BoardView : CanvasLayer, IView {
   private enum HoverType { NORMAL, MOVE, INTERACT, CAST }
   private const float HOVER_SPRITE_LIFT = 0.1F;
 
   public bool Showing { get; private set; }
+	public bool InputEnabled { get; set; } = true;
   public Tile.PartitionTypeEnum HoverPartition;
   public Display.ITile HoveredTile { get; private set; }
   
@@ -40,24 +41,24 @@ public partial class BoardView : CanvasLayer {
   }
 
   public override void _Input(InputEvent @event) {
-	if (Showing == false) { return; }
+		if (!Showing || !InputEnabled) { return; }
 
-	if (Input.IsActionJustPressed("ui_left")) {
-	  
-	}
-	if (Input.IsActionJustPressed("ui_right")) {
-	  
-	}
-	if (Input.IsActionJustPressed("ui_select")) {
-	  SelectTile?.Invoke(HoveredTile);
-	}
+		if (Input.IsActionJustPressed("d_left")) {
+			
+		}
+		if (Input.IsActionJustPressed("d_right")) {
+			
+		}
+		if (Input.IsActionJustPressed("select")) {
+			SelectTile?.Invoke(HoveredTile);
+		}
   }
 
-  public delegate void SelectPieceDelegate(Display.Piece piece);
+  public delegate bool SelectPieceDelegate(Display.Piece piece);
   public SelectPieceDelegate SelectPiece;
-  public delegate void SelectTileDelegate(Display.ITile tile);
+  public delegate bool SelectTileDelegate(Display.ITile tile);
   public SelectTileDelegate SelectTile;
-  public delegate void SelectActivityDelegate(Activity activity);
+  public delegate bool SelectActivityDelegate(Activity activity);
   public SelectActivityDelegate SelectActivity;
 
   public void SetViewPortRect(Rect2 viewPortRect) {
@@ -95,15 +96,15 @@ public partial class BoardView : CanvasLayer {
   }
 
   public new void Show() {
-	base.Show();
-	crosshair.Visible = true;
-	Showing = true;
+		base.Show();
+		crosshair.Visible = true;
+		Showing = true;
   }
 
   public new void Hide() {
-	base.Hide();
-	crosshair.Visible = false;
-	Showing = false;
+		base.Hide();
+		crosshair.Visible = false;
+		Showing = false;
   }
 }
 }

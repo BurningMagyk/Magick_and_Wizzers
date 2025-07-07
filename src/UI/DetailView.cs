@@ -2,12 +2,13 @@ using Godot;
 using System;
 
 namespace UI {
-public partial class DetailView : CanvasLayer {
-  public delegate void SelectItemDelegate();
+public partial class DetailView : CanvasLayer, IView {
+  public delegate bool SelectItemDelegate();
   public SelectItemDelegate SelectItem;
   public bool Showing { get; private set; }
+  public bool InputEnabled { get; set; } = true;
 
-  public delegate void GoBackDelegate();
+  public delegate bool GoBackDelegate();
   public GoBackDelegate GoBack;
 
   // Called when the node enters the scene tree for the first time.
