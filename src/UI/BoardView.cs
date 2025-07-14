@@ -11,6 +11,7 @@ public partial class BoardView : CanvasLayer, IView {
 	public bool InputEnabled { get; set; } = true;
   public Tile.PartitionTypeEnum HoverPartition;
   public Display.ITile HoveredTile { get; private set; }
+	public Vector2I[] Joystick { get; private set; } = [new(0, 0), new(0, 0)];
   
   private Sprite2D crosshair;
   private HoverType hoverType = HoverType.NORMAL;
@@ -18,21 +19,21 @@ public partial class BoardView : CanvasLayer, IView {
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
-	crosshair = GetNode<Sprite2D>("Crosshair");
+		crosshair = GetNode<Sprite2D>("Crosshair");
 
-	hoverSprites = new Sprite3D[Enum.GetNames(typeof(HoverType)).Length];
-	hoverSprites[(int) HoverType.NORMAL] = GetNode<Sprite3D>("Hover");
-	hoverSprites[(int) HoverType.MOVE] = GetNode<Sprite3D>("Hover Move");
-	hoverSprites[(int) HoverType.INTERACT] = GetNode<Sprite3D>("Hover Interact");
-	hoverSprites[(int) HoverType.CAST] = GetNode<Sprite3D>("Hover Cast");
+		hoverSprites = new Sprite3D[Enum.GetNames(typeof(HoverType)).Length];
+		hoverSprites[(int) HoverType.NORMAL] = GetNode<Sprite3D>("Hover");
+		hoverSprites[(int) HoverType.MOVE] = GetNode<Sprite3D>("Hover Move");
+		hoverSprites[(int) HoverType.INTERACT] = GetNode<Sprite3D>("Hover Interact");
+		hoverSprites[(int) HoverType.CAST] = GetNode<Sprite3D>("Hover Cast");
 
-	foreach (Sprite3D hoverSprite in hoverSprites) {
-	  hoverSprite.Visible = false;
-	  hoverSprite.PixelSize = 1F / hoverSprite.Texture.GetSize().X;
-	}
+		foreach (Sprite3D hoverSprite in hoverSprites) {
+			hoverSprite.Visible = false;
+			hoverSprite.PixelSize = 1F / hoverSprite.Texture.GetSize().X;
+		}
 
-	HoverPartition = Tile.MAX_PARTITION;
-	Show();
+		HoverPartition = Tile.MAX_PARTITION;
+		Show();
   }
 
   // Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -49,8 +50,37 @@ public partial class BoardView : CanvasLayer, IView {
 		if (Input.IsActionJustPressed("d_right")) {
 			
 		}
+
+		int horizontalPan = 0, verticalPan = 0;
+		if (Input.IsActionPressed("pan_left")) {
+			horizontalPan -= 1;
+		}
+		if (Input.IsActionPressed("pan_right")) {
+			horizontalPan += 1;
+		}
+		if (Input.IsActionPressed("pan_up")) {
+			verticalPan -= 1;
+		}
+		if (Input.IsActionPressed("pan_down")) {
+			verticalPan += 1;
+		}
+		Joystick[0] = new Vector2I(horizontalPan, verticalPan);
+
+		if (Input.IsActionJustPressed("pass")) {
+			SelectMisc?.Invoke(SelectTypeEnum.FINAL);
+		}
 		if (Input.IsActionJustPressed("select")) {
 			SelectTile?.Invoke(HoveredTile);
+		}
+		if (Input.IsActionJustPressed("hand")) {
+			SelectMisc?.Invoke(SelectTypeEnum.PARTIAL);
+		}
+		if (Input.IsActionJustPressed("detail")) {
+			SelectTile?.Invoke(HoveredTile);
+			// TODO: Do SelectPiece instead if hovering a piece.
+		}
+		if (Input.IsActionJustPressed("surrender")) {
+			SelectMisc?.Invoke(SelectTypeEnum.ALT);
 		}
   }
 
@@ -60,19 +90,21 @@ public partial class BoardView : CanvasLayer, IView {
   public SelectTileDelegate SelectTile;
   public delegate bool SelectActivityDelegate(Activity activity);
   public SelectActivityDelegate SelectActivity;
+	public delegate bool SelectMiscDelegate(SelectTypeEnum selectTypeEnum);
+	public SelectMiscDelegate SelectMisc;
 
   public void SetViewPortRect(Rect2 viewPortRect) {
 	crosshair.Position = new Vector2(viewPortRect.Size.X / 2, viewPortRect.Size.Y / 2);
 }
 
   public Vector2I GetHoverCoordinate(Vector2 point) {
-	return GetHoverCoordinate(point, HoverPartition);
+		return GetHoverCoordinate(point, HoverPartition);
   }
-  public Vector2I GetHoverCoordinate(Vector2 point, Tile.PartitionTypeEnum partitionType) {
-	return new Vector2I(
-	  (int) Math.Floor(point.X / Display.TileWithMesh.MESH_SIZE * Mathf.Pow(2, (int) partitionType)),
-	  (int) Math.Floor(point.Y / Display.TileWithMesh.MESH_SIZE * Mathf.Pow(2, (int) partitionType))
-	);
+  public static Vector2I GetHoverCoordinate(Vector2 point, Tile.PartitionTypeEnum partitionType) {
+		return new Vector2I(
+			(int) Math.Floor(point.X / Display.TileWithMesh.MESH_SIZE * Mathf.Pow(2, (int) partitionType)),
+			(int) Math.Floor(point.Y / Display.TileWithMesh.MESH_SIZE * Mathf.Pow(2, (int) partitionType))
+		);
   }
 
   public void Hover(Display.ITile tile, bool readyToCast) {

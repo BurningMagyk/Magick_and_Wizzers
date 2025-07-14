@@ -11,45 +11,7 @@ public partial class HandView : CanvasLayer, IView {
 
   public bool Showing { get; private set; }
 	public bool InputEnabled { get; set; } = true;
-  // public HandViewMode Mode {
-  //   get => mode;
-  //   private set {
-  //     mode = value;
-  //     if (mode == HandViewMode.BROWSE) {
-  //       // Show every non-null card and return them to their browse positions.
-  //       for (int i = 0; i < cardsInHand.Length; i++) {
-  //         if (cardsInHand[i] != null) {
-  //           cardsInHand[i].SendToBrowsePosition();
-  //           cardsInHand[i].Visible = true;
-  //         }
-  //       }
-  //       cardInSelection = null;
-  //     } else if (mode == HandViewMode.SELECTED) {
-  //       // Hide every non-null card except the hovered one.
-  //       for (int i = 0; i < cardsInHand.Length; i++) {
-  //         if (cardsInHand[i] != null) {
-  //           bool isSelected = i == hoveredCardIndex;
-  //           cardsInHand[i].Visible = isSelected;
-  //         }
-  //       }
-
-  //       // Hide the sleeve but remember the index.
-  //       Unhover(false);
-
-  //       // Set the card in selection.
-  //       cardInSelection = cardsInHand[hoveredCardIndex];
-		
-  //       // Position the selected card.
-  //       cardInSelection.Position = new Vector2(
-  //         selectionPosition.X - cardInSelection.Size.X / 2,
-  //         selectionPosition.Y - cardInSelection.Size.Y / 2
-  //       );
-
-  //       GD.Print("selectionPosition: " + selectionPosition.X + ", " + selectionPosition.Y);
-  //       GD.Print("cardInSelection.Size: " + cardInSelection.Size.X + ", " + cardInSelection.Size.Y);
-  //     }
-  //   }
-  // }
+  
   public Tile.PartitionTypeEnum HoverPartition { get; private set; }
   public int CardCountSupposed { get; private set; }
 
@@ -91,10 +53,15 @@ public partial class HandView : CanvasLayer, IView {
 		if (Input.IsActionJustPressed("detail")) {
 			SelectHoveredCard(true);
 		}
+		if (Input.IsActionJustPressed("hand") || Input.IsActionJustPressed("back")) {
+			GoBack?.Invoke();
+		}
   }
 
   public delegate bool SelectCardDelegate(Card card, SelectTypeEnum selectTypeEnum);
   public SelectCardDelegate SelectCard;
+  public delegate bool GoBackDelegate();
+  public GoBackDelegate GoBack;
 
   public new void Show() {
 	  base.Show();

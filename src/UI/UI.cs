@@ -15,11 +15,6 @@ public partial class UI : Node {
   private DetailView mDetailView;
   private Camera3D camera;
 
-  private Vector2I[] joystick = [
-	new(0, 0),
-	new(0, 0),
-  ];
-
   private Vector2 hoverPoint;
 
   // Called when the node enters the scene tree for the first time.
@@ -39,7 +34,9 @@ public partial class UI : Node {
 		mBoardView.SelectPiece += OnSelectPiece;
 		mBoardView.SelectTile += OnSelectTile;
 		mBoardView.SelectActivity += OnSelectActivity;
+		mBoardView.SelectMisc += OnSelectMisc;
 		mHandView.SelectCard += OnSelectCard;
+		mHandView.GoBack += RegressViewState;
 		mCommandView.SelectCommand += OnSelectCommand;
 		mDetailView.SelectItem += OnSelectItem; // doing this in DETAIL only for spook purposes
 		mDetailView.GoBack += RegressViewState;
@@ -50,7 +47,7 @@ public partial class UI : Node {
 
   public override void _PhysicsProcess(double delta) {
 		Vector3 oldCameraPosition = camera.Position;
-		camera.Position += new Vector3(joystick[0].X, 0, joystick[0].Y) * CAMERA_SPEED;
+		camera.Position += new Vector3(mBoardView.Joystick[0].X, 0, mBoardView.Joystick[0].Y) * CAMERA_SPEED;
 
 		if (oldCameraPosition != camera.Position) {
 				Vector3 hoverPoint3D = GetPlaneIntersection(camera.Position, camera.GlobalTransform.Basis.Z);
@@ -64,38 +61,9 @@ public partial class UI : Node {
   }
 
   public override void _Input(InputEvent @event) {
-		// TODO: These should be handled in the BoardView, not here.
-		if (Input.IsActionJustPressed("hand")) {
-			if (
-				mViewState.ViewStateEnum == ViewStateEnum.MEANDER_HAND
-				|| mViewState.ViewStateEnum == ViewStateEnum.COMMAND_HAND
-				|| mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_HAND
-			) {
-				RegressViewState();
-			} else if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
-				ProgressViewState(ViewStateEnum.MEANDER_HAND);
-			}
-			ChangedHoverType?.Invoke(GetHoverCoordinate(), (int) GetHoverPartition());
-		}
-
-		if (Input.IsActionJustPressed("pass")) {
-			PassRound?.Invoke();
-		}
-
-		int horizontalPan = 0, verticalPan = 0;
-		if (Input.IsActionPressed("pan_left")) {
-			horizontalPan -= 1;
-		}
-		if (Input.IsActionPressed("pan_right")) {
-			horizontalPan += 1;
-		}
-		if (Input.IsActionPressed("pan_up")) {
-			verticalPan -= 1;
-		}
-		if (Input.IsActionPressed("pan_down")) {
-			verticalPan += 1;
-		}
-		joystick[0] = new Vector2I(horizontalPan, verticalPan);
+		// if (Input.IsActionJustPressed("hand")) {
+		// 	ChangedHoverType?.Invoke(GetHoverCoordinate(), (int) GetHoverPartition());
+		// }
 
 		// 	if (Input.IsKeyPressed(Key.G)) {
 		// 		GD.Print("test");
@@ -117,7 +85,7 @@ public partial class UI : Node {
   public delegate void PassRoundDelegate();
   public PassRoundDelegate PassRound;
 
-  public void HoverTile(Display.ITile tile) {
+  public void HoverTile(ITile tile) {
 	if (mHandView.Showing) {
 	  mBoardView.Hover(null, true); // Hovered tile doesn't show up.
 	} else {
@@ -127,13 +95,13 @@ public partial class UI : Node {
   }
 
   public Vector2I GetHoverCoordinate() {
-	return mBoardView.GetHoverCoordinate(hoverPoint);
-  }
-  public Vector2I GetHoverCoordinate(Vector2 point) {
-	if (mHandView.Showing) {
-	  return mBoardView.GetHoverCoordinate(point, mHandView.HoverPartition);
-	}
-	return mBoardView.GetHoverCoordinate(point);
+		return mBoardView.GetHoverCoordinate(hoverPoint);
+		}
+		public Vector2I GetHoverCoordinate(Vector2 point) {
+		if (mHandView.Showing) {
+			return BoardView.GetHoverCoordinate(point, mHandView.HoverPartition);
+		}
+		return mBoardView.GetHoverCoordinate(point);
   }
   public Tile.PartitionTypeEnum GetHoverPartition() {
 	if (mHandView.Showing) { return mHandView.HoverPartition; }
@@ -206,7 +174,32 @@ public partial class UI : Node {
 		return false;
   }
 
-  public void ProgressViewState(ViewStateEnum viewStateEnum) {
+	/// <summary> Called from anywhere using SelectMisc?.Invoke </summary>
+	/// <returns> True if the selection was successful </returns>
+	private bool OnSelectMisc(SelectTypeEnum selectTypeEnum) {
+		if (selectTypeEnum == SelectTypeEnum.PARTIAL) {
+			if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
+				ProgressViewState(ViewStateEnum.MEANDER_HAND);
+				return true;
+			}
+		} else if (selectTypeEnum == SelectTypeEnum.ALT) {
+			if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
+				ProgressViewState(ViewStateEnum.SURRENDER);
+				return true;
+			}
+		} else if (selectTypeEnum == SelectTypeEnum.FINAL) {
+			PassRound?.Invoke();
+		}
+		return false;
+	}
+
+	private void ProgressViewState(ViewStateEnum viewStateEnum) {
+		CallDeferred(nameof(ProgressViewStateImpl), (int) viewStateEnum);
+	}
+
+  private void ProgressViewStateImpl(int viewStateEnumInt) {
+		ViewStateEnum viewStateEnum = (ViewStateEnum) viewStateEnumInt;
+
 		mViewState = mViewState.Append(viewStateEnum);
 
 		if (viewStateEnum == ViewStateEnum.DETAIL) {
@@ -233,11 +226,16 @@ public partial class UI : Node {
 		}
   }
 
-	public bool RegressViewState() {
+	private bool RegressViewState() {
 		if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
 			return false;
 		}
 
+		CallDeferred(nameof(RegressViewStateImpl));
+		return true;
+	}
+
+	private void RegressViewStateImpl() {
 		ViewStateEnum fromViewState = mViewState.ViewStateEnum;
 		mViewState = mViewState.Revert();
 
@@ -269,7 +267,6 @@ public partial class UI : Node {
 				mHandView.Show();
 			}			
 		}
-		return true;
 	}
 
 	private IView GetViewForState(ViewStateEnum viewStateEnum) {
@@ -298,6 +295,7 @@ public partial class UI : Node {
 		public readonly ViewStateEnum ViewStateEnum;
 
 		private ViewState(ViewStateEnum viewStateEnum, ViewState prev) {
+			GD.Print("Creating ViewState for " + viewStateEnum.ToString() + " with previous ViewState: " + prev?.ViewStateEnum.ToString());
 			ViewStateEnum = viewStateEnum;
 			Prev = prev;
 

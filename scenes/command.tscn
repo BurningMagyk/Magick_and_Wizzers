@@ -1,0 +1,27 @@
+[gd_scene load_steps=2 format=3 uid="uid://bh6ncm63hmvwt"]
+
+[ext_resource type="Texture2D" uid="uid://tq0rndtm0rsj" path="res://resources/command_textures/item_active_background.png" id="1_hluhf"]
+
+[node name="Command" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Sleeve" type="Sprite2D" parent="."]
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 400.0
+offset_bottom = 80.0
+texture = ExtResource("1_hluhf")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_right = 400.0
+offset_bottom = 80.0
+theme_override_font_sizes/font_size = 40
+text = "Command"
+horizontal_alignment = 1
+vertical_alignment = 1

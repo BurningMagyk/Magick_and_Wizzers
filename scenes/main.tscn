@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://5h8krlppg2bv"]
+[gd_scene load_steps=17 format=3 uid="uid://5h8krlppg2bv"]
 
 [ext_resource type="Script" uid="uid://duq8otfh4ux1r" path="res://src/Main/Main.cs" id="1_d0b4a"]
 [ext_resource type="PackedScene" uid="uid://b2yvn8v5igbcx" path="res://scenes/tile.tscn" id="2_bo870"]
@@ -15,6 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://dl0k6wr2iw0uy" path="res://resources/tile_hover_cast.png" id="11_4ppjd"]
 [ext_resource type="Script" uid="uid://didlejw31cq6j" path="res://src/UI/CommandView.cs" id="14_xwtol"]
 [ext_resource type="Script" uid="uid://c3hwlo3kwtp1m" path="res://src/UI/DetailView.cs" id="15_14yq0"]
+[ext_resource type="PackedScene" uid="uid://bh6ncm63hmvwt" path="res://scenes/command.tscn" id="15_jbj1t"]
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_d0b4a")
@@ -68,6 +69,10 @@ script = ExtResource("7_dvira")
 [node name="Command View" type="CanvasLayer" parent="UI"]
 script = ExtResource("14_xwtol")
 
+[node name="Background" type="TextureRect" parent="UI/Command View"]
+offset_right = 40.0
+offset_bottom = 40.0
+
 [node name="tmp" type="RichTextLabel" parent="UI/Command View"]
 anchors_preset = 8
 anchor_left = 0.5
@@ -81,6 +86,8 @@ offset_bottom = 76.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "Placeholder Text for Command View"
+
+[node name="Command" parent="UI/Command View" instance=ExtResource("15_jbj1t")]
 
 [node name="Detail View" type="CanvasLayer" parent="UI"]
 script = ExtResource("15_14yq0")

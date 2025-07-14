@@ -5,7 +5,7 @@ namespace UI {
 public enum SelectTypeEnum {
   PARTIAL,
   FINAL,
-  BACK,
+  ALT,
   DETAIL
 }
     

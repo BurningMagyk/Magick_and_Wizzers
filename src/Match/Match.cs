@@ -50,7 +50,8 @@ public class Match {
 
 	public void OnUIChangedHoverType(Vector2I hoveredTileCoordinate, int hoveredTilePartitionType) {
 	  mUi.HoverTile(
-		mBoard.GetTileAt(hoveredTileCoordinate, (Tile.PartitionTypeEnum) hoveredTilePartitionType).DisplayTile
+			mBoard.GetTileAt(hoveredTileCoordinate,
+			(Tile.PartitionTypeEnum) hoveredTilePartitionType).DisplayTile
 	  );
 	}
 
