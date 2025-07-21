@@ -53,8 +53,9 @@ public partial class Board {
 	}
 
 	public Piece AddPiece(Stats stats, Tile targetTile, Texture2D illustration, int uniqueId) {
-		Piece piece = new Piece(stats, mDisplayNode.CreatePiece(uniqueId + '-' + stats.Name, illustration));
-		piece.Tile = targetTile;
+		Piece piece = new(stats, mDisplayNode.CreatePiece(uniqueId + '-' + stats.Name, illustration)) {
+			Tile = targetTile
+		};
 		return piece;
 	}
 

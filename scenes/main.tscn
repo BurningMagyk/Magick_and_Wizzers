@@ -34,6 +34,9 @@ script = ExtResource("5_u8c0w")
 [node name="Camera" type="Camera3D" parent="UI"]
 transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 100, 0)
 
+[node name="Ray Cast" type="RayCast3D" parent="UI/Camera"]
+target_position = Vector3(0, 0, -100)
+
 [node name="Board View" type="CanvasLayer" parent="UI"]
 script = ExtResource("6_mhda3")
 

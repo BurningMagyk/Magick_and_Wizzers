@@ -1,9 +1,16 @@
-[gd_scene load_steps=3 format=3 uid="uid://i0ywuur1dk71"]
+[gd_scene load_steps=4 format=3 uid="uid://i0ywuur1dk71"]
 
 [ext_resource type="Script" uid="uid://b7tbrpjyadlx2" path="res://src/Display/Piece.cs" id="1_vp8q5"]
 
-[sub_resource type="BoxMesh" id="BoxMesh_vww81"]
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_gebih"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_gebih"]
 
 [node name="Piece" type="MeshInstance3D"]
-mesh = SubResource("BoxMesh_vww81")
+mesh = SubResource("CapsuleMesh_gebih")
 script = ExtResource("1_vp8q5")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("CapsuleShape3D_gebih")

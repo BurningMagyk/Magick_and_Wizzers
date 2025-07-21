@@ -49,22 +49,23 @@ public partial class UI : Node {
 		Vector3 oldCameraPosition = camera.Position;
 		camera.Position += new Vector3(mBoardView.Joystick[0].X, 0, mBoardView.Joystick[0].Y) * CAMERA_SPEED;
 
+		RayCast3D rayCast = camera.GetNode<RayCast3D>("Ray Cast");
+		if (rayCast.IsColliding()) {
+			GD.Print("Colliding with: " + ((StaticBody3D) rayCast.GetCollider()).GetParent<MeshInstance3D>().Name);
+		}
+
 		if (oldCameraPosition != camera.Position) {
 				Vector3 hoverPoint3D = GetPlaneIntersection(camera.Position, camera.GlobalTransform.Basis.Z);
 			Vector2 oldHoverPoint = hoverPoint;
 			hoverPoint = new Vector2(hoverPoint3D.X, hoverPoint3D.Z);
 
 			if (oldHoverPoint != hoverPoint) {
-			Moved?.Invoke(oldHoverPoint, hoverPoint);
+				Moved?.Invoke(oldHoverPoint, hoverPoint);
 			}
 		}
   }
 
   public override void _Input(InputEvent @event) {
-		// if (Input.IsActionJustPressed("hand")) {
-		// 	ChangedHoverType?.Invoke(GetHoverCoordinate(), (int) GetHoverPartition());
-		// }
-
 		// 	if (Input.IsKeyPressed(Key.G)) {
 		// 		GD.Print("test");
 		// 	}
