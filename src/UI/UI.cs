@@ -15,7 +15,7 @@ public partial class UI : Node {
   private DetailView mDetailView;
   private Camera3D camera;
 
-  private Vector2 hoverPoint;
+  private Vector2 mHoverPoint;
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
@@ -38,8 +38,11 @@ public partial class UI : Node {
 		mHandView.SelectCard += OnSelectCard;
 		mHandView.GoBack += RegressViewState;
 		mCommandView.SelectCommand += OnSelectCommand;
+		mCommandView.GoBack += RegressViewState;
 		mDetailView.SelectItem += OnSelectItem; // doing this in DETAIL only for spook purposes
 		mDetailView.GoBack += RegressViewState;
+
+		mBoardView.RayCast = camera.GetNode<RayCast3D>("Ray Cast");
   }
 
   // Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -49,18 +52,13 @@ public partial class UI : Node {
 		Vector3 oldCameraPosition = camera.Position;
 		camera.Position += new Vector3(mBoardView.Joystick[0].X, 0, mBoardView.Joystick[0].Y) * CAMERA_SPEED;
 
-		RayCast3D rayCast = camera.GetNode<RayCast3D>("Ray Cast");
-		if (rayCast.IsColliding()) {
-			GD.Print("Colliding with: " + ((StaticBody3D) rayCast.GetCollider()).GetParent<MeshInstance3D>().Name);
-		}
-
 		if (oldCameraPosition != camera.Position) {
 				Vector3 hoverPoint3D = GetPlaneIntersection(camera.Position, camera.GlobalTransform.Basis.Z);
-			Vector2 oldHoverPoint = hoverPoint;
-			hoverPoint = new Vector2(hoverPoint3D.X, hoverPoint3D.Z);
+			Vector2 oldHoverPoint = mHoverPoint;
+			mHoverPoint = new Vector2(hoverPoint3D.X, hoverPoint3D.Z);
 
-			if (oldHoverPoint != hoverPoint) {
-				Moved?.Invoke(oldHoverPoint, hoverPoint);
+			if (oldHoverPoint != mHoverPoint) {
+				Moved?.Invoke(oldHoverPoint, mHoverPoint);
 			}
 		}
   }
@@ -96,7 +94,7 @@ public partial class UI : Node {
   }
 
   public Vector2I GetHoverCoordinate() {
-		return mBoardView.GetHoverCoordinate(hoverPoint);
+		return mBoardView.GetHoverCoordinate(mHoverPoint);
 		}
 		public Vector2I GetHoverCoordinate(Vector2 point) {
 		if (mHandView.Showing) {
@@ -113,6 +111,7 @@ public partial class UI : Node {
 	/// <returns> True if the selection was successful </returns>
   private bool OnSelectPiece(Display.Piece piece) {
 		if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
+			ProgressViewState(ViewStateEnum.COMMAND_LIST);
 			return true;
 		} else if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
 			return true;
@@ -159,8 +158,13 @@ public partial class UI : Node {
 
 	/// <summary> Called from CommandView using SelectCommand?.Invoke </summary>
 	/// <returns> True if the selection was successful </returns>
-  private bool OnSelectCommand(Command command) {
+  private bool OnSelectCommand(Command command, SelectTypeEnum selectTypeEnum) {
 		if (mViewState.ViewStateEnum == ViewStateEnum.COMMAND_LIST) {
+			if (selectTypeEnum == SelectTypeEnum.DETAIL) {
+				ProgressViewState(ViewStateEnum.DETAIL);
+			} else {
+				// Go either to COMMAND_HAND or DESIGNATE_HAND or DESIGNATE_BOARD or DESIGNATE_LIST.
+			}
 			return true;
 		}
 		return false;

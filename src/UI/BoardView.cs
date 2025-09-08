@@ -11,11 +11,13 @@ public partial class BoardView : CanvasLayer, IView {
 	public bool InputEnabled { get; set; } = true;
   public Tile.PartitionTypeEnum HoverPartition;
   public Display.ITile HoveredTile { get; private set; }
-	public Vector2I[] Joystick { get; private set; } = [new(0, 0), new(0, 0)];
-  
+	public Vector2I[] Joystick { get; private set; } = [new(0, 0), new(0, 0)];  
+	public RayCast3D RayCast { private get; set; }
+
   private Sprite2D crosshair;
   private HoverType hoverType = HoverType.NORMAL;
   private Sprite3D[] hoverSprites;
+  private Display.Piece mHoveredPiece;
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
@@ -39,6 +41,22 @@ public partial class BoardView : CanvasLayer, IView {
   // Called every frame. 'delta' is the elapsed time since the previous frame.
   public override void _Process(double delta) {
 	
+  }
+
+  public override void _PhysicsProcess(double delta){
+		if (RayCast != null && RayCast.IsColliding()) {
+			MeshInstance3D collidedMesh = ((StaticBody3D) RayCast.GetCollider()).GetParent<MeshInstance3D>();
+			if (collidedMesh is Display.Piece displayPiece) {
+				if (displayPiece != mHoveredPiece) {
+					mHoveredPiece?.Colorize(ColorizeEnum.NONE);
+					mHoveredPiece = displayPiece;
+					displayPiece.Colorize(ColorizeEnum.HOVER);
+				}
+			}
+		} else {
+			mHoveredPiece?.Colorize(ColorizeEnum.NONE);
+		  mHoveredPiece = null;
+		}
   }
 
   public override void _Input(InputEvent @event) {
@@ -70,6 +88,9 @@ public partial class BoardView : CanvasLayer, IView {
 			SelectMisc?.Invoke(SelectTypeEnum.FINAL);
 		}
 		if (Input.IsActionJustPressed("select")) {
+			if (mHoveredPiece != null) {
+				SelectPiece?.Invoke(mHoveredPiece);
+			}
 			SelectTile?.Invoke(HoveredTile);
 		}
 		if (Input.IsActionJustPressed("hand")) {

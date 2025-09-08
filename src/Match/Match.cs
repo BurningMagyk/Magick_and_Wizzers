@@ -30,8 +30,8 @@ public class Match {
 	  // Set up players.
 	  Vector2I[] startingPositions = mBoard.GetStartingPositions(MatchType.FREE_FOR_ALL, mPlayers.Length);
 	  for (int i = 0; i < mPlayers.Length; i++) {
-		Player player = mPlayers[i];
-		player.AddMaster(GenerateDefaultMaster(player.Name, player.MasterCard, startingPositions[i]));
+			Player player = mPlayers[i];
+			player.AddMaster(GenerateDefaultMaster(player.Name, player.MasterCard, startingPositions[i]));
 	  }
 	}
 
@@ -41,10 +41,10 @@ public class Match {
 		newHoveredTile = mBoard.GetTileAt(mUi.GetHoverCoordinate(newPoint), mUi.GetHoverPartition()),
 		oldHoveredTile = mBoard.GetTileAt(mUi.GetHoverCoordinate(oldPoint), mUi.GetHoverPartition());
 	  if (newHoveredTile == null && hoveredTile == null) {
-		mUi.HoverTile(null);
-	  // Check if new position is hovering a different tile now.
+			mUi.HoverTile(null);
+			// Check if new position is hovering a different tile now.
 	  } else if (hoveredTile != null && newHoveredTile != oldHoveredTile) {
-		mUi.HoverTile(hoveredTile.DisplayTile);
+			mUi.HoverTile(hoveredTile.DisplayTile);
 	  }
 	}
 
@@ -70,10 +70,10 @@ public class Match {
 
 	private Piece GenerateDefaultMaster(string playerName, Main.Card card, Vector2I position) {
 	  return mBoard.AddPiece(
-		card.Stats,
-		mBoard.GetTileAt(position, Tile.MAX_PARTITION), // use default starting positions
-		card.Illustration,
-		uniqueId++
+			card.Stats,
+			mBoard.GetTileAt(position, Tile.MAX_PARTITION), // use default starting positions
+			card.Illustration,
+			uniqueId++
 	  );
 	}
 }

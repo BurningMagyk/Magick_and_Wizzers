@@ -10,10 +10,17 @@ public partial class Board : Node3D {
   public override void _Ready() {
 		mPieceScene = ResourceLoader.Load<PackedScene>("res://scenes/piece.tscn");
 
-		// Make the base stuff invisible.
+		// Make the base tile invisible.
 		GetNode<TileWithMesh>("Tile").Visible = false;
-		GetNode<Piece>("Piece").Visible = false;
-  }
+
+		// Make the base piece invisible.
+		Piece basePiece = GetNode<Piece>("Piece");
+		basePiece.Visible = false;
+
+		// Disable the StaticBody3D of the base piece.
+	  StaticBody3D basePieceStaticBody = basePiece.GetChild<StaticBody3D>(0);
+	  basePieceStaticBody.ProcessMode = ProcessModeEnum.Disabled;
+	}
 
   public void SetRepresentedTiles(Match.Tile[,] tiles, bool useMesh) {
 		PackedScene tileScene = null;
