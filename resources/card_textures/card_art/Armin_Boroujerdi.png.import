@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bb8rtfrp6al8k"
-path="res://.godot/imported/Aidan_Hendrickson_2.png-66736d0ee6444c9e7348cc6420951982.ctex"
+uid="uid://dy2eq1hee7ef5"
+path="res://.godot/imported/Armin_Boroujerdi.png-e5a7beb82b8cc060e3242cef85bace9d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/card_art/Aidan_Hendrickson_2.png"
-dest_files=["res://.godot/imported/Aidan_Hendrickson_2.png-66736d0ee6444c9e7348cc6420951982.ctex"]
+source_file="res://resources/card_textures/card_art/Armin_Boroujerdi.png"
+dest_files=["res://.godot/imported/Armin_Boroujerdi.png-e5a7beb82b8cc060e3242cef85bace9d.ctex"]
 
 [params]
 

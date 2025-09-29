@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b22xsrvmcvfb3"
-path="res://.godot/imported/Ben_Matthews.png-9c145ba0c73c4615216d8efa6768e0ea.ctex"
+uid="uid://cuawsoknnjkh0"
+path="res://.godot/imported/Armin_Boroujerdi_3.png-c79fb84b3868a08a3d5cadde83677ec2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/card_art/Ben_Matthews.png"
-dest_files=["res://.godot/imported/Ben_Matthews.png-9c145ba0c73c4615216d8efa6768e0ea.ctex"]
+source_file="res://resources/card_textures/card_art/Armin_Boroujerdi_3.png"
+dest_files=["res://.godot/imported/Armin_Boroujerdi_3.png-c79fb84b3868a08a3d5cadde83677ec2.ctex"]
 
 [params]
 

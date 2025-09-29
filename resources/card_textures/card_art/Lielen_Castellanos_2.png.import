@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://i1dmjcyevks3"
-path="res://.godot/imported/Aidan_Hendrickson.png-6c315a8f248f63213e105409a42aeb3c.ctex"
+uid="uid://bv4yv6vx1a6qh"
+path="res://.godot/imported/Lielen_Castellanos_2.png-349c19592adffa300793320739d051a3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/card_art/Aidan_Hendrickson.png"
-dest_files=["res://.godot/imported/Aidan_Hendrickson.png-6c315a8f248f63213e105409a42aeb3c.ctex"]
+source_file="res://resources/card_textures/card_art/Lielen_Castellanos_2.png"
+dest_files=["res://.godot/imported/Lielen_Castellanos_2.png-349c19592adffa300793320739d051a3.ctex"]
 
 [params]
 

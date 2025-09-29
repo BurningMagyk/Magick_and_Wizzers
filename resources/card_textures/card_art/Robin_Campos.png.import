@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c3hp7if2rhjs7"
-path="res://.godot/imported/Armin_Boroujerdi_4.png-4a5453a45e17246050cb01fd335465b1.ctex"
+uid="uid://cvtxy6036otv6"
+path="res://.godot/imported/Robin_Campos.png-081c4fdeb3442b03ba523e51f0690544.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/card_art/Armin_Boroujerdi_4.png"
-dest_files=["res://.godot/imported/Armin_Boroujerdi_4.png-4a5453a45e17246050cb01fd335465b1.ctex"]
+source_file="res://resources/card_textures/card_art/Robin_Campos.png"
+dest_files=["res://.godot/imported/Robin_Campos.png-081c4fdeb3442b03ba523e51f0690544.ctex"]
 
 [params]
 

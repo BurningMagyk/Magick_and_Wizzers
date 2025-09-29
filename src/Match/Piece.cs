@@ -7,13 +7,13 @@ public class Piece {
   private static int sNextIdForPiece = 0;
 
   public Tile Tile {
-	get => tile;
-	set {	
-	  tile = value;
-		float size = value.DisplayTile.Size;
-	  mDisplayNode.Position = value.DisplayTile.Position + new Vector3(0, size, 0);
-	  mDisplayNode.Scale = new Vector3(size, size, size);
-	}
+	  get => tile;
+	  set {
+		  tile = value;
+		  float size = value.DisplayTile.Size;
+		  mDisplayNode.Position = value.DisplayTile.Position + new Vector3(0, size, 0);
+		  mDisplayNode.Scale = new Vector3(size, size, size);
+	  }
   }
   public Main.Stats Stats { get; set; }
   public string Name { get; private set;}
@@ -21,12 +21,21 @@ public class Piece {
 
   private readonly Display.Piece mDisplayNode;
   private Tile tile;
+  public Command.CommandType[] CommandTypes { get; private set; }
   public Command Command { get; private set; }
 
   // Called when the node enters the scene tree for the first time.
   public Piece(Stats stats, Display.Piece displayNode) {
-	Name = stats.Name + " " + sNextIdForPiece++;
-	mDisplayNode = displayNode;
+		Name = stats.Name + " " + sNextIdForPiece++;
+		mDisplayNode = displayNode;
+
+		// Command stuff should come from the stats. Use defaults for now.
+		CommandTypes = [
+			Command.CommandType.APPROACH,
+	  	Command.CommandType.AVOID,
+	  	Command.CommandType.INTERCEPT,
+	  	Command.CommandType.LINGER
+		];
   }
 
   public void FollowCommand() {

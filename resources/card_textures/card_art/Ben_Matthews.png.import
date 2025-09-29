@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cb3g2mlxn4lcf"
-path="res://.godot/imported/Joel_Rojo.png-ab362aa15d0ddfbc9f58913e726902bf.ctex"
+uid="uid://b22xsrvmcvfb3"
+path="res://.godot/imported/Ben_Matthews.png-15ffb63aaaa27f39a68dfdd1b58815c7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/card_art/Joel_Rojo.png"
-dest_files=["res://.godot/imported/Joel_Rojo.png-ab362aa15d0ddfbc9f58913e726902bf.ctex"]
+source_file="res://resources/card_textures/card_art/Ben_Matthews.png"
+dest_files=["res://.godot/imported/Ben_Matthews.png-15ffb63aaaa27f39a68dfdd1b58815c7.ctex"]
 
 [params]
 

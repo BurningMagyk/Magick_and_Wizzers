@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dy2eq1hee7ef5"
-path="res://.godot/imported/Armin_Boroujerdi.png-6a0e150d6c8a3ab06ab11a51d7dafa5c.ctex"
+uid="uid://bjw3r2hxa588f"
+path="res://.godot/imported/Trololololo_Road.png-f5361ebf2e0c14d41f17b6304fcf2898.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/card_art/Armin_Boroujerdi.png"
-dest_files=["res://.godot/imported/Armin_Boroujerdi.png-6a0e150d6c8a3ab06ab11a51d7dafa5c.ctex"]
+source_file="res://resources/card_textures/card_art/Trololololo_Road.png"
+dest_files=["res://.godot/imported/Trololololo_Road.png-f5361ebf2e0c14d41f17b6304fcf2898.ctex"]
 
 [params]
 

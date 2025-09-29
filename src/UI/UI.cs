@@ -379,6 +379,7 @@ public partial class UI : Node {
 
 		public ViewState() {
 			ViewStateEnum = ViewStateEnum.MEANDER_BOARD;
+			GD.Print("Creating initial ViewState for " + ViewStateEnum.ToString() + ".");
 			Prev = null;
 		}
 

@@ -1,12 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://bh6ncm63hmvwt"]
+[gd_scene load_steps=3 format=3 uid="uid://bh6ncm63hmvwt"]
 
+[ext_resource type="Script" uid="uid://b16cbmshoau4u" path="res://src/UI/CommandItem.cs" id="1_fxqmn"]
 [ext_resource type="Texture2D" uid="uid://tq0rndtm0rsj" path="res://resources/command_textures/item_active_background.png" id="1_hluhf"]
 
-[node name="Command" type="Control"]
+[node name="Command Item" type="Control"]
 layout_mode = 3
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 400.0
+offset_bottom = 80.0
+script = ExtResource("1_fxqmn")
 
 [node name="Sleeve" type="Sprite2D" parent="."]
 
@@ -22,6 +24,6 @@ layout_mode = 0
 offset_right = 400.0
 offset_bottom = 80.0
 theme_override_font_sizes/font_size = 40
-text = "Command"
+text = "Command Item"
 horizontal_alignment = 1
 vertical_alignment = 1

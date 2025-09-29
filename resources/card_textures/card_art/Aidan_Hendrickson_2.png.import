@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bjw3r2hxa588f"
-path="res://.godot/imported/Trololololo_Road.png-67805b17d16985d9e0defcb39ab0581e.ctex"
+uid="uid://bb8rtfrp6al8k"
+path="res://.godot/imported/Aidan_Hendrickson_2.png-d25efefff0cac9cb73fad65cfacf7563.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/card_art/Trololololo_Road.png"
-dest_files=["res://.godot/imported/Trololololo_Road.png-67805b17d16985d9e0defcb39ab0581e.ctex"]
+source_file="res://resources/card_textures/card_art/Aidan_Hendrickson_2.png"
+dest_files=["res://.godot/imported/Aidan_Hendrickson_2.png-d25efefff0cac9cb73fad65cfacf7563.ctex"]
 
 [params]
 

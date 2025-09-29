@@ -24,15 +24,15 @@ public partial class HandView : CanvasLayer, IView {
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
-	cardBase = ResourceLoader.Load<PackedScene>("res://scenes/card.tscn");
+	  cardBase = ResourceLoader.Load<PackedScene>("res://scenes/card.tscn");
 
-	// Make the base stuff invisible.
-	GetNode<Card>("Card").Visible = false;
+	  // Make the base stuff invisible.
+	  GetNode<Card>("Card").Visible = false;
 
-	hoveredCardIndex = -1;
-	HoverPartition = Tile.MAX_PARTITION;
-	Hide();
-	CardCountSupposed = STARTING_CARD_COUNT;
+	  hoveredCardIndex = -1;
+	  HoverPartition = Tile.MAX_PARTITION;
+	  Hide();
+	  CardCountSupposed = STARTING_CARD_COUNT;
   }
 
   // Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -87,7 +87,7 @@ public partial class HandView : CanvasLayer, IView {
 
 		for (int i = 0; i < cardsInHand.Length; i++) {
 			if (cardsInHand[i] != null) {
-			cardsInHand[i].Visible = false;
+			  cardsInHand[i].Visible = false;
 			}
 		}
 
@@ -114,19 +114,19 @@ public partial class HandView : CanvasLayer, IView {
 		bool drewCard = false;
 		for (int i = 0; i < cardsInHand.Length; i++) {
 			if (cardsInHand[i] == null && !drewCard) {
-			Control drawnCard = cardBase.Instantiate() as Control;
-			drawnCard.Visible = true;
-			drawnCard.Name = "Card " + i;
-			AddChild(drawnCard);
-			cardsInHand[i] = GetNode<Card>("Card " + i);
-			drewCard = true;
+			  Control drawnCard = cardBase.Instantiate() as Control;
+			  drawnCard.Visible = true;
+			  drawnCard.Name = "Card " + i;
+			  AddChild(drawnCard);
+			  cardsInHand[i] = GetNode<Card>("Card " + i);
+			  drewCard = true;
 			}
 			if (cardsInHand[i] != null) {
-			cardsInHand[i].Position = new Vector2(
-			viewPortRect.Size.X / 2 + cardsInHand[i].Size.X * (i - CardCountSupposed / 2F),
-			viewPortRect.Size.Y / 2
-			);
-			cardsInHand[i].BrowsePosition = new Vector2(cardsInHand[i].Position.X, cardsInHand[i].Position.Y);
+			  cardsInHand[i].Position = new Vector2(
+				viewPortRect.Size.X / 2 + cardsInHand[i].Size.X * (i - CardCountSupposed / 2F),
+				viewPortRect.Size.Y / 2
+			  );
+			  cardsInHand[i].BrowsePosition = new Vector2(cardsInHand[i].Position.X, cardsInHand[i].Position.Y);
 			}
 		}
   }
@@ -140,32 +140,32 @@ public partial class HandView : CanvasLayer, IView {
 			return;
 		} else if (direction == Main.DirectionEnum.LEFT) {
 			if (hoveredCardIndex == -1 || hoveredCardIndex == GetLeftmostCardIndex()) {
-			// Start sleeve at right end.
-			hoveredCardIndex = GetRightmostCardIndex();
+			  // Start sleeve at right end.
+			  hoveredCardIndex = GetRightmostCardIndex();
 			} else {
-			// Move sleeve to the left.
-			hoveredCardIndex = GetRightmostCardIndex(hoveredCardIndex - 1);
+			  // Move sleeve to the left.
+			  hoveredCardIndex = GetRightmostCardIndex(hoveredCardIndex - 1);
 			}
 			if (hoveredCardIndex == -1) {
-			Unhover();
-			return;
+			  Unhover();
+			  return;
 			}
 		} else if (direction == Main.DirectionEnum.RIGHT) {
 			if (hoveredCardIndex == -1 || hoveredCardIndex == GetRightmostCardIndex()) {
-			// Start sleeve at left end.
-			hoveredCardIndex = GetLeftmostCardIndex();
+			  // Start sleeve at left end.
+			  hoveredCardIndex = GetLeftmostCardIndex();
 			} else {
-			// Move sleeve to the right.
-			hoveredCardIndex = GetLeftmostCardIndex(hoveredCardIndex + 1);
+			  // Move sleeve to the right.
+			  hoveredCardIndex = GetLeftmostCardIndex(hoveredCardIndex + 1);
 			}
 			if (hoveredCardIndex == -1) {
-			Unhover();
-			return;
+			  Unhover();
+			  return;
 			}
 		}
 		
 		Card hoveredCard = cardsInHand[hoveredCardIndex];
-		if (hoveredCardIndexPrevious > -1) {
+		if (hoveredCardIndexPrevious >= 0) {
 			cardsInHand[hoveredCardIndexPrevious].Unhover();
 		}
 
@@ -180,7 +180,7 @@ public partial class HandView : CanvasLayer, IView {
 			return;
 		}
 
-		// Emits signal to call HandView.Selected, defined in UI class.
+		// Emits signal to call OnSelectCard, defined in UI class.
 		SelectCard?.Invoke(cardsInHand[hoveredCardIndex], forDetail ? SelectTypeEnum.DETAIL : SelectTypeEnum.FINAL);
   }
 
@@ -198,20 +198,20 @@ public partial class HandView : CanvasLayer, IView {
   }
 
   private int GetLeftmostCardIndex(int startIndex = 0) {
-	for (int i = startIndex; i < cardsInHand.Length; i++) {
-	  if (cardsInHand[i] != null) {
-	  return i;
+	  for (int i = startIndex; i < cardsInHand.Length; i++) {
+		if (cardsInHand[i] != null) {
+		  return i;
+		}
 	  }
-	}
-	return -1;
+	  return -1;
 	}
 	private int GetRightmostCardIndex(int startIndex) {
-	for (int i = startIndex; i >= 0; i--) {
-	  if (cardsInHand[i] != null) {
-	  return i;
+	  for (int i = startIndex; i >= 0; i--) {
+		if (cardsInHand[i] != null) {
+		  return i;
+		}
 	  }
-	}
-	return -1;
+	  return -1;
   }
   private int GetRightmostCardIndex() {
 	  return GetRightmostCardIndex(cardsInHand.Length - 1);
@@ -219,12 +219,12 @@ public partial class HandView : CanvasLayer, IView {
   
   private int GetCardCount() {
 	int count = 0;
-	for (int i = 0; i < cardsInHand.Length; i++) {
-	  if (cardsInHand[i] != null) {
-	  count++;
+	  for (int i = 0; i < cardsInHand.Length; i++) {
+		if (cardsInHand[i] != null) {
+		  count++;
+		}
 	  }
-	}
-	return count;
+	  return count;
 	}
 }
 }

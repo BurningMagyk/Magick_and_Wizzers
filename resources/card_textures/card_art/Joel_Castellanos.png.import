@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bvhi7lconr6uh"
-path="res://.godot/imported/Lielen_Castellanos.png-cf39f927d85a0c80c6b8a1bd1eb0063e.ctex"
+uid="uid://boqkx58wrjq4o"
+path="res://.godot/imported/Joel_Castellanos.png-c37d57088b7066f9536e2f1f91e391c2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/card_art/Lielen_Castellanos.png"
-dest_files=["res://.godot/imported/Lielen_Castellanos.png-cf39f927d85a0c80c6b8a1bd1eb0063e.ctex"]
+source_file="res://resources/card_textures/card_art/Joel_Castellanos.png"
+dest_files=["res://.godot/imported/Joel_Castellanos.png-c37d57088b7066f9536e2f1f91e391c2.ctex"]
 
 [params]
 

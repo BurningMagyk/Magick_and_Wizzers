@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://e03e1h6vcln4"
-path="res://.godot/imported/Armin_Boroujerdi_2.png-aab1adbc445cf30d428c4e8df2b0f581.ctex"
+uid="uid://bvhi7lconr6uh"
+path="res://.godot/imported/Lielen_Castellanos.png-e7dcb2e3db5e4a3e5de3d8f8df6e0bf2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/card_art/Armin_Boroujerdi_2.png"
-dest_files=["res://.godot/imported/Armin_Boroujerdi_2.png-aab1adbc445cf30d428c4e8df2b0f581.ctex"]
+source_file="res://resources/card_textures/card_art/Lielen_Castellanos.png"
+dest_files=["res://.godot/imported/Lielen_Castellanos.png-e7dcb2e3db5e4a3e5de3d8f8df6e0bf2.ctex"]
 
 [params]
 

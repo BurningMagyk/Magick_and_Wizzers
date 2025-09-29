@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cuawsoknnjkh0"
-path="res://.godot/imported/Armin_Boroujerdi_3.png-10deb4412279d00b4b8d855211dc29de.ctex"
+uid="uid://b2q5vetsajba6"
+path="res://.godot/imported/card_sleeve.png-4c26064e8b79528fdead31ca0086c089.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/card_art/Armin_Boroujerdi_3.png"
-dest_files=["res://.godot/imported/Armin_Boroujerdi_3.png-10deb4412279d00b4b8d855211dc29de.ctex"]
+source_file="res://resources/card_textures/card_sleeve.png"
+dest_files=["res://.godot/imported/card_sleeve.png-4c26064e8b79528fdead31ca0086c089.ctex"]
 
 [params]
 

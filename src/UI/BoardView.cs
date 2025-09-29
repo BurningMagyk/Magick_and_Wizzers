@@ -94,6 +94,7 @@ public partial class BoardView : CanvasLayer, IView {
 			SelectTile?.Invoke(HoveredTile);
 		}
 		if (Input.IsActionJustPressed("hand")) {
+			GD.Print("BoardView: Going to hand view from board view.");
 			SelectMisc?.Invoke(SelectTypeEnum.PARTIAL);
 		}
 		if (Input.IsActionJustPressed("detail")) {
@@ -115,8 +116,8 @@ public partial class BoardView : CanvasLayer, IView {
 	public SelectMiscDelegate SelectMisc;
 
   public void SetViewPortRect(Rect2 viewPortRect) {
-	crosshair.Position = new Vector2(viewPortRect.Size.X / 2, viewPortRect.Size.Y / 2);
-}
+	  crosshair.Position = new Vector2(viewPortRect.Size.X / 2, viewPortRect.Size.Y / 2);
+  }
 
   public Vector2I GetHoverCoordinate(Vector2 point) {
 		return GetHoverCoordinate(point, HoverPartition);
