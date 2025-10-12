@@ -3,7 +3,7 @@ using System;
 
 namespace Display {
 public partial class Piece : MeshInstance3D {
-  private Match.Piece mGamePiece;
+  public Match.Piece GamePiece { get; private set; }
 
   private StandardMaterial3D[] mColorizedMaterials;
 
@@ -25,7 +25,7 @@ public partial class Piece : MeshInstance3D {
   }
 
   public void SetGamePiece(Match.Piece piece, Main.DirectionEnum horizontal, Main.DirectionEnum vertical) {
-	  mGamePiece = piece;
+	  GamePiece = piece;
 	  Name = piece.Name + " [" + horizontal + ", " + vertical + "]";
 
 	  // Set up regular material from piece.

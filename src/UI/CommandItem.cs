@@ -7,6 +7,7 @@ public partial class CommandItem : Control {
   private Sprite2D sleeve;
 
   public Command.CommandType CommandType { get; set; }
+
   public bool Available { get; set; }
 
   // Called when the node enters the scene tree for the first time.
@@ -21,6 +22,10 @@ public partial class CommandItem : Control {
   }
   public void Unhover() {
 	  sleeve.Visible = false;
+  }
+
+  public void SetText(string text) {
+    GetNode<Label>("Label").Text = text;
   }
 }
 }

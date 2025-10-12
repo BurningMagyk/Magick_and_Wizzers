@@ -4,6 +4,9 @@ using System;
 
 namespace UI {
 public partial class CommandView : CanvasLayer, IView {
+	private const int MAX_COMMAND_COUNT = 5;
+	private const int SPACING = 20;
+
   public delegate bool SelectCommandDelegate(Command command, SelectTypeEnum selectTypeEnum);
   public SelectCommandDelegate SelectCommand;
   public delegate bool GoBackDelegate();
@@ -13,13 +16,21 @@ public partial class CommandView : CanvasLayer, IView {
   public bool InputEnabled { get; set; } = true;
 
   private PackedScene commandItemBase;
-  private CommandItem[] commandItems;
+	private Rect2 viewPortRect;
+  private readonly CommandItem[] commandItems = new CommandItem[MAX_COMMAND_COUNT];
   private int hoveredItemIndex;
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
 	  commandItemBase = ResourceLoader.Load<PackedScene>("res://scenes/command_item.tscn");
 
+		// Instantiate max number of command items.
+		for (int i = 0; i < MAX_COMMAND_COUNT; i++) {
+			CommandItem commandItem = commandItemBase.Instantiate<CommandItem>();
+			AddChild(commandItem);
+			commandItems[i] = commandItem;
+		}
+		
 	  // Make the base stuff invisible.
 	  GetNode<CommandItem>("Command Item").Visible = false;
 
@@ -58,7 +69,7 @@ public partial class CommandView : CanvasLayer, IView {
 	}
 
   public void SetViewPortRect(Rect2 viewPortRect) {
-
+		this.viewPortRect = viewPortRect;
   }
 
   public void Unhover(bool forgetIndex = true) {
@@ -71,78 +82,95 @@ public partial class CommandView : CanvasLayer, IView {
   }
 
   public void SetCommandTypes(Piece piece) {
-	commandItems = new CommandItem[piece.CommandTypes.Length];
-	for (int i = 0; i < piece.CommandTypes.Length; i++) {
-	  Command.CommandType commandType = piece.CommandTypes[i];
-	  CommandItem commandItem = commandItemBase.Instantiate<CommandItem>();
-	  commandItem.CommandType = commandType;
-	  commandItem.Available = true;
-	  commandItem.Position = new Vector2(0, i * (commandItem.Size.Y + 5));
-	  AddChild(commandItem);
-	  commandItems[i] = commandItem;
-	}
+		Command.CommandType[] commandTypes = piece.CommandTypes;
+		if (commandTypes.Length > MAX_COMMAND_COUNT) {
+			throw new Exception(
+				"Amount of command types (" + commandTypes.Length + ") exceeds max amount (" + MAX_COMMAND_COUNT
+				+ ") for CommandView"
+			);
+		}
+
+		for (int i = 0; i < MAX_COMMAND_COUNT; i++) {
+			CommandItem commandItem = commandItems[i];
+			if (i < commandTypes.Length) {
+				commandItem.CommandType = commandTypes[i];
+				commandItem.Available = true; // This should depend on the piece but for now, make all available.
+				
+				// Position them according to how many are visible.
+				commandItem.Position = new Vector2(
+					(viewPortRect.Size.X - commandItems[i].Size.X) / 2,
+					(viewPortRect.Size.Y / 2) + (i - commandTypes.Length / 2F) * (commandItems[i].Size.Y + SPACING)
+				);
+
+				commandItem.Name = commandTypes[i].ToString();
+				commandItem.SetText(commandTypes[i].ToString());
+				commandItem.Show();
+			} else {
+				commandItem.Hide();
+			}
+		}
   }
 
   private void HoverItem(Main.DirectionEnum direction) {
-	int hoveredItemIndexPrevious = hoveredItemIndex;
+		int hoveredItemIndexPrevious = hoveredItemIndex;
 
-	if (direction == Main.DirectionEnum.NONE || GetAvailableItemsCount() == 0) {
-	  // Intend to unhover or no items available.
-	  Unhover();
-	  return;
-	} else if (direction == Main.DirectionEnum.UP) {
-	  if (hoveredItemIndex == -1 || hoveredItemIndex == GetUppermostItemIndex()) {
-			  // Start sleeve at bottom end.
-			  hoveredItemIndex = GetLowermostItemIndex();
-			} else {
-			  // Move sleeve up.
-			  hoveredItemIndex = GetLowermostItemIndex(hoveredItemIndex - 1);
-			}
-			if (hoveredItemIndex == -1) {
-			  Unhover();
-			  return;
-			}
-		} else if (direction == Main.DirectionEnum.DOWN) {
-			if (hoveredItemIndex == -1 || hoveredItemIndex == GetLowermostItemIndex()) {
-			  // Start sleeve at top end.
-			  hoveredItemIndex = GetUppermostItemIndex();
-			} else {
-			  // Move sleeve down.
-			  hoveredItemIndex = GetUppermostItemIndex(hoveredItemIndex + 1);
-			}
-			if (hoveredItemIndex == -1) {
-			  Unhover();
-			  return;
-			}
-	}
+		if (direction == Main.DirectionEnum.NONE || GetAvailableItemsCount() == 0) {
+			// Intend to unhover or no items available.
+			Unhover();
+			return;
+		} else if (direction == Main.DirectionEnum.UP) {
+			if (hoveredItemIndex == -1 || hoveredItemIndex == GetUppermostItemIndex()) {
+					// Start sleeve at bottom end.
+					hoveredItemIndex = GetLowermostItemIndex();
+				} else {
+					// Move sleeve up.
+					hoveredItemIndex = GetLowermostItemIndex(hoveredItemIndex - 1);
+				}
+				if (hoveredItemIndex == -1) {
+					Unhover();
+					return;
+				}
+			} else if (direction == Main.DirectionEnum.DOWN) {
+				if (hoveredItemIndex == -1 || hoveredItemIndex == GetLowermostItemIndex()) {
+					// Start sleeve at top end.
+					hoveredItemIndex = GetUppermostItemIndex();
+				} else {
+					// Move sleeve down.
+					hoveredItemIndex = GetUppermostItemIndex(hoveredItemIndex + 1);
+				}
+				if (hoveredItemIndex == -1) {
+					Unhover();
+					return;
+				}
+		}
 
-	CommandItem hoveredItem = commandItems[hoveredItemIndex];
-	if (hoveredItemIndexPrevious >= 0) {
-	  commandItems[hoveredItemIndexPrevious].Unhover();
-	}
+		CommandItem hoveredItem = commandItems[hoveredItemIndex];
+		if (hoveredItemIndexPrevious >= 0) {
+			commandItems[hoveredItemIndexPrevious].Unhover();
+		}
 
-	// Place the sleeve over the hovered item.
-	hoveredItem.Hover();
+		// Place the sleeve over the hovered item.
+		hoveredItem.Hover();
   }
 
   private void SelectHoveredItem(bool forDetail) {
-	// Emits signal to call OnSelectItem, defined in UI class.
-	SelectCommand?.Invoke(itemToCommand(commandItems[hoveredItemIndex]), forDetail ? SelectTypeEnum.DETAIL : SelectTypeEnum.FINAL);
+		// Emits signal to call OnSelectItem, defined in UI class.
+		SelectCommand?.Invoke(itemToCommand(commandItems[hoveredItemIndex]), forDetail ? SelectTypeEnum.DETAIL : SelectTypeEnum.FINAL);
   }
 
   private int GetUppermostItemIndex(int startIndex = 0) {
 	  for (int i = startIndex; i < commandItems.Length; i++) {
-		if (commandItems[i] != null) {
-		  return i;
-		}
+			if (commandItems[i] != null) {
+				return i;
+			}
 	  }
 	  return -1;
 	}
 	private int GetLowermostItemIndex(int startIndex) {
 	  for (int i = startIndex; i >= 0; i--) {
-		if (commandItems[i] != null) {
-		  return i;
-		}
+			if (commandItems[i] != null) {
+				return i;
+			}
 	  }
 	  return -1;
   }
@@ -152,11 +180,11 @@ public partial class CommandView : CanvasLayer, IView {
 
   private int GetAvailableItemsCount() {
 	int availableCount = 0;
-	for (int i = 0; i < commandItems.Length; i++) {
-	  if (commandItems[i].Available) {
-		availableCount++;
-	  }
-	}
+		for (int i = 0; i < commandItems.Length; i++) {
+			if (commandItems[i].Available) {
+			availableCount++;
+			}
+		}
 	return availableCount;
   }
 

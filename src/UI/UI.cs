@@ -17,6 +17,8 @@ public partial class UI : Node {
 
   private Vector2 mHoverPoint;
 
+	private Display.Piece mSelectedPiece;
+
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
 		camera = GetNode<Camera3D>("Camera");
@@ -111,6 +113,7 @@ public partial class UI : Node {
 	/// <returns> True if the selection was successful </returns>
   private bool OnSelectPiece(Display.Piece piece) {
 		if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
+			mSelectedPiece = piece;
 			ProgressViewState(ViewStateEnum.COMMAND_LIST);
 			return true;
 		} else if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
@@ -216,6 +219,7 @@ public partial class UI : Node {
 			mHandView.Show();
 			mBoardView.Hide();
 		} else if (viewStateEnum == ViewStateEnum.COMMAND_LIST) {
+			mCommandView.SetCommandTypes(mSelectedPiece.GamePiece);
 			mCommandView.Show();
 			mBoardView.Hide();
 		} else if (viewStateEnum == ViewStateEnum.COMMAND_HAND) {

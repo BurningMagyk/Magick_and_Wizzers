@@ -28,6 +28,7 @@ public class Piece {
   public Piece(Stats stats, Display.Piece displayNode) {
 		Name = stats.Name + " " + sNextIdForPiece++;
 		mDisplayNode = displayNode;
+		displayNode.SetGamePiece(this, 0, 0); // Just one central game piece for now.
 
 		// Command stuff should come from the stats. Use defaults for now.
 		CommandTypes = [
