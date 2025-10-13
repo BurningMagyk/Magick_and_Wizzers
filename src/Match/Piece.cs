@@ -22,7 +22,7 @@ public class Piece {
   private readonly Display.Piece mDisplayNode;
   private Tile tile;
   public Command.CommandType[] CommandTypes { get; private set; }
-  public Command Command { get; private set; }
+  public Command Command { get; set; }
 
   // Called when the node enters the scene tree for the first time.
   public Piece(Stats stats, Display.Piece displayNode) {
@@ -38,7 +38,12 @@ public class Piece {
 		];
   }
 
-  public void FollowCommand() {
+	public void Resolve() {
+		FollowCommand();
+		// Apply over-time effects here too.
+	}
+
+  private void FollowCommand() {
 	// switch (command.Type) {
 	// 	case Command.CommandType.MOVE:
 	// 		// Move the piece to the new tile.

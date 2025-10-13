@@ -57,9 +57,9 @@ public class Match {
 
 	public void OnPlayed(UI.Card card) {
 	  mBoard.AddPiece(
-		  card.Stats,
+		  card.GameCard.Stats,
 		  mBoard.GetTileAt(mUi.GetHoverCoordinate(), mUi.GetHoverPartition()),
-		  card.Illustration,
+		  card.GameCard.Illustration,
 		  uniqueId++
 	  );
 	}

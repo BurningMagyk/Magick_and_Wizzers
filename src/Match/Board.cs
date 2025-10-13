@@ -48,7 +48,8 @@ public partial class Board {
 		// Compline (end of the day before retiring, approximately 7 p.m.)
 		// Twilight (to make it 10 hours)
 		foreach (Piece piece in pieces) {
-
+			piece.Resolve();
+			// Resolve activities here too.
 		}
 	}
 

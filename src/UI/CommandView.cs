@@ -8,7 +8,7 @@ public partial class CommandView : CanvasLayer, IView {
 	private const int MAX_COMMAND_COUNT = 5;
 	private const int SPACING = 20;
 
-  public delegate bool SelectCommandDelegate(Command command, SelectTypeEnum selectTypeEnum);
+  public delegate SelectTypeEnum SelectCommandDelegate(Command command, SelectTypeEnum selectTypeEnum);
   public SelectCommandDelegate SelectCommand;
   public delegate bool GoBackDelegate();
   public GoBackDelegate GoBack;
@@ -217,9 +217,9 @@ public partial class CommandView : CanvasLayer, IView {
 
   private static Command ItemToCommand(CommandItem item) {
 	return item.CommandType switch {
-	  Command.CommandType.APPROACH => Command.Approach(null, 0, -1),
-	  Command.CommandType.AVOID => Command.Avoid(null, 0, -1),
-	  Command.CommandType.INTERACT => Command.Interact(null, -1),
+	  Command.CommandType.APPROACH => Command.Approach(0, -1),
+	  Command.CommandType.AVOID => Command.Avoid(0, -1),
+	  Command.CommandType.INTERACT => Command.Interact(-1),
 	  _ => throw new Exception("Unknown command type " + item.CommandType + " in CommandView.itemToCommand"),
 	};
   }

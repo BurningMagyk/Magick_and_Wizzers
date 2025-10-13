@@ -21,6 +21,7 @@ public partial class HandView : CanvasLayer, IView {
   private Card cardInSelection;
   private Vector2 selectionPosition;
   private int hoveredCardIndex;
+	private Command mCurrentCommand;
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
@@ -58,7 +59,11 @@ public partial class HandView : CanvasLayer, IView {
 		}
   }
 
-  public delegate bool SelectCardDelegate(Card card, SelectTypeEnum selectTypeEnum);
+  public delegate SelectTypeEnum SelectCardDelegate(
+		Card card,
+		Command command,
+		SelectTypeEnum selectTypeEnum
+	);
   public SelectCardDelegate SelectCard;
   public delegate bool GoBackDelegate();
   public GoBackDelegate GoBack;
@@ -102,7 +107,7 @@ public partial class HandView : CanvasLayer, IView {
 	}
 
 	public void SetCommand(Command command) {
-		
+		mCurrentCommand = command;
 	}
 
   public void Unhover(bool forgetIndex = true) {
@@ -185,7 +190,11 @@ public partial class HandView : CanvasLayer, IView {
 		}
 
 		// Emits signal to call OnSelectCard, defined in UI class.
-		SelectCard?.Invoke(cardsInHand[hoveredCardIndex], forDetail ? SelectTypeEnum.DETAIL : SelectTypeEnum.FINAL);
+		SelectCard?.Invoke(
+			cardsInHand[hoveredCardIndex],
+			mCurrentCommand,
+			forDetail ? SelectTypeEnum.DETAIL : SelectTypeEnum.FINAL
+		);
   }
 
   public void RemoveHoveredCard() {

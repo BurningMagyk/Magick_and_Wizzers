@@ -8,6 +8,7 @@ public enum ViewStateEnum {
     COMMAND_LIST,
     DESIGNATE_BOARD,
     DESIGNATE_HAND,
-    DESIGNATE_LIST
+    DESIGNATE_LIST,
+    NONE
 }
 }

@@ -6,6 +6,7 @@ public partial class TileWithMesh : MeshInstance3D, ITile {
   public const int MESH_SIZE = 32;
   // private Match.Tile mGameTile;
 
+  public Match.Tile GameTile { get; set; }
   public new Vector3 Position { get => base.Position; set => base.Position = value; }
   public float Size { get; set; }
 

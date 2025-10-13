@@ -58,6 +58,7 @@ public partial class Board : Node3D {
 				displayTile.Size = TileWithMesh.MESH_SIZE / (int) Math.Pow(2, (int) tiles[i, j].PartitionType);
 
 				tiles[i, j].DisplayTile = displayTile;
+				displayTile.GameTile = tiles[i, j];
 	  	}
 		}
   }

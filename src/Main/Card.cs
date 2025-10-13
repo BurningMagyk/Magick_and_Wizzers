@@ -9,13 +9,16 @@ public class Card {
     public Texture2D Illustration { get; set; }
 
     public Card(string name, Stats stats, Texture2D illustration) {
-        Name = name;
-        Stats = stats;
-        Illustration = illustration;
+      Name = name;
+      Stats = stats;
+      Illustration = illustration;
     }
 
     public static Card CreateRandomCard() {
-        return new Card("Random Name", Stats.CreateRandom(), null);
+      return new Card(
+        "Random Name",
+        Stats.CreateRandom(),
+        GD.Load<Texture2D>("res://resources/card_textures/card_art/Trololololo_Road.png")
+      );
     }
-
 }}

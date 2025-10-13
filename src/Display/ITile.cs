@@ -3,6 +3,7 @@ using System;
 
 namespace Display {
 public interface ITile {
+  Match.Tile GameTile { get; set; }
   Vector3 Position { get; set; }
   float Size { get; set; }
   public static Vector3 CalculatePosition(Vector2I coordinate, Match.Tile.PartitionTypeEnum partitionType) {

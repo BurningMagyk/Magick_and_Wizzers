@@ -3,7 +3,11 @@ using System;
 
 namespace UI {
 public partial class DetailView : CanvasLayer, IView {
-  public delegate bool SelectItemDelegate();
+  public delegate SelectTypeEnum SelectItemDelegate(
+    string item,
+    Match.Command command,
+    SelectTypeEnum selectTypeEnum
+  );
   public SelectItemDelegate SelectItem;
   public bool Showing { get; private set; }
   public bool InputEnabled { get; set; } = true;

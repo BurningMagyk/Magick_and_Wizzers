@@ -379,9 +379,10 @@ public class Stats {
 
 	  int clampedResult = Math.Clamp((int) Math.Round(resultFromPoints), 1, 12);
 	  if (expected > 0 && clampedResult != expected) {
-		GD.Print((name != null ? (name + " - ") : "") + "Expected: " + expected + ", Actual: " + resultFromPoints);
-		testLevelCalculationFlavorMissCount++;
+			GD.Print((name != null ? (name + " - ") : "") + "Expected: " + expected + ", Actual: " + resultFromPoints);
+			testLevelCalculationFlavorMissCount++;
 	  }
+
 	  return clampedResult;
   }
 

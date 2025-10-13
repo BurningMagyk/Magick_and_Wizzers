@@ -25,8 +25,37 @@ public partial class Card : Control {
 	  new Color(0.81f, 0.117f, 0.473f)    // Magenta
   ];
 
-  public Stats Stats { get; private set; }
-  public Texture2D Illustration { get; private set; }
+	private Main.Card mGameCard;
+	public Main.Card GameCard {
+		get => mGameCard;
+		set {
+			mGameCard = value;
+
+			if (GameCard.Stats.IsCreature()) {
+				cardType = CardTypeEnum.SUMMON;
+			} else {
+				Random random = new();
+				int cardTypeIndex = random.Next(1, 7);
+				if (cardTypeIndex >= Enum.GetNames(typeof(CardTypeEnum)).Length) {
+				cardTypeIndex = Enum.GetNames(typeof(CardTypeEnum)).Length - 1;
+				}
+				cardType = (CardTypeEnum) cardTypeIndex;
+
+				actionPointsLabel.Visible = false;
+				lifePointsLabel.Visible = false;
+			}
+			GetNode<ColorRect>("Background").Color = ToColor(
+				cardType,
+				GameCard.Stats.IsCreature(),
+				GameCard.Stats.GetAbilityCount()
+			);
+
+			levelLabel.Text = "Level " + GameCard.Stats.Level.ToString();
+			elementIcon.Color = ToColor(GameCard.Stats.ElementGroup);
+			actionPointsLabel.Text = GameCard.Stats.MaxActionPoints.ToString();
+			lifePointsLabel.Text = GameCard.Stats.MaxLifePoints.ToString();
+		}
+	}
 
   private Label levelLabel, actionPointsLabel, lifePointsLabel;
   private ColorRect elementIcon;
@@ -42,25 +71,24 @@ public partial class Card : Control {
 		if (CARD_COLORS[(int) CardColorEnum.ORANGE] == new Color()) {
 			// Setup color stuff.
 			CARD_COLORS[(int) CardColorEnum.ORANGE] = EvenMix(
-			CARD_COLORS[(int) CardColorEnum.RED],
-			CARD_COLORS[(int) CardColorEnum.YELLOW]
+				CARD_COLORS[(int) CardColorEnum.RED],
+				CARD_COLORS[(int) CardColorEnum.YELLOW]
 			);
 			CARD_COLORS[(int) CardColorEnum.AMBER] = EvenMix(
-			CARD_COLORS[(int) CardColorEnum.YELLOW],
-			CARD_COLORS[(int) CardColorEnum.ORANGE]
+				CARD_COLORS[(int) CardColorEnum.YELLOW],
+				CARD_COLORS[(int) CardColorEnum.ORANGE]
 			);
 			CARD_COLORS[(int) CardColorEnum.SUNSET] = EvenMix(
-			CARD_COLORS[(int) CardColorEnum.ORANGE],
-			CARD_COLORS[(int) CardColorEnum.RED]
+				CARD_COLORS[(int) CardColorEnum.ORANGE],
+				CARD_COLORS[(int) CardColorEnum.RED]
 			);
 			CARD_COLORS[(int) CardColorEnum.INDIGO] = EvenMix(
-			CARD_COLORS[(int) CardColorEnum.PURPLE],
-			CARD_COLORS[(int) CardColorEnum.BLUE]
+				CARD_COLORS[(int) CardColorEnum.PURPLE],
+				CARD_COLORS[(int) CardColorEnum.BLUE]
 			);
 		}
 
 	  VBoxContainer foreground = GetNode<VBoxContainer>("Foreground");
-	  Illustration = foreground.GetNode<TextureRect>("Illustration").Texture;
 	  HBoxContainer topContainer = foreground.GetNode<HBoxContainer>("Stats Top");
 	  levelLabel = topContainer.GetNode<Label>("Level");
 	  elementIcon = topContainer.GetNode<ColorRect>("Element");
@@ -72,27 +100,7 @@ public partial class Card : Control {
 		sleeve.Position = Size / 2;
 		sleeve.Visible = false;
 
-	  Stats = Stats.CreateRandom();
-
-		if (Stats.IsCreature()) {
-			cardType = CardTypeEnum.SUMMON;
-		} else {
-			Random random = new();
-			int cardTypeIndex = random.Next(1, 7);
-			if (cardTypeIndex >= Enum.GetNames(typeof(CardTypeEnum)).Length) {
-			cardTypeIndex = Enum.GetNames(typeof(CardTypeEnum)).Length - 1;
-			}
-			cardType = (CardTypeEnum) cardTypeIndex;
-
-			actionPointsLabel.Visible = false;
-			lifePointsLabel.Visible = false;
-		}
-		GetNode<ColorRect>("Background").Color = ToColor(cardType, Stats.IsCreature(), Stats.GetAbilityCount());
-
-	  levelLabel.Text = "Level " + Stats.Level.ToString();
-	  elementIcon.Color = ToColor(Stats.ElementGroup);
-	  actionPointsLabel.Text = Stats.MaxActionPoints.ToString();
-	  lifePointsLabel.Text = Stats.MaxLifePoints.ToString();
+		GameCard = Main.Card.CreateRandomCard();
   }
 
   // Called every frame. 'delta' is the elapsed time since the previous frame.

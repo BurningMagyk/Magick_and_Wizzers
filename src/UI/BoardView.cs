@@ -110,13 +110,25 @@ public partial class BoardView : CanvasLayer, IView {
 		}
   }
 
-  public delegate bool SelectPieceDelegate(Display.Piece piece, Command command, SelectTypeEnum selectTypeEnum);
+  public delegate SelectTypeEnum SelectPieceDelegate(
+		Display.Piece piece,
+		Command command,
+		SelectTypeEnum selectTypeEnum
+	);
   public SelectPieceDelegate SelectPiece;
-  public delegate bool SelectTileDelegate(Display.ITile tile, Command command, SelectTypeEnum selectTypeEnum);
+  public delegate SelectTypeEnum SelectTileDelegate(
+		Display.ITile tile,
+		Command command,
+		SelectTypeEnum selectTypeEnum
+	);
   public SelectTileDelegate SelectTile;
-  public delegate bool SelectActivityDelegate(Activity activity);
+  public delegate SelectTypeEnum SelectActivityDelegate(
+		Activity activity,
+		Command command,
+		SelectTypeEnum selectTypeEnum
+	);
   public SelectActivityDelegate SelectActivity;
-	public delegate bool SelectMiscDelegate(SelectTypeEnum selectTypeEnum);
+	public delegate SelectTypeEnum SelectMiscDelegate(SelectTypeEnum selectTypeEnum);
 	public SelectMiscDelegate SelectMisc;
 
   public void SetViewPortRect(Rect2 viewPortRect) {

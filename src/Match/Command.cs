@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using UI;
 
 namespace Match {
@@ -31,7 +32,8 @@ public class Command {
   private readonly int duration; // in hours
 
   public CommandType Type { get; private set; }
-  public Target Target { get; private set; }
+  public Piece Actor { get; private set; }
+  public List<Target> targets = [];
   public RangeType Range { get; private set; }
   public int RangeDistance { get; private set; } // in acres, only relevant for RangeType.DISTANCE
   public int Duration { get; private set; } // -1 for indefinite duration
@@ -41,53 +43,87 @@ public class Command {
     
   private Command(
     CommandType type,
-    Piece actor,
-    Target target,
     RangeType rangeType,
     int rangeDistance,
     int duration
   ) {
     Type = type;
-    Target = target;
     Range = rangeType;
     RangeDistance = rangeDistance;
     Duration = duration;
     ViewSteps = [ViewStateEnum.DESIGNATE_BOARD]; // should be more variable when when CommandType.INTERACT
   }
 
-  public Command StepView() {
-    Command command = new(Type, null, Target, Range, RangeDistance, Duration) {
-      ViewSteps = new ViewStateEnum[ViewSteps.Length - 1]
-    };
-    Array.Copy(ViewSteps, 1, command.ViewSteps, 0, command.ViewSteps.Length);
+  public ViewStateEnum StepView() {
+    if (ViewSteps.Length == 0) {
+      return ViewStateEnum.NONE;
+    }
 
-    return command;
+    ViewStateEnum viewStep = ViewSteps[0];
+
+    ViewStateEnum[] temp = new ViewStateEnum[ViewSteps.Length - 1];
+    Array.Copy(ViewSteps, 1, temp, 0, temp.Length);
+    ViewSteps = temp;
+
+    return viewStep;
   }
 
-  public Command designateTarget(Target target) {
-    return new Command(Type, null, target, Range, RangeDistance, Duration) {
-      ViewSteps = new ViewStateEnum[ViewSteps.Length - 1]
-    };
+  public bool Feed(Piece piece) {
+    targets.Add(new Target(piece));
+    // For now, just accept one piece and then consider the command fully fed.
+    return true;
   }
 
-  public static Command Approach(Target target, int rangeDistance, int duration) {
-    return new Command(CommandType.APPROACH, null, target, RangeType.DISTANCE, rangeDistance, duration);
+  public bool Feed(Tile tile) {
+    targets.Add(new Target(tile));
+    // For now, just accept one tile and then consider the command fully fed.
+    return true;
   }
 
-  public static Command Approach(Target target, RangeType rangeType, int duration) {
-    return new Command(CommandType.APPROACH, null, target, rangeType, 0, duration);
+  public bool Feed(Main.Card card) {
+    targets.Add(new Target(card));
+    // For now, just accept one card and then consider the command fully fed.
+    return true;
   }
 
-  public static Command Avoid(Target target, int rangeDistance, int duration) {
-    return new Command(CommandType.AVOID, null, target, RangeType.DISTANCE, rangeDistance, duration);
+  public bool Feed(Activity activity) {
+    targets.Add(new Target(activity));
+    // For now, just accept one activity and then consider the command fully fed.
+    return true;
   }
 
-  public static Command Avoid(Target target, RangeType rangeType, int duration) {
-    return new Command(CommandType.AVOID, null, target, rangeType, 0, duration);
+  public bool Feed(string item) {
+    targets.Add(new Target(item));
+    // For now, just accept one item and then consider the command fully fed.
+    return true;
   }
 
-  public static Command Interact(Target target, int duration = -1) {
-    return new Command(CommandType.INTERACT, null, target, RangeType.COMBAT, 0, duration);
+  public void SetActor(Piece actor) {
+    Actor = actor;
+  }
+
+  public void Complete() {
+    Actor.Command = this;
+  }
+
+  public static Command Approach(int rangeDistance, int duration) {
+    return new Command(CommandType.APPROACH, RangeType.DISTANCE, rangeDistance, duration);
+  }
+
+  public static Command Approach(RangeType rangeType, int duration) {
+    return new Command(CommandType.APPROACH, rangeType, 0, duration);
+  }
+
+  public static Command Avoid(int rangeDistance, int duration) {
+    return new Command(CommandType.AVOID, RangeType.DISTANCE, rangeDistance, duration);
+  }
+
+  public static Command Avoid(RangeType rangeType, int duration) {
+    return new Command(CommandType.AVOID, rangeType, 0, duration);
+  }
+
+  public static Command Interact(int duration = -1) {
+    return new Command(CommandType.INTERACT, RangeType.COMBAT, 0, duration);
   }
 
   public static Command Act(Activity activity) {
@@ -97,51 +133,49 @@ public class Command {
     } else {
       target = new Target(activity);
     }
-      return new Command(CommandType.INTERACT, null, target, RangeType.INFLUENCE, 0, 0);
+      return new Command(CommandType.INTERACT, RangeType.INFLUENCE, 0, 0);
   }
 
   public static Command Intercept(
-    Piece actor,
-    Target recipient,
+    Piece secondActor,
     RangeType rangeType,
     int rangeDistance
   ) {
-    return new Command(CommandType.INTERCEPT, actor, recipient, rangeType, rangeDistance, 0);
+    return new Command(CommandType.INTERCEPT, rangeType, rangeDistance, 0);
   }
 
   public static Command Linger(
-    Piece actor,
-    Target recipient,
+    Piece secondActor,
     RangeType rangeType,
     int rangeDistance
   ) {
-    return new Command(CommandType.LINGER, actor, recipient, rangeType, rangeDistance, 0);
+    return new Command(CommandType.LINGER, rangeType, rangeDistance, 0);
   }
 
-  public static Command Defend(Piece actor, Target recipient) {
-    return new Command(CommandType.BRIDLE, actor, recipient, RangeType.COMBAT, 0, 0);
+  public static Command Defend(Piece secondActor) {
+    return new Command(CommandType.BRIDLE, RangeType.COMBAT, 0, 0);
   }
 
-  public static Command Bridle(Piece actor, Activity activity) {
+  public static Command Bridle(Piece secondActor, Activity activity) {
     Target target;
     if (activity == null) {
       target = new Target(Target.TargetType.ACTIVITY);
     } else {
       target = new Target(activity);
     }
-    return new Command(CommandType.BRIDLE, actor, target, RangeType.INFLUENCE, 0, 0);
+    return new Command(CommandType.BRIDLE, RangeType.INFLUENCE, 0, 0);
   }
 
   public static Command Amble() {
-    return new Command(CommandType.AMBLE, null, null, RangeType.DISTANCE, 0, -1);
+    return new Command(CommandType.AMBLE, RangeType.DISTANCE, 0, -1);
   }
 
   public static Command Skulk() {
-    return new Command(CommandType.SKULK, null, null, RangeType.DISTANCE, 0, -1);
+    return new Command(CommandType.SKULK, RangeType.DISTANCE, 0, -1);
   }
 
   public static Command Layer() {
-    return new Command(CommandType.LAYER, null, null, RangeType.DISTANCE, 0, -1);
+    return new Command(CommandType.LAYER, RangeType.DISTANCE, 0, -1);
   }
 }
 }

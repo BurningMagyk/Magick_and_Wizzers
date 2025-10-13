@@ -2,6 +2,7 @@ using Display;
 using Godot;
 using Match;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace UI {
@@ -16,10 +17,7 @@ public partial class UI : Node {
   private Camera3D camera;
 
   private Vector2 mHoverPoint;
-
-	private Match.Piece mActor;
-	private Target[] mBoardTargets;
-	private Target[] mHandTargets;
+	private Command mCurrentCommand;
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
@@ -113,109 +111,151 @@ public partial class UI : Node {
 
 	/// <summary> Called from BoardView using SelectPiece?.Invoke </summary>
 	/// <returns> True if the selection was successful </returns>
-  private bool OnSelectPiece(Display.Piece piece, Command command, SelectTypeEnum selectTypeEnum) {
-		if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
-			mActor = piece.GamePiece;
+  private SelectTypeEnum OnSelectPiece(Display.Piece piece, Command command, SelectTypeEnum selectTypeEnum) {
+		if (selectTypeEnum == SelectTypeEnum.DETAIL) {
+			ProgressViewState(ViewStateEnum.DETAIL);
+			return SelectTypeEnum.DETAIL;
+		} else if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
+			mCommandView.SetActor(piece.GamePiece);
 			ProgressViewState(ViewStateEnum.COMMAND_LIST);
-			return true;
+			return SelectTypeEnum.FINAL;
 		} else if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
-			return true;
+			if ((command.Feed(piece.GamePiece) && selectTypeEnum == SelectTypeEnum.SERIES)
+				|| selectTypeEnum == SelectTypeEnum.FINAL
+			) {
+				ProgressSteppedViewState(command);
+				return SelectTypeEnum.FINAL;
+			}
+			// Stay in DESIGNATE_BOARD if command is not done being fed.
+			return selectTypeEnum;
 		}
-		return false;
+		return SelectTypeEnum.INVALID;
   }
 
 	/// <summary> Called from BoardView using SelectTile?.Invoke </summary>
 	/// <returns> True if the selection was successful </returns>
-  private bool OnSelectTile(ITile tile, Command command, SelectTypeEnum selectTypeEnum) {
-		if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
-			return true;
+  private SelectTypeEnum OnSelectTile(ITile tile, Command command, SelectTypeEnum selectTypeEnum) {
+		if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD || selectTypeEnum == SelectTypeEnum.DETAIL) {
+			ProgressViewState(ViewStateEnum.DETAIL);
+			return SelectTypeEnum.DETAIL;
 		} else if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
-			return true;
+			if ((command.Feed(tile.GameTile) && selectTypeEnum == SelectTypeEnum.SERIES)
+				|| selectTypeEnum == SelectTypeEnum.FINAL
+			) {
+				ProgressSteppedViewState(command);
+				return SelectTypeEnum.FINAL;
+			}
+			// Stay in DESIGNATE_BOARD if command is not done being fed.
+			return selectTypeEnum;
 		}
-		return false;
-  }
+		return SelectTypeEnum.INVALID;
+	}
 
 	/// <summary> Called from BoardView using SelectActivity?.Invoke </summary>
 	/// <returns> True if the selection was successful </returns>
-  private bool OnSelectActivity(Match.Activity activity) {
+  private SelectTypeEnum OnSelectActivity(Match.Activity activity, Command command, SelectTypeEnum selectTypeEnum) {
 		if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
-			return true;
+			if ((command.Feed(activity) && selectTypeEnum == SelectTypeEnum.SERIES)
+				|| selectTypeEnum == SelectTypeEnum.FINAL
+			) {
+				ProgressSteppedViewState(command);
+				return SelectTypeEnum.FINAL;
+			}
+			// Stay in DESIGNATE_BOARD if command is not done being fed.
+			return selectTypeEnum;
 		}
-		return false;
+		return SelectTypeEnum.INVALID;
   }
 
 	/// <summary> Called from HandView using SelectCard?.Invoke </summary>
 	/// <returns> True if the selection was successful </returns>
-  private bool OnSelectCard(Card card, SelectTypeEnum selectTypeEnum) {
-		if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_HAND) {
+  private SelectTypeEnum OnSelectCard(Card card, Command command, SelectTypeEnum selectTypeEnum) {
+		if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_HAND || selectTypeEnum == SelectTypeEnum.DETAIL) {
 			ProgressViewState(ViewStateEnum.DETAIL);
-			return true;
-		} else if (mViewState.ViewStateEnum == ViewStateEnum.COMMAND_HAND) {
-			if (selectTypeEnum == SelectTypeEnum.DETAIL) {
-				ProgressViewState(ViewStateEnum.DETAIL);
-			} else {
-				// Go either to DESIGNATE_HAND or DESIGNATE_BOARD.
+			return SelectTypeEnum.DETAIL;
+		} else if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_HAND) {
+			if ((command.Feed(card.GameCard) && selectTypeEnum == SelectTypeEnum.SERIES)
+				|| selectTypeEnum == SelectTypeEnum.FINAL
+			) {
+				ProgressSteppedViewState(command);
+				return SelectTypeEnum.FINAL;	
 			}
-			return true;
+			// Stay in DESIGNATE_HAND if command is not done being fed.
+			return selectTypeEnum;
 		}
-		return false;
+		return SelectTypeEnum.INVALID;
   }
 
 	/// <summary> Called from CommandView using SelectCommand?.Invoke </summary>
 	/// <returns> True if the selection was successful </returns>
-  private bool OnSelectCommand(Command command, SelectTypeEnum selectTypeEnum) {
+  private SelectTypeEnum OnSelectCommand(Command command, SelectTypeEnum selectTypeEnum) {
 		if (mViewState.ViewStateEnum == ViewStateEnum.COMMAND_LIST) {
 			if (selectTypeEnum == SelectTypeEnum.DETAIL) {
 				ProgressViewState(ViewStateEnum.DETAIL);
 			} else {
-				// Go either to COMMAND_HAND or DESIGNATE_HAND or DESIGNATE_BOARD or DESIGNATE_LIST or back to MEANDER_BOARD.
-				Command steppedCommand = command.StepView();
-				if (steppedCommand.ViewSteps.Length == 0) {
-					ProgressViewState(ViewStateEnum.MEANDER_BOARD);
-				} else if (steppedCommand.ViewSteps[0] == ViewStateEnum.COMMAND_HAND) {
-					mHandView.SetCommand(steppedCommand);
-					ProgressViewState(ViewStateEnum.COMMAND_HAND);
-				} else if (steppedCommand.ViewSteps[0] == ViewStateEnum.DESIGNATE_HAND) {
-					mHandView.SetCommand(steppedCommand);
-					ProgressViewState(ViewStateEnum.DESIGNATE_HAND);
-				} else if (steppedCommand.ViewSteps[0] == ViewStateEnum.DESIGNATE_BOARD) {
-					mBoardView.SetCommand(steppedCommand);
-					ProgressViewState(ViewStateEnum.DESIGNATE_BOARD);
-				} else {
-					throw new Exception("Command has invalid step " + steppedCommand.ViewSteps[0].ToString() + ".");
-				}
+				ProgressSteppedViewState(command);
 			}
-			return true;
+			return SelectTypeEnum.FINAL;
 		}
-		return false;
+		return SelectTypeEnum.INVALID;
   }
 
 	/// <summary> Called from DetailView using SelectItem?.Invoke </summary>
 	/// <returns> True if the selection was successful </returns>
-  private bool OnSelectItem() {
-		if (mViewState.ViewStateEnum == ViewStateEnum.SURRENDER) {
-			return true;
+  private SelectTypeEnum OnSelectItem(string item, Command command, SelectTypeEnum selectTypeEnum) {
+		if (mViewState.ViewStateEnum != ViewStateEnum.DETAIL) {
+			return SelectTypeEnum.ALT;
+		} else if (mViewState.ViewStateEnum == ViewStateEnum.SURRENDER) {
+			return SelectTypeEnum.SURRENDER;
+		} else if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_LIST) {
+			if ((command.Feed(item) && selectTypeEnum == SelectTypeEnum.SERIES)
+				|| (selectTypeEnum == SelectTypeEnum.FINAL)
+			) {
+				ProgressSteppedViewState(command);
+				return SelectTypeEnum.FINAL;
+			}
+			// Stay in DESIGNATE_LIST if command is not done being fed.
+			return selectTypeEnum;
 		}
-		return false;
+		return SelectTypeEnum.INVALID;
   }
 
 	/// <summary> Called from anywhere using SelectMisc?.Invoke </summary>
 	/// <returns> True if the selection was successful </returns>
-	private bool OnSelectMisc(SelectTypeEnum selectTypeEnum) {
+	private SelectTypeEnum OnSelectMisc(SelectTypeEnum selectTypeEnum) {
 		if (selectTypeEnum == SelectTypeEnum.ALT) {
 			if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
 				ProgressViewState(ViewStateEnum.MEANDER_HAND);
-				return true;
+				return SelectTypeEnum.FINAL;
 			}
 		} else if (selectTypeEnum == SelectTypeEnum.SURRENDER) {
 			if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
 				ProgressViewState(ViewStateEnum.SURRENDER);
-				return true;
+				return SelectTypeEnum.FINAL;
 			}
 		} else if (selectTypeEnum == SelectTypeEnum.FINAL) {
 			PassRound?.Invoke();
 		}
-		return false;
+		return SelectTypeEnum.INVALID;
+	}
+
+	private void ProgressSteppedViewState(Command command) {
+		ViewStateEnum steppedView = command.StepView();
+		if (steppedView == ViewStateEnum.NONE) {
+			command.Complete();
+			ProgressViewState(ViewStateEnum.MEANDER_BOARD);
+		} else if (steppedView == ViewStateEnum.COMMAND_HAND) {
+			mHandView.SetCommand(command);
+			ProgressViewState(ViewStateEnum.COMMAND_HAND);
+		} else if (steppedView == ViewStateEnum.DESIGNATE_HAND) {
+			mHandView.SetCommand(command);
+			ProgressViewState(ViewStateEnum.DESIGNATE_HAND);
+		} else if (steppedView == ViewStateEnum.DESIGNATE_BOARD) {
+			mBoardView.SetCommand(command);
+			ProgressViewState(ViewStateEnum.DESIGNATE_BOARD);
+		} else {
+			throw new Exception("Command has invalid step " + steppedView.ToString() + ".");
+		}
 	}
 
 	private void ProgressViewState(ViewStateEnum viewStateEnum) {
@@ -235,20 +275,24 @@ public partial class UI : Node {
 		} else if (viewStateEnum == ViewStateEnum.MEANDER_HAND) {
 			mHandView.Show();
 			mBoardView.Hide();
+			mDetailView.Hide();
 		} else if (viewStateEnum == ViewStateEnum.COMMAND_LIST) {
-			mCommandView.SetActor(mActor);
 			mCommandView.Show();
 			mBoardView.Hide();
+			mDetailView.Hide();
 		} else if (viewStateEnum == ViewStateEnum.COMMAND_HAND) {
 			mCommandView.Show();
 			mHandView.Hide();
+			mDetailView.Hide();
 		} else if (viewStateEnum == ViewStateEnum.DESIGNATE_HAND) {
 			mHandView.Show();
 			mCommandView.Hide();
+			mDetailView.Hide();
 		} else if (viewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
 			mBoardView.Show();
 			mCommandView.Hide();
 			mHandView.Hide();
+			mDetailView.Hide();
 		}
   }
 
@@ -339,8 +383,7 @@ public partial class UI : Node {
 			switch (viewStateEnum) {
 				case ViewStateEnum.MEANDER_BOARD:
 					if (prev != null) {
-						GD.PrintErr(prev + "There should be no previous ViewState " + prev + " for MEANDER_BOARD.");
-						Prev = null;
+						Prev = null; // should let player undo his last command?
 					}
 					break;
 				case ViewStateEnum.DETAIL:
