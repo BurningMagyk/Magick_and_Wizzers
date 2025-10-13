@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using UI;
 
 namespace Match {
 public class Command {
@@ -32,8 +33,11 @@ public class Command {
   public CommandType Type { get; private set; }
   public Target Target { get; private set; }
   public RangeType Range { get; private set; }
-  public int RangeDistance { get; private set; } // in acres, only relevant for DISTANCE
+  public int RangeDistance { get; private set; } // in acres, only relevant for RangeType.DISTANCE
   public int Duration { get; private set; } // -1 for indefinite duration
+  // For commands that need UI input from multiple views.
+  // Will typically just be [ViewStateEnum.DESIGNATE_BOARD] unless it's CommandType.INTERACT.
+  public ViewStateEnum[] ViewSteps { get; private set; }
     
   private Command(
     CommandType type,
@@ -48,6 +52,22 @@ public class Command {
     Range = rangeType;
     RangeDistance = rangeDistance;
     Duration = duration;
+    ViewSteps = [ViewStateEnum.DESIGNATE_BOARD]; // should be more variable when when CommandType.INTERACT
+  }
+
+  public Command StepView() {
+    Command command = new(Type, null, Target, Range, RangeDistance, Duration) {
+      ViewSteps = new ViewStateEnum[ViewSteps.Length - 1]
+    };
+    Array.Copy(ViewSteps, 1, command.ViewSteps, 0, command.ViewSteps.Length);
+
+    return command;
+  }
+
+  public Command designateTarget(Target target) {
+    return new Command(Type, null, target, Range, RangeDistance, Duration) {
+      ViewSteps = new ViewStateEnum[ViewSteps.Length - 1]
+    };
   }
 
   public static Command Approach(Target target, int rangeDistance, int duration) {

@@ -101,6 +101,10 @@ public partial class HandView : CanvasLayer, IView {
 		selectionPosition = new Vector2(viewPortRect.Size.X * 4 / 5, viewPortRect.Size.Y / 2);
 	}
 
+	public void SetCommand(Command command) {
+		
+	}
+
   public void Unhover(bool forgetIndex = true) {
 		if (hoveredCardIndex > -1 && cardsInHand[hoveredCardIndex] != null) {
 			cardsInHand[hoveredCardIndex].Unhover();

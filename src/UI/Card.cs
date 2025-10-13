@@ -39,25 +39,25 @@ public partial class Card : Control {
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
-	if (CARD_COLORS[(int) CardColorEnum.ORANGE] == new Color()) {
-	  // Setup color stuff.
-	  CARD_COLORS[(int) CardColorEnum.ORANGE] = EvenMix(
-		CARD_COLORS[(int) CardColorEnum.RED],
-		CARD_COLORS[(int) CardColorEnum.YELLOW]
-	  );
-	  CARD_COLORS[(int) CardColorEnum.AMBER] = EvenMix(
-		CARD_COLORS[(int) CardColorEnum.YELLOW],
-		CARD_COLORS[(int) CardColorEnum.ORANGE]
-	  );
-	  CARD_COLORS[(int) CardColorEnum.SUNSET] = EvenMix(
-		CARD_COLORS[(int) CardColorEnum.ORANGE],
-		CARD_COLORS[(int) CardColorEnum.RED]
-	  );
-	  CARD_COLORS[(int) CardColorEnum.INDIGO] = EvenMix(
-		CARD_COLORS[(int) CardColorEnum.PURPLE],
-		CARD_COLORS[(int) CardColorEnum.BLUE]
-	  );
-	}
+		if (CARD_COLORS[(int) CardColorEnum.ORANGE] == new Color()) {
+			// Setup color stuff.
+			CARD_COLORS[(int) CardColorEnum.ORANGE] = EvenMix(
+			CARD_COLORS[(int) CardColorEnum.RED],
+			CARD_COLORS[(int) CardColorEnum.YELLOW]
+			);
+			CARD_COLORS[(int) CardColorEnum.AMBER] = EvenMix(
+			CARD_COLORS[(int) CardColorEnum.YELLOW],
+			CARD_COLORS[(int) CardColorEnum.ORANGE]
+			);
+			CARD_COLORS[(int) CardColorEnum.SUNSET] = EvenMix(
+			CARD_COLORS[(int) CardColorEnum.ORANGE],
+			CARD_COLORS[(int) CardColorEnum.RED]
+			);
+			CARD_COLORS[(int) CardColorEnum.INDIGO] = EvenMix(
+			CARD_COLORS[(int) CardColorEnum.PURPLE],
+			CARD_COLORS[(int) CardColorEnum.BLUE]
+			);
+		}
 
 	  VBoxContainer foreground = GetNode<VBoxContainer>("Foreground");
 	  Illustration = foreground.GetNode<TextureRect>("Illustration").Texture;
@@ -68,26 +68,26 @@ public partial class Card : Control {
 	  actionPointsLabel = bottomContainer.GetNode<Label>("Action Points");
 	  lifePointsLabel = bottomContainer.GetNode<Label>("Life Points");
  
-	sleeve = GetNode<Sprite2D>("Sleeve");
-	sleeve.Position = Size / 2;
-	sleeve.Visible = false;
+		sleeve = GetNode<Sprite2D>("Sleeve");
+		sleeve.Position = Size / 2;
+		sleeve.Visible = false;
 
 	  Stats = Stats.CreateRandom();
 
-	if (Stats.IsCreature()) {
-	  cardType = CardTypeEnum.SUMMON;
-	} else {
-	  Random random = new();
-	  int cardTypeIndex = random.Next(1, 7);
-	  if (cardTypeIndex >= Enum.GetNames(typeof(CardTypeEnum)).Length) {
-		cardTypeIndex = Enum.GetNames(typeof(CardTypeEnum)).Length - 1;
-	  }
-	  cardType = (CardTypeEnum) cardTypeIndex;
+		if (Stats.IsCreature()) {
+			cardType = CardTypeEnum.SUMMON;
+		} else {
+			Random random = new();
+			int cardTypeIndex = random.Next(1, 7);
+			if (cardTypeIndex >= Enum.GetNames(typeof(CardTypeEnum)).Length) {
+			cardTypeIndex = Enum.GetNames(typeof(CardTypeEnum)).Length - 1;
+			}
+			cardType = (CardTypeEnum) cardTypeIndex;
 
-	  actionPointsLabel.Visible = false;
-	  lifePointsLabel.Visible = false;
-	}
-	GetNode<ColorRect>("Background").Color = ToColor(cardType, Stats.IsCreature(), Stats.GetAbilityCount());
+			actionPointsLabel.Visible = false;
+			lifePointsLabel.Visible = false;
+		}
+		GetNode<ColorRect>("Background").Color = ToColor(cardType, Stats.IsCreature(), Stats.GetAbilityCount());
 
 	  levelLabel.Text = "Level " + Stats.Level.ToString();
 	  elementIcon.Color = ToColor(Stats.ElementGroup);

@@ -3,11 +3,11 @@ using System;
 
 namespace UI {
 public enum SelectTypeEnum {
-  PARTIAL,
   FINAL,
+  SERIES,
+  INVALID,
+  DETAIL,
   ALT,
-  DETAIL
+  SURRENDER
+}    
 }
-    
-}
-

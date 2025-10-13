@@ -1,6 +1,7 @@
 using Godot;
 using Match;
 using System;
+using System.Collections.Generic;
 
 namespace UI {
 public partial class CommandView : CanvasLayer, IView {
@@ -18,7 +19,10 @@ public partial class CommandView : CanvasLayer, IView {
   private PackedScene commandItemBase;
 	private Rect2 viewPortRect;
   private readonly CommandItem[] commandItems = new CommandItem[MAX_COMMAND_COUNT];
-  private int hoveredItemIndex;
+	private int commandCountSupposed;
+  private readonly Dictionary<Piece, int> hoveredItemIndexPerPiece = [];
+	private Piece currentActor;
+	private int hoveredItemIndex;
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
@@ -33,8 +37,7 @@ public partial class CommandView : CanvasLayer, IView {
 		
 	  // Make the base stuff invisible.
 	  GetNode<CommandItem>("Command Item").Visible = false;
-
-	  hoveredItemIndex = -1;
+		hoveredItemIndex = -1;
 	  Hide();
   }
 
@@ -48,10 +51,10 @@ public partial class CommandView : CanvasLayer, IView {
 			HoverItem(Main.DirectionEnum.DOWN);
 		}
 		if (Input.IsActionJustPressed("select")) {
-			SelectHoveredItem(false);
+			SelectHoveredItem();
 		}
 		if (Input.IsActionJustPressed("detail")) {
-			SelectHoveredItem(true);
+			DetailHoveredItem();
 		}
 	if (Input.IsActionJustPressed("back")) {
 	  GoBack?.Invoke();
@@ -59,6 +62,13 @@ public partial class CommandView : CanvasLayer, IView {
   }
 
   public new void Show() {
+		// Hover the current item. We expect SetCommandTypes to have been called before Show.
+		if (hoveredItemIndex >= commandCountSupposed || hoveredItemIndex == -1) {
+			HoverItem(Main.DirectionEnum.NONE);
+		} else {
+			commandItems[hoveredItemIndex].Hover();
+		}
+
 	  base.Show();
 	  Showing = true;
 	}
@@ -66,33 +76,39 @@ public partial class CommandView : CanvasLayer, IView {
   public new void Hide() {
 		base.Hide();
 		Showing = false;
+
+		// Remember the hovered item index for this piece as we leave.
+		if (currentActor != null) {
+			hoveredItemIndexPerPiece[currentActor] = hoveredItemIndex;
+		}
+		currentActor = null;
+		Unhover();
 	}
 
   public void SetViewPortRect(Rect2 viewPortRect) {
 		this.viewPortRect = viewPortRect;
   }
 
-  public void Unhover(bool forgetIndex = true) {
-		if (hoveredItemIndex > -1 && commandItems[hoveredItemIndex] != null) {
-			commandItems[hoveredItemIndex].Unhover();
-		}
-		if (forgetIndex) {
-			hoveredItemIndex = -1;
-		}
-  }
-
-  public void SetCommandTypes(Piece piece) {
-		Command.CommandType[] commandTypes = piece.CommandTypes;
-		if (commandTypes.Length > MAX_COMMAND_COUNT) {
+	public void SetActor(Piece actor) {
+		Command.CommandType[] commandTypes = actor.CommandTypes;
+		commandCountSupposed = commandTypes.Length;
+		if (commandCountSupposed > MAX_COMMAND_COUNT) {
 			throw new Exception(
-				"Amount of command types (" + commandTypes.Length + ") exceeds max amount (" + MAX_COMMAND_COUNT
+				"Amount of command types (" + commandCountSupposed + ") exceeds max amount (" + MAX_COMMAND_COUNT
 				+ ") for CommandView"
 			);
 		}
 
+		currentActor = actor;
+		if (hoveredItemIndexPerPiece.TryGetValue(actor, out int value)) {
+			hoveredItemIndex = value;
+		} else {
+			hoveredItemIndex = -1;
+		}
+
 		for (int i = 0; i < MAX_COMMAND_COUNT; i++) {
 			CommandItem commandItem = commandItems[i];
-			if (i < commandTypes.Length) {
+			if (i < commandCountSupposed) {
 				commandItem.CommandType = commandTypes[i];
 				commandItem.Available = true; // This should depend on the piece but for now, make all available.
 				
@@ -108,6 +124,15 @@ public partial class CommandView : CanvasLayer, IView {
 			} else {
 				commandItem.Hide();
 			}
+		}
+  }
+
+  public void Unhover(bool forgetIndex = true) {
+		if (hoveredItemIndex > -1 && commandItems[hoveredItemIndex] != null) {
+			commandItems[hoveredItemIndex].Unhover();
+		}
+		if (forgetIndex) {
+			hoveredItemIndex = -1;
 		}
   }
 
@@ -153,29 +178,31 @@ public partial class CommandView : CanvasLayer, IView {
 		hoveredItem.Hover();
   }
 
-  private void SelectHoveredItem(bool forDetail) {
+  private void SelectHoveredItem() {
 		// Emits signal to call OnSelectItem, defined in UI class.
-		SelectCommand?.Invoke(itemToCommand(commandItems[hoveredItemIndex]), forDetail ? SelectTypeEnum.DETAIL : SelectTypeEnum.FINAL);
+		SelectCommand?.Invoke(ItemToCommand(commandItems[hoveredItemIndex]), SelectTypeEnum.FINAL);
   }
+
+	private void DetailHoveredItem() {
+		// Emits signal to call OnSelectItem, defined in UI class.
+		SelectCommand?.Invoke(ItemToCommand(commandItems[hoveredItemIndex]), SelectTypeEnum.DETAIL);
+	}
 
   private int GetUppermostItemIndex(int startIndex = 0) {
 	  for (int i = startIndex; i < commandItems.Length; i++) {
-			if (commandItems[i] != null) {
+			if (commandItems[i].Visible) {
 				return i;
 			}
 	  }
 	  return -1;
 	}
-	private int GetLowermostItemIndex(int startIndex) {
+	private int GetLowermostItemIndex(int startIndex = MAX_COMMAND_COUNT - 1) {
 	  for (int i = startIndex; i >= 0; i--) {
-			if (commandItems[i] != null) {
+			if (commandItems[i].Visible) {
 				return i;
 			}
 	  }
 	  return -1;
-  }
-  private int GetLowermostItemIndex() {
-	  return GetLowermostItemIndex(commandItems.Length - 1);
   }
 
   private int GetAvailableItemsCount() {
@@ -188,7 +215,7 @@ public partial class CommandView : CanvasLayer, IView {
 	return availableCount;
   }
 
-  private static Command itemToCommand(CommandItem item) {
+  private static Command ItemToCommand(CommandItem item) {
 	return item.CommandType switch {
 	  Command.CommandType.APPROACH => Command.Approach(null, 0, -1),
 	  Command.CommandType.AVOID => Command.Avoid(null, 0, -1),

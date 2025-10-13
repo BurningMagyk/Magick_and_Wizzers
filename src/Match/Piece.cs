@@ -34,8 +34,7 @@ public class Piece {
 		CommandTypes = [
 			Command.CommandType.APPROACH,
 	  	Command.CommandType.AVOID,
-	  	Command.CommandType.INTERCEPT,
-	  	Command.CommandType.LINGER
+	  	Command.CommandType.INTERCEPT
 		];
   }
 

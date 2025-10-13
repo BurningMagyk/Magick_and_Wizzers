@@ -18,6 +18,7 @@ public partial class BoardView : CanvasLayer, IView {
   private HoverType hoverType = HoverType.NORMAL;
   private Sprite3D[] hoverSprites;
   private Display.Piece mHoveredPiece;
+	private Command mCurrentCommand;
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
@@ -89,26 +90,29 @@ public partial class BoardView : CanvasLayer, IView {
 		}
 		if (Input.IsActionJustPressed("select")) {
 			if (mHoveredPiece != null) {
-				SelectPiece?.Invoke(mHoveredPiece);
+				SelectPiece?.Invoke(mHoveredPiece, mCurrentCommand, SelectTypeEnum.FINAL);
+			} else if (HoveredTile != null) {
+				SelectTile?.Invoke(HoveredTile, mCurrentCommand, SelectTypeEnum.FINAL);
 			}
-			SelectTile?.Invoke(HoveredTile);
 		}
 		if (Input.IsActionJustPressed("hand")) {
-			GD.Print("BoardView: Going to hand view from board view.");
-			SelectMisc?.Invoke(SelectTypeEnum.PARTIAL);
+			SelectMisc?.Invoke(SelectTypeEnum.ALT);
 		}
 		if (Input.IsActionJustPressed("detail")) {
-			SelectTile?.Invoke(HoveredTile);
-			// TODO: Do SelectPiece instead if hovering a piece.
+			if (mHoveredPiece != null) {
+				SelectPiece?.Invoke(mHoveredPiece, null, SelectTypeEnum.DETAIL);
+			} else if (HoveredTile != null) {
+				SelectTile?.Invoke(HoveredTile, null, SelectTypeEnum.DETAIL);
+			}
 		}
 		if (Input.IsActionJustPressed("surrender")) {
-			SelectMisc?.Invoke(SelectTypeEnum.ALT);
+			SelectMisc?.Invoke(SelectTypeEnum.SURRENDER);
 		}
   }
 
-  public delegate bool SelectPieceDelegate(Display.Piece piece);
+  public delegate bool SelectPieceDelegate(Display.Piece piece, Command command, SelectTypeEnum selectTypeEnum);
   public SelectPieceDelegate SelectPiece;
-  public delegate bool SelectTileDelegate(Display.ITile tile);
+  public delegate bool SelectTileDelegate(Display.ITile tile, Command command, SelectTypeEnum selectTypeEnum);
   public SelectTileDelegate SelectTile;
   public delegate bool SelectActivityDelegate(Activity activity);
   public SelectActivityDelegate SelectActivity;
@@ -118,6 +122,10 @@ public partial class BoardView : CanvasLayer, IView {
   public void SetViewPortRect(Rect2 viewPortRect) {
 	  crosshair.Position = new Vector2(viewPortRect.Size.X / 2, viewPortRect.Size.Y / 2);
   }
+
+	public void SetCommand(Command command) {
+		mCurrentCommand = command;
+	}
 
   public Vector2I GetHoverCoordinate(Vector2 point) {
 		return GetHoverCoordinate(point, HoverPartition);
@@ -130,23 +138,23 @@ public partial class BoardView : CanvasLayer, IView {
   }
 
   public void Hover(Display.ITile tile, bool readyToCast) {
-	if (tile == null) {
-	  hoverSprites[(int) this.hoverType].Visible = false;
-	  return;
-	}
+		if (tile == null) {
+			hoverSprites[(int) this.hoverType].Visible = false;
+			return;
+		}
 
-	HoveredTile = tile;
+		HoveredTile = tile;
 
-	HoverType hoverType = readyToCast ? HoverType.CAST : HoverType.NORMAL;
-	hoverSprites[(int) hoverType].Visible = true;
-	if (this.hoverType != hoverType) {
-	  hoverSprites[(int) this.hoverType].Visible = false;
-	  this.hoverType = hoverType;
-	}
+		HoverType hoverType = readyToCast ? HoverType.CAST : HoverType.NORMAL;
+		hoverSprites[(int) hoverType].Visible = true;
+		if (this.hoverType != hoverType) {
+			hoverSprites[(int) this.hoverType].Visible = false;
+			this.hoverType = hoverType;
+		}
 
-	hoverSprites[(int) hoverType].GlobalPosition = tile.Position
-	  + new Vector3(0, HOVER_SPRITE_LIFT, 0);
-	hoverSprites[(int) hoverType].Scale = new Vector3(tile.Size, tile.Size, 1);
+		hoverSprites[(int) hoverType].GlobalPosition = tile.Position
+			+ new Vector3(0, HOVER_SPRITE_LIFT, 0);
+		hoverSprites[(int) hoverType].Scale = new Vector3(tile.Size, tile.Size, 1);
   }
 
   public new void Show() {

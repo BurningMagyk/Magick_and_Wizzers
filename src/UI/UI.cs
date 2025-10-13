@@ -17,7 +17,9 @@ public partial class UI : Node {
 
   private Vector2 mHoverPoint;
 
-	private Display.Piece mSelectedPiece;
+	private Match.Piece mActor;
+	private Target[] mBoardTargets;
+	private Target[] mHandTargets;
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
@@ -111,9 +113,9 @@ public partial class UI : Node {
 
 	/// <summary> Called from BoardView using SelectPiece?.Invoke </summary>
 	/// <returns> True if the selection was successful </returns>
-  private bool OnSelectPiece(Display.Piece piece) {
+  private bool OnSelectPiece(Display.Piece piece, Command command, SelectTypeEnum selectTypeEnum) {
 		if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
-			mSelectedPiece = piece;
+			mActor = piece.GamePiece;
 			ProgressViewState(ViewStateEnum.COMMAND_LIST);
 			return true;
 		} else if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
@@ -124,7 +126,7 @@ public partial class UI : Node {
 
 	/// <summary> Called from BoardView using SelectTile?.Invoke </summary>
 	/// <returns> True if the selection was successful </returns>
-  private bool OnSelectTile(ITile tile) {
+  private bool OnSelectTile(ITile tile, Command command, SelectTypeEnum selectTypeEnum) {
 		if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
 			return true;
 		} else if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
@@ -166,7 +168,22 @@ public partial class UI : Node {
 			if (selectTypeEnum == SelectTypeEnum.DETAIL) {
 				ProgressViewState(ViewStateEnum.DETAIL);
 			} else {
-				// Go either to COMMAND_HAND or DESIGNATE_HAND or DESIGNATE_BOARD or DESIGNATE_LIST.
+				// Go either to COMMAND_HAND or DESIGNATE_HAND or DESIGNATE_BOARD or DESIGNATE_LIST or back to MEANDER_BOARD.
+				Command steppedCommand = command.StepView();
+				if (steppedCommand.ViewSteps.Length == 0) {
+					ProgressViewState(ViewStateEnum.MEANDER_BOARD);
+				} else if (steppedCommand.ViewSteps[0] == ViewStateEnum.COMMAND_HAND) {
+					mHandView.SetCommand(steppedCommand);
+					ProgressViewState(ViewStateEnum.COMMAND_HAND);
+				} else if (steppedCommand.ViewSteps[0] == ViewStateEnum.DESIGNATE_HAND) {
+					mHandView.SetCommand(steppedCommand);
+					ProgressViewState(ViewStateEnum.DESIGNATE_HAND);
+				} else if (steppedCommand.ViewSteps[0] == ViewStateEnum.DESIGNATE_BOARD) {
+					mBoardView.SetCommand(steppedCommand);
+					ProgressViewState(ViewStateEnum.DESIGNATE_BOARD);
+				} else {
+					throw new Exception("Command has invalid step " + steppedCommand.ViewSteps[0].ToString() + ".");
+				}
 			}
 			return true;
 		}
@@ -185,12 +202,12 @@ public partial class UI : Node {
 	/// <summary> Called from anywhere using SelectMisc?.Invoke </summary>
 	/// <returns> True if the selection was successful </returns>
 	private bool OnSelectMisc(SelectTypeEnum selectTypeEnum) {
-		if (selectTypeEnum == SelectTypeEnum.PARTIAL) {
+		if (selectTypeEnum == SelectTypeEnum.ALT) {
 			if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
 				ProgressViewState(ViewStateEnum.MEANDER_HAND);
 				return true;
 			}
-		} else if (selectTypeEnum == SelectTypeEnum.ALT) {
+		} else if (selectTypeEnum == SelectTypeEnum.SURRENDER) {
 			if (mViewState.ViewStateEnum == ViewStateEnum.MEANDER_BOARD) {
 				ProgressViewState(ViewStateEnum.SURRENDER);
 				return true;
@@ -219,7 +236,7 @@ public partial class UI : Node {
 			mHandView.Show();
 			mBoardView.Hide();
 		} else if (viewStateEnum == ViewStateEnum.COMMAND_LIST) {
-			mCommandView.SetCommandTypes(mSelectedPiece.GamePiece);
+			mCommandView.SetActor(mActor);
 			mCommandView.Show();
 			mBoardView.Hide();
 		} else if (viewStateEnum == ViewStateEnum.COMMAND_HAND) {
