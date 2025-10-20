@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://duq8otfh4ux1r" path="res://src/Main/Main.cs" id="1_d0b4a"]
 [ext_resource type="PackedScene" uid="uid://b2yvn8v5igbcx" path="res://scenes/tile.tscn" id="2_bo870"]
 [ext_resource type="Script" uid="uid://dpn6bi4h6tda4" path="res://src/Display/Board.cs" id="2_luuvt"]
-[ext_resource type="PackedScene" uid="uid://ctgrwf42n2e28" path="res://scenes/card.tscn" id="2_uvfj4"]
 [ext_resource type="PackedScene" uid="uid://i0ywuur1dk71" path="res://scenes/piece.tscn" id="3_af6yf"]
 [ext_resource type="Script" uid="uid://cilnaome7q3t8" path="res://src/UI/UI.cs" id="5_u8c0w"]
 [ext_resource type="Script" uid="uid://cec0e4t13w2t0" path="res://src/UI/BoardView.cs" id="6_mhda3"]
@@ -15,7 +14,8 @@
 [ext_resource type="Texture2D" uid="uid://dl0k6wr2iw0uy" path="res://resources/tile_hover_cast.png" id="11_4ppjd"]
 [ext_resource type="Script" uid="uid://didlejw31cq6j" path="res://src/UI/CommandView.cs" id="14_xwtol"]
 [ext_resource type="Script" uid="uid://c3hwlo3kwtp1m" path="res://src/UI/DetailView.cs" id="15_14yq0"]
-[ext_resource type="PackedScene" uid="uid://bh6ncm63hmvwt" path="res://scenes/command_item.tscn" id="15_jbj1t"]
+[ext_resource type="Script" uid="uid://dlvfquomxgr3y" path="res://src/UI/PassView.cs" id="16_muem4"]
+[ext_resource type="Script" uid="uid://cnusk6ts70wcu" path="res://src/UI/SurrenderView.cs" id="17_dp3eg"]
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_d0b4a")
@@ -68,8 +68,6 @@ texture = ExtResource("11_4ppjd")
 [node name="Hand View" type="CanvasLayer" parent="UI"]
 script = ExtResource("7_dvira")
 
-[node name="Card" parent="UI/Hand View" instance=ExtResource("2_uvfj4")]
-
 [node name="Command View" type="CanvasLayer" parent="UI"]
 script = ExtResource("14_xwtol")
 
@@ -77,7 +75,40 @@ script = ExtResource("14_xwtol")
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="Command Item" parent="UI/Command View" instance=ExtResource("15_jbj1t")]
+[node name="Pass View" type="CanvasLayer" parent="UI"]
+script = ExtResource("16_muem4")
+
+[node name="tmp" type="RichTextLabel" parent="UI/Pass View"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -176.0
+offset_top = -124.0
+offset_right = 224.0
+offset_bottom = 76.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Placeholder Text for Pass View"
+
+[node name="Surrender View" type="CanvasLayer" parent="UI"]
+script = ExtResource("17_dp3eg")
+
+[node name="Message" type="RichTextLabel" parent="UI/Surrender View"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -176.0
+offset_top = -124.0
+offset_right = 224.0
+offset_bottom = 76.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "DO YOU WISH
+TO SURRENDER?"
 
 [node name="Detail View" type="CanvasLayer" parent="UI"]
 script = ExtResource("15_14yq0")

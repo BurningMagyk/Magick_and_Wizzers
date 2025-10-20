@@ -3,7 +3,7 @@ using Match;
 using System;
 
 namespace UI {
-public partial class CommandItem : Control {
+public partial class Item : Control {
   private Sprite2D sleeve;
 
   public Command.CommandType CommandType { get; set; }
@@ -12,7 +12,7 @@ public partial class CommandItem : Control {
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
-    sleeve = GetNode<Sprite2D>("Sleeve");
+	sleeve = GetNode<Sprite2D>("Sleeve");
 	  sleeve.Position = Size / 2;
 	  sleeve.Visible = false;
   }
@@ -25,7 +25,7 @@ public partial class CommandItem : Control {
   }
 
   public void SetText(string text) {
-    GetNode<Label>("Label").Text = text;
+	GetNode<Label>("Label").Text = text;
   }
 }
 }

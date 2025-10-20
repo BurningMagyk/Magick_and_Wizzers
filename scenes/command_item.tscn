@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://bh6ncm63hmvwt"]
 
-[ext_resource type="Script" uid="uid://b16cbmshoau4u" path="res://src/UI/CommandItem.cs" id="1_fxqmn"]
+[ext_resource type="Script" uid="uid://b16cbmshoau4u" path="res://src/UI/Item.cs" id="1_fxqmn"]
 [ext_resource type="Texture2D" uid="uid://tq0rndtm0rsj" path="res://resources/command_textures/item_active_background.png" id="1_hluhf"]
 [ext_resource type="Texture2D" uid="uid://ca8su2dgr3l22" path="res://resources/command_textures/sleeve.png" id="2_e1b6n"]
 

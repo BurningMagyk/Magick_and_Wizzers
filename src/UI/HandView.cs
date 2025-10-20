@@ -9,6 +9,15 @@ public partial class HandView : CanvasLayer, IView {
   
   public enum HandViewMode { BROWSE, SELECTED }
 
+	public delegate SelectTypeEnum SelectCardDelegate(
+		Card card,
+		Command command,
+		SelectTypeEnum selectTypeEnum
+	);
+  public SelectCardDelegate SelectCard;
+  public delegate bool GoBackDelegate();
+  public GoBackDelegate GoBack;
+
   public bool Showing { get; private set; }
 	public bool InputEnabled { get; set; } = true;
   
@@ -26,9 +35,6 @@ public partial class HandView : CanvasLayer, IView {
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
 	  cardBase = ResourceLoader.Load<PackedScene>("res://scenes/card.tscn");
-
-	  // Make the base stuff invisible.
-	  GetNode<Card>("Card").Visible = false;
 
 	  hoveredCardIndex = -1;
 	  HoverPartition = Tile.MAX_PARTITION;
@@ -58,15 +64,6 @@ public partial class HandView : CanvasLayer, IView {
 			GoBack?.Invoke();
 		}
   }
-
-  public delegate SelectTypeEnum SelectCardDelegate(
-		Card card,
-		Command command,
-		SelectTypeEnum selectTypeEnum
-	);
-  public SelectCardDelegate SelectCard;
-  public delegate bool GoBackDelegate();
-  public GoBackDelegate GoBack;
 
   public new void Show() {
 	  base.Show();

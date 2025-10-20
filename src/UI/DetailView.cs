@@ -4,9 +4,7 @@ using System;
 namespace UI {
 public partial class DetailView : CanvasLayer, IView {
   public delegate SelectTypeEnum SelectItemDelegate(
-    string item,
-    Match.Command command,
-    SelectTypeEnum selectTypeEnum
+	  SelectTypeEnum selectTypeEnum
   );
   public SelectItemDelegate SelectItem;
   public bool Showing { get; private set; }
@@ -17,27 +15,27 @@ public partial class DetailView : CanvasLayer, IView {
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
-    Hide();
+	Hide();
   }
 
   public override void _Input(InputEvent @event) {
-    if (!Showing) { return; }
+	if (!Showing) { return; }
 
-    if (Input.IsActionJustPressed("detail") || Input.IsActionJustPressed("back")) {
-      GoBack?.Invoke();
-    }
+	if (Input.IsActionJustPressed("detail") || Input.IsActionJustPressed("back")) {
+	  GoBack?.Invoke();
+	}
   }
 
   public new void Show() {
-    base.Show();
+	base.Show();
 
-    Showing = true;
+	Showing = true;
   }
 
   public new void Hide() {
-    base.Hide();
+	base.Hide();
 
-    Showing = false;
+	Showing = false;
   }
 
   public void SetViewPortRect(Rect2 viewPortRect) {
@@ -45,4 +43,3 @@ public partial class DetailView : CanvasLayer, IView {
   }
 }
 }
-

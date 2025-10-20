@@ -16,33 +16,32 @@ public partial class CommandView : CanvasLayer, IView {
   public bool Showing { get; private set; }
   public bool InputEnabled { get; set; } = true;
 
-  private PackedScene commandItemBase;
+  private PackedScene itemBase;
 	private Rect2 viewPortRect;
-  private readonly CommandItem[] commandItems = new CommandItem[MAX_COMMAND_COUNT];
+  private readonly Item[] items = new Item[MAX_COMMAND_COUNT];
 	private int commandCountSupposed;
+	private readonly Dictionary<Item, Command.CommandType> itemCommandTypes = [];
   private readonly Dictionary<Piece, int> hoveredItemIndexPerPiece = [];
 	private Piece currentActor;
 	private int hoveredItemIndex;
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
-	  commandItemBase = ResourceLoader.Load<PackedScene>("res://scenes/command_item.tscn");
+	  itemBase = ResourceLoader.Load<PackedScene>("res://scenes/command_item.tscn");
 
-		// Instantiate max number of command items.
+		// Instantiate max number of items.
 		for (int i = 0; i < MAX_COMMAND_COUNT; i++) {
-			CommandItem commandItem = commandItemBase.Instantiate<CommandItem>();
-			AddChild(commandItem);
-			commandItems[i] = commandItem;
+			Item item = itemBase.Instantiate<Item>();
+			AddChild(item);
+			items[i] = item;
 		}
 		
-	  // Make the base stuff invisible.
-	  GetNode<CommandItem>("Command Item").Visible = false;
 		hoveredItemIndex = -1;
 	  Hide();
   }
 
   public override void _Input(InputEvent @event) {
-	  if (!Showing) { return; }
+	  if (!Showing || !InputEnabled) { return; }
 
 	  if (Input.IsActionJustPressed("d_up")) {
 			HoverItem(Main.DirectionEnum.UP);
@@ -56,9 +55,9 @@ public partial class CommandView : CanvasLayer, IView {
 		if (Input.IsActionJustPressed("detail")) {
 			DetailHoveredItem();
 		}
-	if (Input.IsActionJustPressed("back")) {
-	  GoBack?.Invoke();
-	}
+		if (Input.IsActionJustPressed("back")) {
+			GoBack?.Invoke();
+		}
   }
 
   public new void Show() {
@@ -66,7 +65,7 @@ public partial class CommandView : CanvasLayer, IView {
 		if (hoveredItemIndex >= commandCountSupposed || hoveredItemIndex == -1) {
 			HoverItem(Main.DirectionEnum.NONE);
 		} else {
-			commandItems[hoveredItemIndex].Hover();
+			items[hoveredItemIndex].Hover();
 		}
 
 	  base.Show();
@@ -107,29 +106,29 @@ public partial class CommandView : CanvasLayer, IView {
 		}
 
 		for (int i = 0; i < MAX_COMMAND_COUNT; i++) {
-			CommandItem commandItem = commandItems[i];
+			Item item = items[i];
 			if (i < commandCountSupposed) {
-				commandItem.CommandType = commandTypes[i];
-				commandItem.Available = true; // This should depend on the piece but for now, make all available.
+				itemCommandTypes.Add(item, commandTypes[i]);
+				item.Available = true; // This should depend on the piece but for now, make all available.
 				
 				// Position them according to how many are visible.
-				commandItem.Position = new Vector2(
-					(viewPortRect.Size.X - commandItems[i].Size.X) / 2,
-					(viewPortRect.Size.Y / 2) + (i - commandTypes.Length / 2F) * (commandItems[i].Size.Y + SPACING)
+				item.Position = new Vector2(
+					(viewPortRect.Size.X - items[i].Size.X) / 2,
+					(viewPortRect.Size.Y / 2) + (i - commandTypes.Length / 2F) * (items[i].Size.Y + SPACING)
 				);
 
-				commandItem.Name = commandTypes[i].ToString();
-				commandItem.SetText(commandTypes[i].ToString());
-				commandItem.Show();
+				item.Name = commandTypes[i].ToString();
+				item.SetText(commandTypes[i].ToString());
+				item.Show();
 			} else {
-				commandItem.Hide();
+				item.Hide();
 			}
 		}
   }
 
   public void Unhover(bool forgetIndex = true) {
-		if (hoveredItemIndex > -1 && commandItems[hoveredItemIndex] != null) {
-			commandItems[hoveredItemIndex].Unhover();
+		if (hoveredItemIndex > -1 && items[hoveredItemIndex] != null) {
+			items[hoveredItemIndex].Unhover();
 		}
 		if (forgetIndex) {
 			hoveredItemIndex = -1;
@@ -169,9 +168,9 @@ public partial class CommandView : CanvasLayer, IView {
 				}
 		}
 
-		CommandItem hoveredItem = commandItems[hoveredItemIndex];
+		Item hoveredItem = items[hoveredItemIndex];
 		if (hoveredItemIndexPrevious >= 0) {
-			commandItems[hoveredItemIndexPrevious].Unhover();
+			items[hoveredItemIndexPrevious].Unhover();
 		}
 
 		// Place the sleeve over the hovered item.
@@ -180,17 +179,17 @@ public partial class CommandView : CanvasLayer, IView {
 
   private void SelectHoveredItem() {
 		// Emits signal to call OnSelectItem, defined in UI class.
-		SelectCommand?.Invoke(ItemToCommand(commandItems[hoveredItemIndex]), SelectTypeEnum.FINAL);
+		SelectCommand?.Invoke(ItemToCommand(items[hoveredItemIndex]), SelectTypeEnum.FINAL);
   }
 
 	private void DetailHoveredItem() {
 		// Emits signal to call OnSelectItem, defined in UI class.
-		SelectCommand?.Invoke(ItemToCommand(commandItems[hoveredItemIndex]), SelectTypeEnum.DETAIL);
+		SelectCommand?.Invoke(ItemToCommand(items[hoveredItemIndex]), SelectTypeEnum.DETAIL);
 	}
 
   private int GetUppermostItemIndex(int startIndex = 0) {
-	  for (int i = startIndex; i < commandItems.Length; i++) {
-			if (commandItems[i].Visible) {
+	  for (int i = startIndex; i < items.Length; i++) {
+			if (items[i].Visible) {
 				return i;
 			}
 	  }
@@ -198,7 +197,7 @@ public partial class CommandView : CanvasLayer, IView {
 	}
 	private int GetLowermostItemIndex(int startIndex = MAX_COMMAND_COUNT - 1) {
 	  for (int i = startIndex; i >= 0; i--) {
-			if (commandItems[i].Visible) {
+			if (items[i].Visible) {
 				return i;
 			}
 	  }
@@ -207,21 +206,21 @@ public partial class CommandView : CanvasLayer, IView {
 
   private int GetAvailableItemsCount() {
 	int availableCount = 0;
-		for (int i = 0; i < commandItems.Length; i++) {
-			if (commandItems[i].Available) {
+		for (int i = 0; i < items.Length; i++) {
+			if (items[i].Available) {
 			availableCount++;
 			}
 		}
 	return availableCount;
   }
 
-  private static Command ItemToCommand(CommandItem item) {
-	return item.CommandType switch {
-	  Command.CommandType.APPROACH => Command.Approach(0, -1),
-	  Command.CommandType.AVOID => Command.Avoid(0, -1),
-	  Command.CommandType.INTERACT => Command.Interact(-1),
-	  _ => throw new Exception("Unknown command type " + item.CommandType + " in CommandView.itemToCommand"),
-	};
+  private Command ItemToCommand(Item item) {
+		return itemCommandTypes[item] switch {
+			Command.CommandType.APPROACH => Command.Approach(currentActor, 0, -1),
+			Command.CommandType.AVOID => Command.Avoid(currentActor, 0, -1),
+			Command.CommandType.INTERACT => Command.Interact(currentActor, -1),
+			_ => throw new Exception("Unknown command type " + itemCommandTypes[item] + " in CommandView.itemToCommand"),
+		};
   }
 }
 }

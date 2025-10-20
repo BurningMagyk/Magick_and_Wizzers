@@ -1,0 +1,32 @@
+[gd_scene load_steps=4 format=3 uid="uid://df8bkvka3e5no"]
+
+[ext_resource type="Script" uid="uid://b16cbmshoau4u" path="res://src/UI/Item.cs" id="1_tgced"]
+[ext_resource type="Texture2D" uid="uid://ca8su2dgr3l22" path="res://resources/command_textures/sleeve.png" id="2_fu50b"]
+[ext_resource type="Texture2D" uid="uid://tq0rndtm0rsj" path="res://resources/command_textures/item_active_background.png" id="3_joo5h"]
+
+[node name="Surrender Item" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 362.0
+offset_bottom = 83.0
+script = ExtResource("1_tgced")
+
+[node name="Sleeve" type="Sprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_fu50b")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 362.0
+offset_bottom = 83.0
+texture = ExtResource("3_joo5h")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_right = 362.0
+offset_bottom = 83.0
+theme_override_font_sizes/font_size = 40
+text = "Item"
+horizontal_alignment = 1
+vertical_alignment = 1
