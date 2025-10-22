@@ -36,7 +36,7 @@ public partial class Board {
 		mDisplayNode = displayNode;
 	}
 
-	public void Resolve() {
+	public void ResolveTick() {
 		// Vigil (eighth hour of night: 2 a.m.)
 		// Matins (a later portion of Vigil, from 3 a.m. to dawn)
 		// Lauds (dawn; approximately 5 a.m., but varies seasonally)
@@ -48,7 +48,7 @@ public partial class Board {
 		// Compline (end of the day before retiring, approximately 7 p.m.)
 		// Twilight (to make it 10 hours)
 		foreach (Piece piece in pieces) {
-			piece.Resolve();
+			piece.ResolveTick();
 			// Resolve activities here too.
 		}
 	}

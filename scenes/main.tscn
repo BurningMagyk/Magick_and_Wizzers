@@ -65,6 +65,10 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 
 visible = false
 texture = ExtResource("11_4ppjd")
 
+[node name="Command Info" type="Label" parent="UI/Board View"]
+offset_right = 200.0
+offset_bottom = 150.0
+
 [node name="Hand View" type="CanvasLayer" parent="UI"]
 script = ExtResource("7_dvira")
 

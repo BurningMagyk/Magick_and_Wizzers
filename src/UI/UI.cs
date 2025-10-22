@@ -112,9 +112,13 @@ public partial class UI : Node {
 		return mBoardView.GetHoverCoordinate(point);
   }
   public Tile.PartitionTypeEnum GetHoverPartition() {
-	if (mHandView.Showing) { return mHandView.HoverPartition; }
+		if (mHandView.Showing) { return mHandView.HoverPartition; }
 	  return mBoardView.HoverPartition;
   }
+
+	public void ProgressToTheater() {
+		ProgressViewState(ViewStateEnum.THEATER);
+	}
 
 	/// <summary> Called from BoardView using SelectPiece?.Invoke </summary>
 	/// <returns> True if the selection was successful </returns>
@@ -257,7 +261,7 @@ public partial class UI : Node {
 
 	private void OnConfirmPass() {
 		PassRound?.Invoke();
-		ProgressViewState(ViewStateEnum.THEATER);
+		// Don't need to call ProgressViewState because PassRound will force every user into ViewStateEnum.THEATER.
 	}
 
 	private void ProgressSteppedViewState(Command command) {
@@ -294,6 +298,10 @@ public partial class UI : Node {
 		} else if (viewStateEnum == ViewStateEnum.DETAIL) {
 			GetViewForState(mViewState.Prev.ViewStateEnum).InputEnabled = false;
 			mDetailView.Show();
+		} else if (viewStateEnum == ViewStateEnum.THEATER) {
+			mBoardView.Show();
+			mBoardView.InputEnabled = true;
+			mPassView.Hide();
 		} else if (viewStateEnum == ViewStateEnum.MEANDER_HAND) {
 			mHandView.Show();
 			mBoardView.Hide();
@@ -327,6 +335,9 @@ public partial class UI : Node {
 	private void RegressViewStateImpl() {
 		ViewStateEnum fromViewState = mViewState.ViewStateEnum;
 		mViewState = mViewState.Revert();
+		GD.Print(
+			"Reverted to ViewState: " + mViewState.ViewStateEnum.ToString() + " from " + fromViewState.ToString() + "."
+		);
 
 		if (fromViewState == ViewStateEnum.PASS) {
 			GetViewForState(mViewState.ViewStateEnum).InputEnabled = true;

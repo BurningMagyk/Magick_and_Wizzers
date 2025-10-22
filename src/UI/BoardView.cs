@@ -17,6 +17,7 @@ public partial class BoardView : CanvasLayer, IView {
   private Sprite2D crosshair;
   private HoverType hoverType = HoverType.NORMAL;
   private Sprite3D[] hoverSprites;
+	private Label commandInfoDisplay;
   private Display.Piece mHoveredPiece;
 	private Command mCurrentCommand;
 
@@ -35,6 +36,8 @@ public partial class BoardView : CanvasLayer, IView {
 			hoverSprite.PixelSize = 1F / hoverSprite.Texture.GetSize().X;
 		}
 
+		commandInfoDisplay = GetNode<Label>("Command Info");
+
 		HoverPartition = Tile.MAX_PARTITION;
 		Show();
   }
@@ -48,15 +51,10 @@ public partial class BoardView : CanvasLayer, IView {
 		if (RayCast != null && RayCast.IsColliding()) {
 			MeshInstance3D collidedMesh = ((StaticBody3D) RayCast.GetCollider()).GetParent<MeshInstance3D>();
 			if (collidedMesh is Display.Piece displayPiece) {
-				if (displayPiece != mHoveredPiece) {
-					mHoveredPiece?.Colorize(ColorizeEnum.NONE);
-					mHoveredPiece = displayPiece;
-					displayPiece.Colorize(ColorizeEnum.HOVER);
-				}
+				Hover(displayPiece);
 			}
 		} else {
-			mHoveredPiece?.Colorize(ColorizeEnum.NONE);
-		  mHoveredPiece = null;
+			Hover(null);
 		}
   }
 
@@ -180,5 +178,26 @@ public partial class BoardView : CanvasLayer, IView {
 		crosshair.Visible = false;
 		Showing = false;
   }
+
+	private void Hover(Display.Piece piece) {
+		if (piece == null) {
+			mHoveredPiece?.Colorize(ColorizeEnum.NONE);
+			mHoveredPiece = null;
+
+			// Clear the command info.
+			commandInfoDisplay.Text = "";
+		} else if (piece != mHoveredPiece) {
+			mHoveredPiece?.Colorize(ColorizeEnum.NONE);
+			mHoveredPiece = piece;
+			piece.Colorize(ColorizeEnum.HOVER);
+
+			// Update the command info.
+			if (piece.GamePiece.Command == null) {
+				commandInfoDisplay.Text = "Have yet to command me.";
+			} else {
+				commandInfoDisplay.Text = piece.GamePiece.Command.Describe();
+			}
+		}
+	}
 }
 }

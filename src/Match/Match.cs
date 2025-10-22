@@ -7,6 +7,8 @@ public class Match {
 	  FREE_FOR_ALL
 	}
 	private const int STARTING_LIFE_POINTS = 8000;
+	private const int TICKS_PER_ROUND = 100;
+	private const double TICK_LENGTH = 1;
 
 	public const int MAX_PLAYER_COUNT = 16;
 
@@ -14,6 +16,8 @@ public class Match {
 	private readonly UI.UI mUi;
 	private readonly Player[] mPlayers;
 
+	private bool mResolving = false;
+	private double mAccumulatedTime = 0;
 	private int uniqueId = 0;
 
 	public Match(Display.Board displayBoard, UI.UI ui, Player[] players) {
@@ -65,7 +69,22 @@ public class Match {
 	}
 
 	public void OnPassRound() {
-	  mBoard.Resolve();
+		// Force every user into ViewStateEnum.THEATER.
+		mUi.ProgressToTheater();
+		mResolving = true;
+	}
+
+	public void FrameUpdate(double delta) {
+		if (!mResolving) { return; }
+
+		mAccumulatedTime += delta;
+		int ticksPassed = (int) Math.Floor(mAccumulatedTime / TICK_LENGTH);
+		if (ticksPassed == 0) { return; }
+
+		mAccumulatedTime -= ticksPassed * TICK_LENGTH;
+		for (int i = 0; i < ticksPassed; i++) {
+			mBoard.ResolveTick();
+		}
 	}
 
 	private Piece GenerateDefaultMaster(string playerName, Main.Card card, Vector2I position) {

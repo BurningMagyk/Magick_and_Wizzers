@@ -104,6 +104,10 @@ public class Command {
 	  Actor.Command = this;
   }
 
+  public string Describe() {
+	return $"{Type} command for {Actor.Name}";
+  }
+
   public static Command Approach(Piece actor, int rangeDistance, int duration) {
 	  return new Command(CommandType.APPROACH, RangeType.DISTANCE, actor, rangeDistance, duration);
   }

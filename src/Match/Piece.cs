@@ -38,7 +38,7 @@ public class Piece {
 		];
   }
 
-	public void Resolve() {
+	public void ResolveTick() {
 		FollowCommand();
 		// Apply over-time effects here too.
 	}

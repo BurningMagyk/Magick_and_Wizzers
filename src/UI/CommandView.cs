@@ -108,6 +108,12 @@ public partial class CommandView : CanvasLayer, IView {
 		for (int i = 0; i < MAX_COMMAND_COUNT; i++) {
 			Item item = items[i];
 			if (i < commandCountSupposed) {
+				if (itemCommandTypes.TryGetValue(item, out Command.CommandType prevCommandType)
+					&& prevCommandType != commandTypes[i]
+				) {
+					// It complains if we try adding the item if it's already been added before.
+					itemCommandTypes.Remove(item);
+				}
 				itemCommandTypes.Add(item, commandTypes[i]);
 				item.Available = true; // This should depend on the piece but for now, make all available.
 				
