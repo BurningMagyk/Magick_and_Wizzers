@@ -4,7 +4,7 @@ using Match;
 
 namespace UI {
 public partial class BoardView : CanvasLayer, IView {
-  private enum HoverType { NORMAL, MOVE, INTERACT, CAST }
+  private enum HoverType { THEATER, NORMAL, MOVE, INTERACT, CAST }
   private const float HOVER_SPRITE_LIFT = 0.1F;
 
   public bool Showing { get; private set; }
@@ -27,6 +27,7 @@ public partial class BoardView : CanvasLayer, IView {
 
 		hoverSprites = new Sprite3D[Enum.GetNames(typeof(HoverType)).Length];
 		hoverSprites[(int) HoverType.NORMAL] = GetNode<Sprite3D>("Hover");
+		hoverSprites[(int) HoverType.THEATER] = GetNode<Sprite3D>("Hover Theater");
 		hoverSprites[(int) HoverType.MOVE] = GetNode<Sprite3D>("Hover Move");
 		hoverSprites[(int) HoverType.INTERACT] = GetNode<Sprite3D>("Hover Interact");
 		hoverSprites[(int) HoverType.CAST] = GetNode<Sprite3D>("Hover Cast");

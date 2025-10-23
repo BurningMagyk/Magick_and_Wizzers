@@ -11,11 +11,26 @@ public partial class Board {
 	public const int STRAIGHT_UNITS = 5;
 	public const int DIAGONAL_UNITS = 7;
 	public const int RANDOM_POSSIBLE_STARTING_POSITION_COUNT = 1000;
-	private readonly Display.Board mDisplayNode;
+
+	private Display.Board mDisplayNode;
+	public Display.Board DisplayNode {
+		private get => mDisplayNode;
+		set {
+			mDisplayNode = value;
+			value.SetRepresentedTiles(Tiles[0], true);
+			for (int i = 1; i < Tiles.Count; i++) {
+				value.SetRepresentedTiles(Tiles[i], false);
+			}
+		}
+	}
+
 	public readonly List<Tile[,]> Tiles = new List<Tile[,]>();
 	private readonly HashSet<Piece> pieces = new HashSet<Piece>();
+	private readonly bool mToroidal;
 
-	public Board(Display.Board displayNode) {
+	public Board(bool toroidal) {
+		mToroidal = toroidal;
+
 		for (int i = 0; i <= (int) Tile.MAX_PARTITION; i++) {
 			int boardLength = BOARD_SIZE * (int) Math.Pow(2, i);
 			Tiles.Add(new Tile[boardLength, boardLength]);
@@ -23,17 +38,55 @@ public partial class Board {
 
 		for (int i = 0; i < BOARD_SIZE; i++) {
 			for (int j = 0; j < BOARD_SIZE; j++) {
-				Tile tile = new Tile(new Vector2I(i, j), Tile.PartitionTypeEnum.CARUCATE);
+				Tile tile = new(new Vector2I(i, j), Tile.PartitionTypeEnum.CARUCATE, null);
 				tile.Partition(Tiles.Skip(1).ToList());
 				Tiles[0][i, j] = tile;
 			}
 		}
 
-		displayNode.SetRepresentedTiles(Tiles[0], true);
-		for (int i = 1; i < Tiles.Count; i++) {
-		  displayNode.SetRepresentedTiles(Tiles[i], false);
+		// Link neighbors.
+		for (int i = 0; i < BOARD_SIZE; i++) {
+			for (int j = 0; j < BOARD_SIZE; j++) {
+				// 0 - North, 1 - East, 2 - South, 3 - West, 4 - NE, 5 - SE, 6 - SW, 7 - NW
+				Tile[] neighbors = [
+					j == 0 ? null : Tiles[0][i, j - 1],
+					i == BOARD_SIZE - 1 ? null : Tiles[0][i + 1, j],
+					j == BOARD_SIZE - 1 ? null : Tiles[0][i, j + 1],
+					i == 0 ? null : Tiles[0][i - 1, j],
+					i == BOARD_SIZE - 1 || j == 0 ? null : Tiles[0][i + 1, j - 1],
+					i == BOARD_SIZE - 1 || j == BOARD_SIZE - 1 ? null : Tiles[0][i + 1, j + 1],
+					i == 0 || j == BOARD_SIZE - 1 ? null : Tiles[0][i - 1, j + 1],
+					i == 0 || j == 0 ? null : Tiles[0][i - 1, j - 1]
+				];
+				if (mToroidal) {
+					if (neighbors[0] == null) { // North
+						neighbors[0] = Tiles[0][i, BOARD_SIZE - 1];
+					}
+					if (neighbors[1] == null) { // East
+						neighbors[1] = Tiles[0][0, j];
+					}
+					if (neighbors[2] == null) { // South
+						neighbors[2] = Tiles[0][i, 0];
+					}
+					if (neighbors[3] == null) { // West
+						neighbors[3] = Tiles[0][BOARD_SIZE - 1, j];
+					}
+					if (neighbors[4] == null) { // NE
+						neighbors[4] = Tiles[0][(i + 1) % BOARD_SIZE, (j - 1 + BOARD_SIZE) % BOARD_SIZE];
+					}
+					if (neighbors[5] == null) { // SE
+						neighbors[5] = Tiles[0][(i + 1) % BOARD_SIZE, (j + 1) % BOARD_SIZE];
+					}
+					if (neighbors[6] == null) { // SW
+						neighbors[6] = Tiles[0][(i - 1 + BOARD_SIZE) % BOARD_SIZE, (j + 1) % BOARD_SIZE];
+					}
+					if (neighbors[7] == null) { // NW
+						neighbors[7] = Tiles[0][(i - 1 + BOARD_SIZE) % BOARD_SIZE, (j - 1 + BOARD_SIZE) % BOARD_SIZE];
+					}
+				}
+				Tiles[0][i, j].Neighbors = neighbors;
+			}
 		}
-		mDisplayNode = displayNode;
 	}
 
 	public void ResolveTick() {

@@ -120,6 +120,10 @@ public partial class UI : Node {
 		ProgressViewState(ViewStateEnum.THEATER);
 	}
 
+	public void ProgressFromTheater() {
+		ProgressViewState(ViewStateEnum.MEANDER_BOARD);
+	}
+
 	/// <summary> Called from BoardView using SelectPiece?.Invoke </summary>
 	/// <returns> True if the selection was successful </returns>
   private SelectTypeEnum OnSelectPiece(Display.Piece piece, Command command, SelectTypeEnum selectTypeEnum) {
