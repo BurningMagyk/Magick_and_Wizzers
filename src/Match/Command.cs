@@ -33,13 +33,14 @@ public class Command {
 
   public CommandType Type { get; private set; }
   public Piece Actor { get; private set; }
-  public List<Target> targets = [];
   public RangeType Range { get; private set; }
   public int RangeDistance { get; private set; } // in acres, only relevant for RangeType.DISTANCE
   public int Duration { get; private set; } // -1 for indefinite duration
   // For commands that need UI input from multiple views.
   // Will typically just be [ViewStateEnum.DESIGNATE_BOARD] unless it's CommandType.INTERACT.
   public ViewStateEnum[] ViewSteps { get; private set; }
+
+  private readonly List<Target> targets = [];
 	
   private Command(
 	  CommandType type,
@@ -102,6 +103,10 @@ public class Command {
 
   public void Complete() {
 	  Actor.Command = this;
+  }
+
+  public Target[] GetTargets() {
+	return [.. targets];
   }
 
   public string Describe() {

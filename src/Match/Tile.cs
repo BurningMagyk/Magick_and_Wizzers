@@ -5,9 +5,12 @@ using System.Linq;
 
 namespace Match {
 public class Tile {
-	public const PartitionTypeEnum MAX_PARTITION = PartitionTypeEnum.VIRGATE; // smallest
-	public const PartitionTypeEnum MIN_PARTITION = PartitionTypeEnum.CARUCATE; // largest
+	public const int PARTITION_TYPE_COUNT = 2;
 	public enum PartitionTypeEnum { CARUCATE, VIRGATE, BOVATE, HECTARE, ACRE }
+	public static readonly PartitionTypeEnum MIN_PARTITION =
+		(PartitionTypeEnum) Enum.GetValues(typeof(PartitionTypeEnum)).GetValue(0); // largest
+	public static readonly PartitionTypeEnum MAX_PARTITION =
+		(PartitionTypeEnum) Enum.GetValues(typeof(PartitionTypeEnum)).GetValue(PARTITION_TYPE_COUNT - 1); // smallest
 
 	public Display.ITile DisplayTile { get; set; }
 	public string Name { get; private set; }
@@ -91,5 +94,23 @@ public class Tile {
 			}
 		}
 	}
+
+	public Tile[] GetTilesWithPartition(PartitionTypeEnum partitionType) {
+		if (PartitionType == partitionType) {
+			return [this];
+		} else if (PartitionType > partitionType) {
+			return ParentTile.GetTilesWithPartition(partitionType);
+		} else {
+			List<Tile> subTiles = [];
+			foreach (Tile tile in tiles) {
+				subTiles.AddRange(tile.GetTilesWithPartition(partitionType));
+			}
+			return [.. subTiles];
+		}
+	}
+
+	// public static LinkedList<Tile> AStar(Tile start, Tile goal, Tile[,] grid) {
+		
+	// }
 }
 }

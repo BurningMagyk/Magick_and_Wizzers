@@ -26,11 +26,10 @@ public partial class BoardView : CanvasLayer, IView {
 		crosshair = GetNode<Sprite2D>("Crosshair");
 
 		hoverSprites = new Sprite3D[Enum.GetNames(typeof(HoverType)).Length];
-		hoverSprites[(int) HoverType.NORMAL] = GetNode<Sprite3D>("Hover");
-		hoverSprites[(int) HoverType.THEATER] = GetNode<Sprite3D>("Hover Theater");
-		hoverSprites[(int) HoverType.MOVE] = GetNode<Sprite3D>("Hover Move");
-		hoverSprites[(int) HoverType.INTERACT] = GetNode<Sprite3D>("Hover Interact");
-		hoverSprites[(int) HoverType.CAST] = GetNode<Sprite3D>("Hover Cast");
+		for (int i = 0; i < hoverSprites.Length; i++) {
+			string enumName = ((HoverType) i).ToString();
+			hoverSprites[i] = GetNode<Sprite3D>("Hover " + enumName[0] + enumName[1..].ToLower());
+		}
 
 		foreach (Sprite3D hoverSprite in hoverSprites) {
 			hoverSprite.Visible = false;

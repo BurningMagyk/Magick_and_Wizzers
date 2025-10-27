@@ -101,14 +101,15 @@ public partial class Board {
 		// Compline (end of the day before retiring, approximately 7 p.m.)
 		// Twilight (to make it 10 hours)
 		foreach (Piece piece in pieces) {
-			piece.ResolveTick();
+			piece.ResolveTick(this);
 			// Resolve activities here too.
 		}
 	}
 
 	public Piece AddPiece(Stats stats, Tile targetTile, Texture2D illustration, int uniqueId) {
 		Piece piece = new(stats, mDisplayNode.CreatePiece(uniqueId + '-' + stats.Name, illustration)) {
-			Tile = targetTile
+			Tile = targetTile,
+			Toroidal = mToroidal
 		};
 		return piece;
 	}
@@ -130,28 +131,6 @@ public partial class Board {
 
 	public int GetTotalSize() {
 		return GetSize(Tile.MAX_PARTITION);
-	}
-
-	public int GetDistance(Vector2I posA, Vector2I posB) {
-		int size = GetTotalSize();
-		int horizontalToroidalDistance = Math.Min(
-			Math.Abs(posA.X - posB.X),
-			size - Math.Abs(posA.X - posB.X)
-		);
-		int verticalToroidalDistance = Math.Min(
-			Math.Abs(posA.Y - posB.Y),
-			size - Math.Abs(posA.Y - posB.Y)
-		);
-		bool horizontalDistanceGreater = horizontalToroidalDistance > verticalToroidalDistance;
-		int diagonalDistance, remainingParallelDistance;
-		if (horizontalDistanceGreater) {
-			diagonalDistance = verticalToroidalDistance;
-			remainingParallelDistance = horizontalToroidalDistance - diagonalDistance;
-		} else {
-			diagonalDistance = horizontalToroidalDistance;
-			remainingParallelDistance = verticalToroidalDistance - diagonalDistance;
-		}
-		return diagonalDistance * 10 + remainingParallelDistance * STRAIGHT_UNITS;
 	}
 
 	/**
@@ -244,28 +223,50 @@ public partial class Board {
 		);
 	}
 
-	public Vector2I GetFarthestPositionFrom(Vector2I[] positions, Vector2I[] choices) {
-		int greatestDistance = 0;
-		Vector2I farthestPosition = new Vector2I(0, 0);
-		foreach (Vector2I choice in choices) {
-			int distance = GetClosestDistanceFrom(positions, choice);
-			if (distance > greatestDistance) {
-				greatestDistance = distance;
-				farthestPosition = choice;
-			}
-		}
-		return farthestPosition;
-	}
+	// public int GetDistance(Vector2I posA, Vector2I posB) {
+	// 	int size = GetTotalSize();
+	// 	int horizontalToroidalDistance = Math.Min(
+	// 		Math.Abs(posA.X - posB.X),
+	// 		size - Math.Abs(posA.X - posB.X)
+	// 	);
+	// 	int verticalToroidalDistance = Math.Min(
+	// 		Math.Abs(posA.Y - posB.Y),
+	// 		size - Math.Abs(posA.Y - posB.Y)
+	// 	);
+	// 	bool horizontalDistanceGreater = horizontalToroidalDistance > verticalToroidalDistance;
+	// 	int diagonalDistance, remainingParallelDistance;
+	// 	if (horizontalDistanceGreater) {
+	// 		diagonalDistance = verticalToroidalDistance;
+	// 		remainingParallelDistance = horizontalToroidalDistance - diagonalDistance;
+	// 	} else {
+	// 		diagonalDistance = horizontalToroidalDistance;
+	// 		remainingParallelDistance = verticalToroidalDistance - diagonalDistance;
+	// 	}
+	// 	return diagonalDistance * 10 + remainingParallelDistance * STRAIGHT_UNITS;
+	// }
 
-	public int GetClosestDistanceFrom(Vector2I[] positions, Vector2I choice) {
-		int closestDistance = int.MaxValue;
-		foreach (Vector2I position in positions) {
-			int distance = GetDistance(position, choice);
-			if (distance < closestDistance) {
-				closestDistance = distance;
-			}
-		}
-		return closestDistance;
-	}
+	// public Vector2I GetFarthestPositionFrom(Vector2I[] positions, Vector2I[] choices) {
+	// 	int greatestDistance = 0;
+	// 	Vector2I farthestPosition = new Vector2I(0, 0);
+	// 	foreach (Vector2I choice in choices) {
+	// 		int distance = GetClosestDistanceFrom(positions, choice);
+	// 		if (distance > greatestDistance) {
+	// 			greatestDistance = distance;
+	// 			farthestPosition = choice;
+	// 		}
+	// 	}
+	// 	return farthestPosition;
+	// }
+
+	// public int GetClosestDistanceFrom(Vector2I[] positions, Vector2I choice) {
+	// 	int closestDistance = int.MaxValue;
+	// 	foreach (Vector2I position in positions) {
+	// 		int distance = GetDistance(position, choice);
+	// 		if (distance < closestDistance) {
+	// 			closestDistance = distance;
+	// 		}
+	// 	}
+	// 	return closestDistance;
+	// }
 }
 }

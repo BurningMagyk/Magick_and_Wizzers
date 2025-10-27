@@ -45,7 +45,7 @@ script = ExtResource("6_mhda3")
 scale = Vector2(0.1, 0.1)
 texture = ExtResource("8_3qukr")
 
-[node name="Hover" type="Sprite3D" parent="UI/Board View"]
+[node name="Hover Normal" type="Sprite3D" parent="UI/Board View"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0.05)
 visible = false
 texture = ExtResource("8_a5pjv")
