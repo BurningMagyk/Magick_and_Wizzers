@@ -25,8 +25,8 @@ public class Piece {
 
   private readonly Display.Piece mDisplayNode;
   private Tile tile, prevTile;
-  public Command.CommandType[] CommandTypes { get; private set; }
-  public Command Command { get; set; }
+  public Command.CommandType[] AvailableCommandTypes { get; private set; }
+  public List<Command> mCommands = [];
 	public bool Toroidal { get; set;}
 
   // Called when the node enters the scene tree for the first time.
@@ -36,52 +36,143 @@ public class Piece {
 		displayNode.SetGamePiece(this, 0, 0); // Just one central game piece for now.
 
 		// Command stuff should come from the stats. Use defaults for now.
-		CommandTypes = [
+		AvailableCommandTypes = [
 			Command.CommandType.APPROACH,
 	  	Command.CommandType.AVOID,
 	  	Command.CommandType.INTERCEPT
 		];
   }
 
+	public void AddCommand(Command command) {
+		mCommands.Add(command);
+	}
+
+	public bool HasCommands() {
+		return mCommands.Count > 0;
+	}
+
+	public string GetCommandDescriptions() {
+		string description = "";
+		foreach (Command command in mCommands) {
+			description += command.Describe() + "\n";
+		}
+		return description;
+	}
+
 	public void ResolveTick(Board board) {
-		FollowCommand(board.Tiles[(int) GetPartitionType(Size)]);
+		// Get active commands.
+		List<Command> activeCommands = [];
+		foreach (Command command in mCommands) {
+			if (command.IsActive()) {
+				activeCommands.Add(command);
+			}
+		}
+
+		// Determine move direction.
+		DirectionEnum moveDirection = DetermineMoveDirection(
+			board.Tiles[(int) GetPartitionType(Size)],
+			[.. activeCommands]
+		);
+		
 		// Apply over-time effects here too.
 	}
 
-  private void FollowCommand(Tile[,] grid) {
-		if (Command == null) {
-			return;
+  private DirectionEnum DetermineMoveDirection(Tile[,] grid, Command[] activeCommands) {
+		if (activeCommands.Length == 0) {
+			return DirectionEnum.NONE;
 		}
 
-		if (Command.Type == Command.CommandType.APPROACH) {
-			if (Command.GetTargets().Length == 0) {
-				return;
+		Command primaryCommand = null;
+		foreach (Command command in activeCommands) {
+			if (command.IsPrimary) {
+				primaryCommand = command;
+				break;;
 			}
+		}
+		if (primaryCommand == null) {
+			throw new Exception("No primary command found among active commands.");
+		}
 
-			// Get all target tiles.
-			List<Tile> targetTiles = [];
-			foreach (Target target in Command.GetTargets()) {
+		// Get all target tiles.
+		List<Tile> targetTiles = [];
+		foreach (Target target in primaryCommand.GetTargets()) {
+			Tile[] tilesFromTarget = target.GetTiles(GetPartitionType(Size));
+			foreach (Tile tile in tilesFromTarget) {
+				if (!targetTiles.Contains(tile)) {
+					targetTiles.Add(tile);
+				}
+			}
+		}
+
+		List<Tile> secondaryApproachTiles = [];
+		foreach (Command command in activeCommands) {
+			if (command == primaryCommand || command.Type != Command.CommandType.APPROACH) {
+				continue;
+			}
+			foreach (Target target in primaryCommand.GetTargets()) {
 				Tile[] tilesFromTarget = target.GetTiles(GetPartitionType(Size));
 				foreach (Tile tile in tilesFromTarget) {
-					if (!targetTiles.Contains(tile)) {
-						targetTiles.Add(tile);
+					if (!secondaryApproachTiles.Contains(tile)) {
+						secondaryApproachTiles.Add(tile);
 					}
 				}
 			}
+		}
 
-			// Check that all target tiles are the correct partition type.
-			Tile.PartitionTypeEnum requiredPartition = GetPartitionType(Size);
-			foreach (Tile tile in targetTiles) {
-				if (tile.PartitionType != requiredPartition) {
-					throw new Exception($"Target tile {tile.Name} does not match piece partition type {requiredPartition}.");
+		List<Tile> secondaryAvoidTiles = [];
+		foreach (Command command in activeCommands) {
+			if (command == primaryCommand || command.Type != Command.CommandType.AVOID) {
+				continue;
+			}
+			foreach (Target target in primaryCommand.GetTargets()) {
+				Tile[] tilesFromTarget = target.GetTiles(GetPartitionType(Size));
+				foreach (Tile tile in tilesFromTarget) {
+					if (!secondaryAvoidTiles.Contains(tile)) {
+						secondaryAvoidTiles.Add(tile);
+					}
 				}
 			}
-
-			// Determine which target is closest to this piece using A*.
-			
-
 		}
-  }
+
+		// Check that all target tiles are the correct partition type.
+		Tile.PartitionTypeEnum requiredPartition = GetPartitionType(Size);
+		foreach (Tile tile in targetTiles) {
+			if (tile.PartitionType != requiredPartition) {
+				throw new Exception($"Target tile {tile.Name} does not match piece partition type {requiredPartition}.");
+			}
+		}
+		foreach (Tile tile in secondaryApproachTiles) {
+			if (tile.PartitionType != requiredPartition) {
+				throw new Exception($"Target tile {tile.Name} does not match piece partition type {requiredPartition}.");
+			}
+		}
+		foreach (Tile tile in secondaryAvoidTiles) {
+			if (tile.PartitionType != requiredPartition) {
+				throw new Exception($"Target tile {tile.Name} does not match piece partition type {requiredPartition}.");
+			}
+		}
+
+		// Determine which target is closest to this piece using A*.
+		int lowestCost = int.MaxValue;
+		DirectionEnum bestDirection = DirectionEnum.NONE;
+		foreach (Tile targetTile in targetTiles) {
+			DirectionEnum startingDirectionToTarget = AStar(
+				grid,
+				Tile,
+				targetTile,
+				[.. secondaryApproachTiles],
+				[.. secondaryAvoidTiles],
+				Toroidal,
+				out int cost
+			);
+			if (cost < lowestCost) {
+				lowestCost = cost;
+				bestDirection = startingDirectionToTarget;
+			}
+		}
+
+		return bestDirection;
+	}
 
 	public static Tile.PartitionTypeEnum GetPartitionType(SizeEnum size) {
 		switch (size) {
@@ -98,6 +189,88 @@ public class Piece {
 			default:
 				throw new ArgumentOutOfRangeException(nameof(size), size, null);
 		};
+	}
+
+	private static DirectionEnum AStar(
+		Tile[,] grid,
+		Tile start,
+		Tile goal,
+		Tile[] approachTiles,
+		Tile[] avoidTiles,
+		bool toroidal,
+		out int cost
+	) {
+		var openSet = new PriorityQueue<Tile, int>();
+		var cameFrom = new Dictionary<Tile, Tile>();
+		var gScore = new Dictionary<Tile, int> { [start] = 0 };
+
+		openSet.Enqueue(start, Tile.Heuristic(start, goal));
+
+		while (openSet.Count > 0) {
+			var current = openSet.Dequeue();
+
+			if (current.Equals(goal)) {
+				cost = gScore[current];
+				List<Tile> path = ReconstructPath(cameFrom, current);
+				if (path.Count < 2) {
+					return DirectionEnum.NONE;
+				}
+				Tile nextStep = path[1];
+				if (nextStep.Equals(start)) {
+					return DirectionEnum.NONE;
+				} else if (!Tile.IsNeighbor(start, nextStep)) {
+					throw new Exception("Next step in path is not a neighbor of start tile.");
+				} else {
+					return Tile.DetermineDirection(start, nextStep);
+				}
+			}
+
+			foreach (var (dx, dy, baseCost) in Tile.DirectionsCostMatrix) {
+				var neighbor = grid[current.Coordinate.X + dx, current.Coordinate.Y + dy];
+
+				// Skip if outside board bounds.
+				if (neighbor.Coordinate.X < 0 ||
+						neighbor.Coordinate.Y < 0 ||
+						neighbor.Coordinate.X >= grid.GetLength(0) ||
+						neighbor.Coordinate.Y >= grid.GetLength(1)
+				) {
+					continue;
+				}
+
+				// Compute cost modifier based on approach/avoid tiles.
+				int moveCost = baseCost;
+				bool closerToAvoid = Tile.IsCloserToAny(neighbor, current, avoidTiles);
+				bool closerToApproach = Tile.IsCloserToAny(neighbor, current, approachTiles);
+
+				if (closerToAvoid && !closerToApproach) {
+					moveCost *= 2;
+				} else if (closerToApproach && !closerToAvoid) {
+					moveCost /= 2;
+				}
+
+				int tentativeG = gScore[current] + moveCost;
+
+				if (!gScore.TryGetValue(neighbor, out int existingG) || tentativeG < existingG) {
+					cameFrom[neighbor] = current;
+					gScore[neighbor] = tentativeG;
+					int fScore = tentativeG + Tile.Heuristic(neighbor, goal);
+					openSet.Enqueue(neighbor, fScore);
+				}
+			}
+		}
+
+		// No path found
+		cost = int.MaxValue;
+		return DirectionEnum.NONE;
+	}
+
+	private static List<Tile> ReconstructPath(Dictionary<Tile, Tile> cameFrom, Tile current) {
+		var path = new List<Tile> { current };
+		while (cameFrom.ContainsKey(current)) {
+			current = cameFrom[current];
+			path.Insert(0, current);
+		}
+		return path;
 	}
 }
 }

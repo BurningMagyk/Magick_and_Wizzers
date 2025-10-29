@@ -49,10 +49,10 @@ public partial class HandView : CanvasLayer, IView {
 		if (!Showing || !InputEnabled) { return; }
 
 		if (Input.IsActionJustPressed("d_left")) {
-			HoverCard(Main.DirectionEnum.LEFT);
+			HoverCard(Main.DirectionEnum.WEST);
 		}
 		if (Input.IsActionJustPressed("d_right")) {
-			HoverCard(Main.DirectionEnum.RIGHT);
+			HoverCard(Main.DirectionEnum.EAST);
 		}
 		if (Input.IsActionJustPressed("select")) {
 			SelectHoveredCard(false);
@@ -144,7 +144,7 @@ public partial class HandView : CanvasLayer, IView {
 			// Intend to unhover or no cards in hand.
 			Unhover();
 			return;
-		} else if (direction == Main.DirectionEnum.LEFT) {
+		} else if (direction == Main.DirectionEnum.WEST) {
 			if (hoveredCardIndex == -1 || hoveredCardIndex == GetLeftmostCardIndex()) {
 			  // Start sleeve at right end.
 			  hoveredCardIndex = GetRightmostCardIndex();
@@ -156,7 +156,7 @@ public partial class HandView : CanvasLayer, IView {
 			  Unhover();
 			  return;
 			}
-		} else if (direction == Main.DirectionEnum.RIGHT) {
+		} else if (direction == Main.DirectionEnum.EAST) {
 			if (hoveredCardIndex == -1 || hoveredCardIndex == GetRightmostCardIndex()) {
 			  // Start sleeve at left end.
 			  hoveredCardIndex = GetLeftmostCardIndex();

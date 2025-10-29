@@ -1,4 +1,5 @@
 using Godot;
+using Main;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -109,8 +110,73 @@ public class Tile {
 		}
 	}
 
-	// public static LinkedList<Tile> AStar(Tile start, Tile goal, Tile[,] grid) {
-		
-	// }
+	public override bool Equals(object obj) {
+		if (!(obj is Tile)) { // TODO - check if "is not" works instead
+			return false;
+		}
+		Tile t = (Tile) obj;
+		return Coordinate.X == t.Coordinate.X && Coordinate.Y == t.Coordinate.Y && PartitionType == t.PartitionType;
+	}
+
+	public override int GetHashCode() => HashCode.Combine(Coordinate.X, Coordinate.Y, PartitionType);
+
+	public static readonly (int dx, int dy, int cost)[] DirectionsCostMatrix = [
+		( 1,  0, 5), (-1,  0, 5),
+		( 0,  1, 5), ( 0, -1, 5),
+		( 1,  1, 7), ( 1, -1, 7),
+		(-1,  1, 7), (-1, -1, 7)
+	];
+
+	public static int Heuristic(Tile a, Tile b) {
+		// Use Manhattan distance scaled to match 5/7 weighting
+		int dx = Math.Abs(a.Coordinate.X - b.Coordinate.X);
+		int dy = Math.Abs(a.Coordinate.Y - b.Coordinate.Y);
+		int diagonal = Math.Min(dx, dy);
+		int straight = Math.Abs(dx - dy);
+		return diagonal * 7 + straight * 5;
+	}
+
+	public static bool IsCloserToAny(Tile candidate, Tile current, Tile[] targets) {
+		foreach (var t in targets)
+		{
+			double distCurrent = Distance(current, t);
+			double distCandidate = Distance(candidate, t);
+			if (distCandidate < distCurrent)
+				return true;
+		}
+		return false;
+	}
+
+	public static DirectionEnum DetermineDirection(Tile from, Tile to) {
+		if (from.Equals(to)) {
+			return DirectionEnum.NONE;
+		} else if (from.Coordinate.X == to.Coordinate.X) {
+			return to.Coordinate.Y > from.Coordinate.Y ? DirectionEnum.SOUTH : DirectionEnum.NORTH;
+		} else if (from.Coordinate.Y == to.Coordinate.Y) {
+			return to.Coordinate.X > from.Coordinate.X ? DirectionEnum.EAST : DirectionEnum.WEST;
+		} else if (to.Coordinate.X > from.Coordinate.X) {
+			return to.Coordinate.Y > from.Coordinate.Y ? DirectionEnum.SOUTHEAST : DirectionEnum.NORTHEAST;
+		} else {
+			return to.Coordinate.Y > from.Coordinate.Y ? DirectionEnum.SOUTHWEST : DirectionEnum.NORTHWEST;
+		}
+  }
+
+	public static bool IsNeighbor(Tile a, Tile b) {
+		if (a.Equals(b)) {
+			return false;
+		} else if (Math.Abs(a.Coordinate.X - b.Coordinate.X) > 1) {
+			return false;
+		} else if (Math.Abs(a.Coordinate.Y - b.Coordinate.Y) > 1) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	private static double Distance(Tile a, Tile b) {
+		int dx = a.Coordinate.X - b.Coordinate.X;
+		int dy = a.Coordinate.Y - b.Coordinate.Y;
+		return Math.Sqrt(dx * dx + dy * dy);
+	}
 }
 }

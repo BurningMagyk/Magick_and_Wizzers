@@ -36,9 +36,12 @@ public class Command {
   public RangeType Range { get; private set; }
   public int RangeDistance { get; private set; } // in acres, only relevant for RangeType.DISTANCE
   public int Duration { get; private set; } // -1 for indefinite duration
-  // For commands that need UI input from multiple views.
-  // Will typically just be [ViewStateEnum.DESIGNATE_BOARD] unless it's CommandType.INTERACT.
-  public ViewStateEnum[] ViewSteps { get; private set; }
+
+  public bool IsPrimary { get; set; }
+
+    // For commands that need UI input from multiple views.
+    // Will typically just be [ViewStateEnum.DESIGNATE_BOARD] unless it's CommandType.INTERACT.
+    public ViewStateEnum[] ViewSteps { get; private set; }
 
   private readonly List<Target> targets = [];
 	
@@ -102,16 +105,22 @@ public class Command {
   }
 
   public void Complete() {
-	  Actor.Command = this;
+	  Actor.AddCommand(this);
   }
 
   public Target[] GetTargets() {
-	return [.. targets];
+	  return [.. targets];
+  }
+
+  public bool IsActive() {
+    return Type == CommandType.APPROACH ||
+           Type == CommandType.AVOID ||
+           Type == CommandType.INTERACT;
   }
 
   public string Describe() {
-	return $"{Type} command for {Actor.Name}";
-  }
+      return $"{Type} command for {Actor.Name}";
+    }
 
   public static Command Approach(Piece actor, int rangeDistance, int duration) {
 	  return new Command(CommandType.APPROACH, RangeType.DISTANCE, actor, rangeDistance, duration);

@@ -1,5 +1,13 @@
 namespace Main {
 public enum DirectionEnum {
-    UP = 0, LEFT = 1, RIGHT = 2, DOWN = 3, NONE = -1
+    NORTH = 0,
+    EAST = 1,
+    SOUTH = 2,
+    WEST = 3,
+    NORTHEAST = 4,
+    SOUTHEAST = 5,
+    SOUTHWEST = 6,
+    NORTHWEST = 7,
+    NONE = -1
 }
 }

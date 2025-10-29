@@ -44,10 +44,10 @@ public partial class CommandView : CanvasLayer, IView {
 	  if (!Showing || !InputEnabled) { return; }
 
 	  if (Input.IsActionJustPressed("d_up")) {
-			HoverItem(Main.DirectionEnum.UP);
+			HoverItem(Main.DirectionEnum.NORTH);
 		}
 		if (Input.IsActionJustPressed("d_down")) {
-			HoverItem(Main.DirectionEnum.DOWN);
+			HoverItem(Main.DirectionEnum.SOUTH);
 		}
 		if (Input.IsActionJustPressed("select")) {
 			SelectHoveredItem();
@@ -89,8 +89,8 @@ public partial class CommandView : CanvasLayer, IView {
   }
 
 	public void SetActor(Piece actor) {
-		Command.CommandType[] commandTypes = actor.CommandTypes;
-		commandCountSupposed = commandTypes.Length;
+		Command.CommandType[] availableCommandTypes = actor.AvailableCommandTypes;
+		commandCountSupposed = availableCommandTypes.Length;
 		if (commandCountSupposed > MAX_COMMAND_COUNT) {
 			throw new Exception(
 				"Amount of command types (" + commandCountSupposed + ") exceeds max amount (" + MAX_COMMAND_COUNT
@@ -109,22 +109,22 @@ public partial class CommandView : CanvasLayer, IView {
 			Item item = items[i];
 			if (i < commandCountSupposed) {
 				if (itemCommandTypes.TryGetValue(item, out Command.CommandType prevCommandType)
-					&& prevCommandType != commandTypes[i]
+					&& prevCommandType != availableCommandTypes[i]
 				) {
 					// It complains if we try adding the item if it's already been added before.
 					itemCommandTypes.Remove(item);
 				}
-				itemCommandTypes.Add(item, commandTypes[i]);
+				itemCommandTypes.Add(item, availableCommandTypes[i]);
 				item.Available = true; // This should depend on the piece but for now, make all available.
 				
 				// Position them according to how many are visible.
 				item.Position = new Vector2(
 					(viewPortRect.Size.X - items[i].Size.X) / 2,
-					(viewPortRect.Size.Y / 2) + (i - commandTypes.Length / 2F) * (items[i].Size.Y + SPACING)
+					(viewPortRect.Size.Y / 2) + (i - availableCommandTypes.Length / 2F) * (items[i].Size.Y + SPACING)
 				);
 
-				item.Name = commandTypes[i].ToString();
-				item.SetText(commandTypes[i].ToString());
+				item.Name = availableCommandTypes[i].ToString();
+				item.SetText(availableCommandTypes[i].ToString());
 				item.Show();
 			} else {
 				item.Hide();
@@ -148,7 +148,7 @@ public partial class CommandView : CanvasLayer, IView {
 			// Intend to unhover or no items available.
 			Unhover();
 			return;
-		} else if (direction == Main.DirectionEnum.UP) {
+		} else if (direction == Main.DirectionEnum.NORTH) {
 			if (hoveredItemIndex == -1 || hoveredItemIndex == GetUppermostItemIndex()) {
 					// Start sleeve at bottom end.
 					hoveredItemIndex = GetLowermostItemIndex();
@@ -160,7 +160,7 @@ public partial class CommandView : CanvasLayer, IView {
 					Unhover();
 					return;
 				}
-			} else if (direction == Main.DirectionEnum.DOWN) {
+			} else if (direction == Main.DirectionEnum.SOUTH) {
 				if (hoveredItemIndex == -1 || hoveredItemIndex == GetLowermostItemIndex()) {
 					// Start sleeve at top end.
 					hoveredItemIndex = GetUppermostItemIndex();
