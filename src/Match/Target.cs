@@ -45,5 +45,21 @@ public class Target {
       _ => [],
     };
   }
+
+  public override string ToString() {
+    if (Type == TargetType.ACTIVITY) {
+      return "an activity";
+    } else if (Type == TargetType.CARD) {
+      return $"Card: {Card.Name}";
+    } else if (Type == TargetType.PIECE) {
+      return $"Piece: {Piece.Name}";
+    } else if (Type == TargetType.TILE) {
+      return $"Tile at {Tile.Coordinate}";
+    } else if (Type == TargetType.ITEM) {
+      return $"Item: {Item}";
+    } else {
+      return "Unknown Target";
+    }
+  }
 }
 }

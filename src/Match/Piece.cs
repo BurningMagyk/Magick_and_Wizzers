@@ -6,6 +6,7 @@ using System.Collections.Generic;
 namespace Match {
 public class Piece {
 	public enum SizeEnum { TINY, SMALL, MEDIUM, LARGE, HUGE, GARGANTUAN, COLOSSAL }
+	private enum MovementState { DONE, STRAIGHT, DIAGONAL }
   private static int sNextIdForPiece = 0;
 
   public Tile Tile {
@@ -25,6 +26,9 @@ public class Piece {
 
   private readonly Display.Piece mDisplayNode;
   private Tile tile, prevTile;
+	private MovementState mMovementState = MovementState.DONE;
+	private int mMovementProgress = 0;
+	private int mSpeed = 1; // Tiles per tick.
   public Command.CommandType[] AvailableCommandTypes { get; private set; }
   public List<Command> mCommands = [];
 	public bool Toroidal { get; set;}
@@ -66,15 +70,68 @@ public class Piece {
 			if (command.IsActive()) {
 				activeCommands.Add(command);
 			}
-		}
+		}		
 
-		// Determine move direction.
-		DirectionEnum moveDirection = DetermineMoveDirection(
-			board.Tiles[(int) GetPartitionType(Size)],
-			[.. activeCommands]
-		);
+		// Move piece.
+		ResolveMovement(mSpeed, board, [.. activeCommands]);
 		
 		// Apply over-time effects here too.
+	}
+
+	public void ResolveMovement(int speed, Board board, Command[] activeCommands) {
+		if (speed == 0) {
+			return;
+		}
+
+		if (mMovementState == MovementState.DONE) {
+			// Not between tiles. Determine move direction.
+			DirectionEnum moveDirection = DetermineMoveDirection(
+				board.Tiles[(int) GetPartitionType(Size)],
+				activeCommands
+			);
+			// Assume that prevTile is the current tile and that mMovementProgress is 0.
+			tile = Tile.Neighbors[(int) moveDirection]; // Don't move the piece's display yet.
+			if (moveDirection > DirectionEnum.WEST) {
+				// Diagonal move
+				mMovementState = MovementState.DIAGONAL;
+			} else if (moveDirection != DirectionEnum.NONE) {
+				// Straight move
+				mMovementState = MovementState.STRAIGHT;
+			} else {
+				// No move
+				mMovementState = MovementState.DONE;
+				return;
+			}
+		}
+
+		// Move towards target tile.
+		mMovementProgress += mSpeed;
+		if (mMovementState == MovementState.STRAIGHT && mMovementProgress >= Tile.STRT_COST) {
+			mMovementState = MovementState.DONE;
+			prevTile = tile;
+			ResolveMovement(mMovementProgress - Tile.STRT_COST, board, activeCommands);
+		} else if (mMovementState == MovementState.DIAGONAL && mMovementProgress >= Tile.DIAG_COST) {
+			mMovementState = MovementState.DONE;
+			prevTile = tile;
+			ResolveMovement(mMovementProgress - Tile.DIAG_COST, board, activeCommands);
+		}
+
+		// Done moving during this tick.
+		Tile tileBeingMovedTo = tile;
+		// Relocate display node.
+		Tile = prevTile;
+		// Make the tile being moved to the current tile for next tick.
+		tile = tileBeingMovedTo;
+	}
+
+	public void FinalizePosition() {
+		// This should resolve pieces that share tiles and relocated them. Don't bother for now.
+		if (mMovementState != MovementState.DONE) {
+			// Relocate display node.
+			Tile = prevTile;
+			mMovementProgress = 0;
+			mMovementState = MovementState.DONE;
+		}
 	}
 
   private DirectionEnum DetermineMoveDirection(Tile[,] grid, Command[] activeCommands) {

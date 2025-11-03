@@ -106,6 +106,13 @@ public partial class Board {
 		}
 	}
 
+	public void FinalizeRound() {
+		foreach (Piece piece in pieces) {
+			piece.FinalizePosition();
+		}
+		// Resolve end-of-round effects here.
+	}
+
 	public Piece AddPiece(Stats stats, Tile targetTile, Texture2D illustration, int uniqueId) {
 		Piece piece = new(stats, mDisplayNode.CreatePiece(uniqueId + '-' + stats.Name, illustration)) {
 			Tile = targetTile,

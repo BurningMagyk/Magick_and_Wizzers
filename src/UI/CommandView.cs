@@ -222,9 +222,10 @@ public partial class CommandView : CanvasLayer, IView {
 
   private Command ItemToCommand(Item item) {
 		return itemCommandTypes[item] switch {
-			Command.CommandType.APPROACH => Command.Approach(currentActor, 0, -1),
-			Command.CommandType.AVOID => Command.Avoid(currentActor, 0, -1),
-			Command.CommandType.INTERACT => Command.Interact(currentActor, -1),
+			// These need to be using range specified by other items in this view, leave it like this for now.
+			Command.CommandType.APPROACH => Command.Approach(currentActor, Command.RangeEnum.ADJACENT),
+			Command.CommandType.AVOID => Command.Avoid(currentActor, Command.RangeEnum.FAR),
+			Command.CommandType.INTERACT => Command.Interact(currentActor),
 			_ => throw new Exception("Unknown command type " + itemCommandTypes[item] + " in CommandView.itemToCommand"),
 		};
   }

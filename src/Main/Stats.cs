@@ -41,6 +41,8 @@ public class Stats {
 	  HUMAN, MAMMAL, FEATHERED, REPTILIAN, AQUATIC, ARTHROPOD, FLORA, SPIRIT, HOLY, UNHOLY, UNDEAD, CONSTRUCT
   }
 
+	private const int MAX_ABILITY_COUNT = 5;
+
   private ElementEnum[] elements;
   private ElementGroupEnum[] elementGroups;
   private ClassEnum[] classes;
@@ -111,16 +113,24 @@ public class Stats {
 			maxActionPoints = 0;
 			maxHitPoints = 0;
 		} else {
-			int abilityCount = random.Next(1, 6);
-			if (abilityCount == 2 || abilityCount == 3) {
-				if (random.Next(0, 3) < 2) {
-					abilityCount = 1;
-				}
-			} else if (abilityCount == 4 || abilityCount == 5) {
-				if (random.Next(0, 4) < 3) {
-					abilityCount -= 2;
+			int ratioTotal = 0;
+			for (int i = 0; i < MAX_ABILITY_COUNT; i++) {
+				ratioTotal += i;
+			}
+			int randomValue = random.Next(0, ratioTotal) + 1;
+			int abilityCount = -1;
+			for (int i = 0; i < MAX_ABILITY_COUNT; i++) {
+				ratioTotal -= i;
+				if (randomValue >= ratioTotal) {
+					abilityCount = i;
+					break;
 				}
 			}
+
+			if (abilityCount < 0) {
+				throw new Exception("Randomly generated ability count less than zero. This should never happen.");
+			}
+			
 			abilities = new Ability[abilityCount];
 
 			maxActionPoints = random.Next(0, 2500) / 100 * 100;

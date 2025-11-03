@@ -7,7 +7,7 @@ public class Match {
 	  FREE_FOR_ALL
 	}
 	private const int STARTING_LIFE_POINTS = 8000;
-	private const int TICKS_PER_ROUND = 3;
+	private const int TICKS_PER_ROUND = 20;
 	private const double TICK_LENGTH = 1;
 
 	public const int MAX_PLAYER_COUNT = 16;
@@ -89,6 +89,7 @@ public class Match {
 			mBoard.ResolveTick();
 			GD.Print("Resolved tick " + (mAccumulatedTicks + 1));
 			if (++mAccumulatedTicks >= TICKS_PER_ROUND) {
+				mBoard.FinalizeRound();
 				EndRound();
 				break;
 			}

@@ -22,47 +22,35 @@ public class Command {
 	  LAYER // Move through particular layer
   }
 
-  public enum RangeType {
-	  DISTANCE,
-	  DETECTION,
-	  COMBAT,
-	  INFLUENCE
-  }
-
-  private readonly int duration; // in hours
+  public enum RangeEnum { NOT_APPLICABLE, ADJACENT, NEAR, MODERATE, FAR }
 
   public CommandType Type { get; private set; }
   public Piece Actor { get; private set; }
-  public RangeType Range { get; private set; }
-  public int RangeDistance { get; private set; } // in acres, only relevant for RangeType.DISTANCE
-  public int Duration { get; private set; } // -1 for indefinite duration
+  public RangeEnum Range { get; private set; }
 
   public bool IsPrimary { get; set; }
 
-    // For commands that need UI input from multiple views.
-    // Will typically just be [ViewStateEnum.DESIGNATE_BOARD] unless it's CommandType.INTERACT.
-    public ViewStateEnum[] ViewSteps { get; private set; }
+	// For commands that need UI input from multiple views.
+	// Will typically just be [ViewStateEnum.DESIGNATE_BOARD] unless it's CommandType.INTERACT.
+  public ViewStateEnum[] ViewSteps { get; private set; }
 
   private readonly List<Target> targets = [];
 	
+  private Command(CommandType type, Piece actor) : this(type, RangeEnum.NOT_APPLICABLE, actor) { }
   private Command(
 	  CommandType type,
-	  RangeType rangeType,
-	  Piece actor,
-	  int rangeDistance,
-	  int duration
+	  RangeEnum range,
+	  Piece actor
   ) {
 	  Type = type;
-	  Range = rangeType;
-	  RangeDistance = rangeDistance;
+	  Range = range;
 	  Actor = actor;
-	  Duration = duration;
 	  ViewSteps = [ViewStateEnum.DESIGNATE_BOARD]; // should be more variable when when CommandType.INTERACT
   }
 
   public ViewStateEnum StepView() {
 	  if (ViewSteps.Length == 0) {
-		return ViewStateEnum.NONE;
+		  return ViewStateEnum.NONE;
 	  }
 
 	  ViewStateEnum viewStep = ViewSteps[0];
@@ -119,27 +107,24 @@ public class Command {
   }
 
   public string Describe() {
-      return $"{Type} command for {Actor.Name}";
+    String mainDescription = $"{Type} command for {Actor.Name}";
+    if (targets.Count == 0) {
+      return mainDescription + " with no targets.";
     }
-
-  public static Command Approach(Piece actor, int rangeDistance, int duration) {
-	  return new Command(CommandType.APPROACH, RangeType.DISTANCE, actor, rangeDistance, duration);
+    return mainDescription + " targeting the following: " +
+      string.Join(", ", targets);
   }
 
-  public static Command Approach(Piece actor, RangeType rangeType, int duration) {
-	  return new Command(CommandType.APPROACH, rangeType, actor, 0, duration);
+  public static Command Approach(Piece actor, RangeEnum range) {
+	  return new Command(CommandType.APPROACH, range, actor);
   }
 
-  public static Command Avoid(Piece actor, int rangeDistance, int duration) {
-	  return new Command(CommandType.AVOID, RangeType.DISTANCE, actor, rangeDistance, duration);
+  public static Command Avoid(Piece actor, RangeEnum range) {
+	  return new Command(CommandType.AVOID, range, actor);
   }
 
-  public static Command Avoid(Piece actor, RangeType rangeType, int duration) {
-	  return new Command(CommandType.AVOID, rangeType, actor, 0, duration);
-  }
-
-  public static Command Interact(Piece actor, int duration = -1) {
-	  return new Command(CommandType.INTERACT, RangeType.COMBAT, actor, 0, duration);
+  public static Command Interact(Piece actor) {
+	  return new Command(CommandType.INTERACT, actor);
   }
 
   // public static Command Act(Activity activity) {
@@ -152,21 +137,13 @@ public class Command {
   //     return new Command(CommandType.INTERACT, RangeType.INFLUENCE, 0, 0);
   // }
 
-  // public static Command Intercept(
-  //   Piece secondActor,
-  //   RangeType rangeType,
-  //   int rangeDistance
-  // ) {
-  //   return new Command(CommandType.INTERCEPT, rangeType, rangeDistance, 0);
-  // }
+  public static Command Intercept(Piece actor, RangeEnum rangeType) {
+    return new Command(CommandType.INTERCEPT, rangeType, actor);
+  }
 
-  // public static Command Linger(
-  //   Piece secondActor,
-  //   RangeType rangeType,
-  //   int rangeDistance
-  // ) {
-  //   return new Command(CommandType.LINGER, rangeType, rangeDistance, 0);
-  // }
+  public static Command Linger(Piece actor, RangeEnum range) {
+    return new Command(CommandType.LINGER, range, actor);
+  }
 
   // public static Command Defend(Piece secondActor) {
   //   return new Command(CommandType.BRIDLE, RangeType.COMBAT, 0, 0);
@@ -183,15 +160,15 @@ public class Command {
   // }
 
   public static Command Amble(Piece actor) {
-	  return new Command(CommandType.AMBLE, RangeType.DISTANCE, actor, 0, -1);
+	  return new Command(CommandType.AMBLE, actor);
   }
 
   public static Command Skulk(Piece actor) {
-	  return new Command(CommandType.SKULK, RangeType.DISTANCE, actor, 0, -1);
+	  return new Command(CommandType.SKULK, actor);
   }
 
   public static Command Layer(Piece actor) {
-	  return new Command(CommandType.LAYER, RangeType.DISTANCE, actor, 0, -1);
+	  return new Command(CommandType.LAYER, actor);
   }
 }
 }

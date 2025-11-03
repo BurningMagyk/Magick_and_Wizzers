@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace Match {
 public class Tile {
+	public const int STRT_COST = 5, DIAG_COST = 7;
 	public const int PARTITION_TYPE_COUNT = 2;
 	public enum PartitionTypeEnum { CARUCATE, VIRGATE, BOVATE, HECTARE, ACRE }
 	public static readonly PartitionTypeEnum MIN_PARTITION =
@@ -121,10 +122,10 @@ public class Tile {
 	public override int GetHashCode() => HashCode.Combine(Coordinate.X, Coordinate.Y, PartitionType);
 
 	public static readonly (int dx, int dy, int cost)[] DirectionsCostMatrix = [
-		( 1,  0, 5), (-1,  0, 5),
-		( 0,  1, 5), ( 0, -1, 5),
-		( 1,  1, 7), ( 1, -1, 7),
-		(-1,  1, 7), (-1, -1, 7)
+		( 1,  0, STRT_COST), (-1,  0, STRT_COST),
+		( 0,  1, STRT_COST), ( 0, -1, STRT_COST),
+		( 1,  1, DIAG_COST), ( 1, -1, DIAG_COST),
+		(-1,  1, DIAG_COST), (-1, -1, DIAG_COST)
 	];
 
 	public static int Heuristic(Tile a, Tile b) {

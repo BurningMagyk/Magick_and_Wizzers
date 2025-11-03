@@ -35,11 +35,7 @@ public partial class Card : Control {
 				cardType = CardTypeEnum.SUMMON;
 			} else {
 				Random random = new();
-				int cardTypeIndex = random.Next(1, 7);
-				if (cardTypeIndex >= Enum.GetNames(typeof(CardTypeEnum)).Length) {
-				cardTypeIndex = Enum.GetNames(typeof(CardTypeEnum)).Length - 1;
-				}
-				cardType = (CardTypeEnum) cardTypeIndex;
+				cardType = (CardTypeEnum) random.Next(1, Enum.GetNames(typeof(CardTypeEnum)).Length);
 
 				actionPointsLabel.Visible = false;
 				lifePointsLabel.Visible = false;
@@ -119,36 +115,36 @@ public partial class Card : Control {
 
   private static Color ToColor(Stats.ElementGroupEnum elementGroup) {
 	  return elementGroup switch {
-		Stats.ElementGroupEnum.PURPLE => new Color(0.8f, 0.4f, 0.8f),
-		Stats.ElementGroupEnum.YELLOW => new Color(0.8f, 0.8f, 0.4f),
-		Stats.ElementGroupEnum.CYAN => new Color(0.4f, 0.8f, 0.8f),
-		Stats.ElementGroupEnum.RED => new Color(0.8f, 0.4f, 0.4f),
-		Stats.ElementGroupEnum.BLACK => new Color(0.2f, 0.2f, 0.2f),
-		Stats.ElementGroupEnum.GREEN => new Color(0.4f, 0.8f, 0.4f),
-		_ => CARD_COLORS[(int) CardColorEnum.GREY] // Should never get this color if working properly.
+			Stats.ElementGroupEnum.PURPLE => new Color(0.8f, 0.4f, 0.8f),
+			Stats.ElementGroupEnum.YELLOW => new Color(0.8f, 0.8f, 0.4f),
+			Stats.ElementGroupEnum.CYAN => new Color(0.4f, 0.8f, 0.8f),
+			Stats.ElementGroupEnum.RED => new Color(0.8f, 0.4f, 0.4f),
+			Stats.ElementGroupEnum.BLACK => new Color(0.2f, 0.2f, 0.2f),
+			Stats.ElementGroupEnum.GREEN => new Color(0.4f, 0.8f, 0.4f),
+			_ => CARD_COLORS[(int) CardColorEnum.GREY] // Should never get this color if working properly.
 	  };
   }
 
   private static Color ToColor(CardTypeEnum cardType, bool isCreature, int abilityCount) {
 	  if (cardType == CardTypeEnum.SUMMON) {
-		if (isCreature) {
-		  return CARD_COLORS[abilityCount];
-	  } else {
-		return CARD_COLORS[(int) CardColorEnum.TEAL];
-	  }
-	} else if (
-	  cardType == CardTypeEnum.CHARM
-	  || cardType == CardTypeEnum.MASTERY
-	  || cardType == CardTypeEnum.TERRAFORM
-	  || cardType == CardTypeEnum.NORMAL
-	) {
-	  return CARD_COLORS[(int) CardColorEnum.TEAL];
-	} else if (cardType == CardTypeEnum.TRAP) {
-	  return CARD_COLORS[(int) CardColorEnum.MAGENTA];
-	}
+			if (isCreature) {
+				return CARD_COLORS[abilityCount];
+			} else {
+				return CARD_COLORS[(int) CardColorEnum.TEAL];
+			}
+		} else if (
+			cardType == CardTypeEnum.CHARM
+			|| cardType == CardTypeEnum.MASTERY
+			|| cardType == CardTypeEnum.TERRAFORM
+			|| cardType == CardTypeEnum.NORMAL
+		) {
+			return CARD_COLORS[(int) CardColorEnum.TEAL];
+		} else if (cardType == CardTypeEnum.TRAP) {
+			return CARD_COLORS[(int) CardColorEnum.MAGENTA];
+		}
 
-	// Cards should never be grey if working properly.
-	return CARD_COLORS[(int) CardColorEnum.GREY];
+		// Cards should never be grey if working properly.
+		return CARD_COLORS[(int) CardColorEnum.GREY];
   }
 
   private static Color EvenMix(Color a, Color b) {
