@@ -22,7 +22,7 @@ public class Match {
 	private int uniqueId = 0;
 
 	public Match(Display.Board displayBoard, UI.UI ui, Player[] players) {
-		mBoard = new(true) {
+		mBoard = new(false) {
 			DisplayNode = displayBoard
 		};
 

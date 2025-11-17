@@ -43,6 +43,8 @@ public class Stats {
 
 	private const int MAX_ABILITY_COUNT = 5;
 
+	private static string[] randomNames = null;
+
   private ElementEnum[] elements;
   private ElementGroupEnum[] elementGroups;
   private ClassEnum[] classes;
@@ -138,7 +140,18 @@ public class Stats {
 		}
 		GD.Print("Generating " + abilities.Length + " abilities.");
 
-	  return new Stats("Random", elements, classes, races, abilities, maxActionPoints, maxHitPoints);
+		if (randomNames == null) {
+			string path = "res://resources/frankish_names.txt";
+	  if (FileAccess.FileExists(path)) {
+		using FileAccess file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+		randomNames = file.GetAsText().Split("\n");
+	  } else {
+				randomNames = ["Default Name"];
+			}
+		}
+		string name = randomNames[random.Next(0, randomNames.Length)];
+
+	  return new Stats(name, elements, classes, races, abilities, maxActionPoints, maxHitPoints);
   }
 
   private static int testLevelCalculationFlavorMissCount = 0;

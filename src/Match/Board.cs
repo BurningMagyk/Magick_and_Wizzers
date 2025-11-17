@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Match {
 public partial class Board {
-	public const int BOARD_SIZE = 7;
+	public const int BOARD_SIZE = 2;
 	public const int STRAIGHT_UNITS = 5;
 	public const int DIAGONAL_UNITS = 7;
 	public const int RANDOM_POSSIBLE_STARTING_POSITION_COUNT = 1000;
@@ -24,8 +24,8 @@ public partial class Board {
 		}
 	}
 
-	public readonly List<Tile[,]> Tiles = new List<Tile[,]>();
-	private readonly HashSet<Piece> pieces = new HashSet<Piece>();
+	public readonly List<Tile[,]> Tiles = [];
+	private readonly HashSet<Piece> pieces = [];
 	private readonly bool mToroidal;
 
 	public Board(bool toroidal) {
@@ -38,8 +38,9 @@ public partial class Board {
 
 		for (int i = 0; i < BOARD_SIZE; i++) {
 			for (int j = 0; j < BOARD_SIZE; j++) {
-				Tile tile = new(new Vector2I(i, j), Tile.PartitionTypeEnum.CARUCATE, null);
-				tile.Partition(Tiles.Skip(1).ToList());
+				// null parent tile (2nd arg) will make it the largest partition (MIN_PARTITION).
+				Tile tile = new(new Vector2I(i, j), null);
+				tile.Partition([.. Tiles.Skip(1)]);
 				Tiles[0][i, j] = tile;
 			}
 		}
@@ -118,6 +119,7 @@ public partial class Board {
 			Tile = targetTile,
 			Toroidal = mToroidal
 		};
+		pieces.Add(piece);
 		return piece;
 	}
 

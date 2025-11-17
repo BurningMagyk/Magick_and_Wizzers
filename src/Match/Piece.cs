@@ -20,7 +20,7 @@ public class Piece {
 	  }
   }
   public Main.Stats Stats { get; set; }
-  public string Name { get; private set;}
+  public string Name { get; private set; }
   public Player MasteringPlayer { get; set; }
 	public SizeEnum Size { get; set; }
 
@@ -49,6 +49,9 @@ public class Piece {
 
 	public void AddCommand(Command command) {
 		mCommands.Add(command);
+		if (mCommands.Count == 1) {
+			command.IsPrimary = true;
+		}
 	}
 
 	public bool HasCommands() {
@@ -90,7 +93,6 @@ public class Piece {
 				activeCommands
 			);
 			// Assume that prevTile is the current tile and that mMovementProgress is 0.
-			tile = Tile.Neighbors[(int) moveDirection]; // Don't move the piece's display yet.
 			if (moveDirection > DirectionEnum.WEST) {
 				// Diagonal move
 				mMovementState = MovementState.DIAGONAL;
@@ -102,6 +104,7 @@ public class Piece {
 				mMovementState = MovementState.DONE;
 				return;
 			}
+			tile = Tile.Neighbors[(int) moveDirection]; // Don't move the piece's display yet.
 		}
 
 		// Move towards target tile.
@@ -212,6 +215,7 @@ public class Piece {
 		// Determine which target is closest to this piece using A*.
 		int lowestCost = int.MaxValue;
 		DirectionEnum bestDirection = DirectionEnum.NONE;
+		GD.Print("targetTiles count: " + targetTiles.Count);
 		foreach (Tile targetTile in targetTiles) {
 			DirectionEnum startingDirectionToTarget = AStar(
 				grid,
@@ -269,6 +273,13 @@ public class Piece {
 			if (current.Equals(goal)) {
 				cost = gScore[current];
 				List<Tile> path = ReconstructPath(cameFrom, current);
+				// Print the path:
+				GD.Print("========== Path Found ==========");
+				foreach (Tile tile in path) {
+					GD.Print(tile.Name);
+				}
+				GD.Print("================================");
+
 				if (path.Count < 2) {
 					return DirectionEnum.NONE;
 				}
