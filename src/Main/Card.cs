@@ -14,6 +14,10 @@ public class Card {
     Illustration = illustration;
   }
 
+  public override string ToString() {
+    return $"Card: {Name}";
+  }
+
   public static Card CreateRandomCard() {
     return new Card(
       "Random Name",

@@ -25,7 +25,11 @@ public partial class Item : Control {
   }
 
   public void SetText(string text) {
-	GetNode<Label>("Label").Text = text;
+	  GetNode<Label>("Label").Text = text;
+  }
+
+  public override string ToString() {
+	return $"Item: {CommandType}, Available: {Available}";
   }
 }
 }

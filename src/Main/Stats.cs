@@ -1,10 +1,16 @@
 using Godot;
+using Match;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 
 namespace Main {
 public class Stats {
+
+  public enum ElementGroupEnum {
+	  PURPLE, YELLOW, CYAN, RED, BLACK, GREEN, TEAL, FUCHSIA
+  }
   public enum ElementEnum {
 	  BLACK, DREAM, UNHOLY,
 	  RAY, LIGHTNING, HOLY,
@@ -12,9 +18,6 @@ public class Stats {
 	  FIRE, LASER, LAVA,
 	  DIRT, METAL, WOOD, FLESH,
 	  WIND, THUNDER
-  }
-  public enum ElementGroupEnum {
-	  PURPLE, YELLOW, CYAN, RED, BLACK, GREEN
   }
 
   public enum ClassEnum {
@@ -25,6 +28,10 @@ public class Stats {
   public enum ClassGroupEnum {
 	  FIGHTER, CASTER, TRADER
   }
+
+	public enum StructureEnum {
+		NONE, WALL, EQUIPMENT, VEHICLE
+	}
 
   public enum RaceEnum {
 	  DRAGON, DINOSAUR, CHIMERA, SPHINX,
@@ -41,46 +48,119 @@ public class Stats {
 	  HUMAN, MAMMAL, FEATHERED, REPTILIAN, AQUATIC, ARTHROPOD, FLORA, SPIRIT, HOLY, UNHOLY, UNDEAD, CONSTRUCT
   }
 
-	private const int MAX_ABILITY_COUNT = 5;
-
-	private static string[] randomNames = null;
+	private const int MAX_ABILITY_COUNT = 7;
 
   private ElementEnum[] elements;
   private ElementGroupEnum[] elementGroups;
   private ClassEnum[] classes;
   private ClassGroupEnum[] classGroups;
+	private StructureEnum structure;
   private RaceEnum[] races;
   private RaceGroupEnum[] raceGroupsStrong, raceGroupsWeak;
 	private Ability[] abilities;
-  private int maxActionPoints, maxLifePoints;
 
   public string Name { get; private set;}
   public int Level { get; private set; }
-  public int MaxActionPoints { get { return maxActionPoints; } }
-  public int MaxLifePoints { get { return maxLifePoints; } }
-  public ElementGroupEnum ElementGroup { get { return elementGroups[0]; } }
+	public Command.CommandType[] AvailableCommandTypes { get; private set; }
+  public int MaxActionPoints { get; private set; }
+  public int MaxLifePoints { get; private set; }
+  public ElementGroupEnum ElementGroup { get; private set; }
 
+	// For creatures.
   public Stats(
 	  string name,
 	  ElementEnum[] elements, ClassEnum[] classes, RaceEnum[] races,
-		Ability[] abilities,
-	  int maxActionPoints, int maxLifePoints
+		Command.CommandType[] availableCommandTypes, Ability[] abilities,
+	  int maxActionPoints, int maxLifePoints,
+		bool isTrap = false
   ) {
 	  Name = name;
+		if (elements.Distinct().Count() != elements.Length) {
+			throw new Exception("Duplicate elements provided.");
+		}
 	  this.elements = elements;
-	  elementGroups = DetermineElementGroups(elements);
+	  elementGroups = isTrap ?
+			[.. DetermineElementGroups(elements), ElementGroupEnum.FUCHSIA] :
+			DetermineElementGroups(elements);
 
+		if (classes.Distinct().Count() != classes.Length) {
+			throw new Exception("Duplicate classes provided.");
+		}
 	  this.classes = classes;
 	  classGroups = DetermineClassGroups(classes);
 
+		if (races.Distinct().Count() != races.Length) {
+			throw new Exception("Duplicate races provided.");
+		}
 	  this.races = races;
+		RaceGroupEnum[][] raceGroups = DetermineRaceGroups(races);
+		raceGroupsStrong = raceGroups[0];
+		raceGroupsWeak = raceGroups[1];
+
+		AvailableCommandTypes = availableCommandTypes;
 		this.abilities = abilities;
 
-	  this.maxActionPoints = maxActionPoints;
-	  this.maxLifePoints = maxLifePoints;
+	  MaxActionPoints = maxActionPoints;
+	  MaxLifePoints = maxLifePoints;
 
 	  Level = DetermineLevel(maxActionPoints, maxLifePoints);
   }
+
+	// For non-creatures.
+	public Stats(
+		string name,
+		ElementEnum[] supernaturalElements, ElementEnum[] naturalElements,
+		StructureEnum structure,
+		Ability[] abilities,
+		bool isTrap = false
+	) {
+		Name = name;
+		if (supernaturalElements.Distinct().Count() != supernaturalElements.Length) {
+			throw new Exception("Duplicate supernatural elements provided.");
+		}
+		if (naturalElements.Distinct().Count() != naturalElements.Length) {
+			throw new Exception("Duplicate natural elements provided.");
+		}
+		for (int i = 0; i < supernaturalElements.Length; i++) {
+			if (IsElementNatural((ElementEnum) i)) {
+				throw new Exception("Element " + (ElementEnum) i + " is natural but was provided as supernatural.");
+			}
+		}
+		for (int i = 0; i < naturalElements.Length; i++) {
+			if (!IsElementNatural((ElementEnum) i)) {
+				throw new Exception("Element " + (ElementEnum) i + " is supernatural but was provided as natural.");
+			}
+		}
+		if (supernaturalElements.Contains(ElementEnum.HOLY) && 
+				supernaturalElements.Contains(ElementEnum.UNHOLY)
+		) {
+			throw new Exception("Item cannot have both HOLY and UNHOLY elements.");
+		}
+		if (!isTrap && supernaturalElements.Length == 0) {
+			throw new Exception("Non-trap non-creature items must have at least one supernatural element.");
+		}
+		elements = [.. supernaturalElements, .. naturalElements];
+		elementGroups = isTrap ?
+			[.. DetermineElementGroups(elements), ElementGroupEnum.TEAL, ElementGroupEnum.FUCHSIA] :
+			[.. DetermineElementGroups(elements), ElementGroupEnum.TEAL];
+		this.structure = structure;
+		this.abilities = abilities;
+	}
+
+	// For non-creatures without a structure.
+	public Stats(
+		string name,
+		ElementEnum[] supernaturalElements, ElementEnum[] naturalElements,
+		Ability[] abilities,
+		bool isTrap = false
+	) : this(
+		name,
+		supernaturalElements,
+		naturalElements,
+		StructureEnum.NONE,
+		abilities,
+		isTrap
+	) { }
 
   public bool IsCreature() {
 	  return races.Length > 0;
@@ -92,67 +172,265 @@ public class Stats {
   public static Stats CreateRandom() {
 	  Random random = new();
 
-	  ElementEnum[] elements = new ElementEnum[random.Next(1, 2)];
-	  for (int i = 0; i < elements.Length - 1; i++) {
-		  elements[i] = (ElementEnum) random.Next(0, Enum.GetNames(typeof(ElementEnum)).Length);
-	  }
-
-	  ClassEnum[] classes = new ClassEnum[random.Next(0, 2)];
-	  for (int i = 0; i < classes.Length; i++) {
-		  classes[i] = (ClassEnum) random.Next(0, Enum.GetNames(typeof(ClassEnum)).Length);
-	  }
-
-	  RaceEnum[] races = new RaceEnum[random.Next(0, 3)];
-	  for (int i = 0; i < races.Length; i++) {
-		  races[i] = (RaceEnum) random.Next(0, Enum.GetNames(typeof(RaceEnum)).Length);
-	  }
-
-		int maxActionPoints, maxHitPoints;
-
-		Ability[] abilities;
-		if (races.Length == 0) {
-			abilities = [];
-			maxActionPoints = 0;
-			maxHitPoints = 0;
+		if (random.Next(0, 2) == 0) {
+			// 50% (total) chance to be a non-item creature.
+			return CreateRandomForCreature(false);
 		} else {
-			int ratioTotal = 0;
-			for (int i = 0; i < MAX_ABILITY_COUNT; i++) {
-				ratioTotal += i;
+			int varChance = random.Next(0, 10);
+			if (varChance < 4) {
+				// 40% chance to be an item.
+				if (varChance == 0) {
+					// 10% chance to be an item creature.
+					if (random.Next(0, 4) == 0) {
+						// 5% chance to be an item creature trap.
+						return CreateRandomForCreature(true, true);
+					}
+					return CreateRandomForCreature(true, false);
+				} else if (varChance < 2) {
+					// 20% chance to be an equipment.
+					if (random.Next(0, 8) == 0) {
+						// 2.5% chance to be an equipment trap.
+						return CreateRandomForNonCreature(true, true);
+					}
+					return CreateRandomForNonCreature(true, false);
+				} else {
+					// 10% chance to be a non-creature, non-equipment item.
+					if (random.Next(0, 2) == 0) {
+						// 5% chance to be a non-equipment item trap.
+						return CreateRandomForNonCreature(false, true);
+					}
+					return CreateRandomForNonCreature(false, false);
+				}
+			} else if (varChance < 6) {
+				// 20% chance to be a charm.
+				if (random.Next(0, 4) == 0) {
+					// 5% chance to be a charm trap.
+					return CreateRandomForNonCreature(false, true);
+				}
+				return CreateRandomForNonCreature(false, false);
+			} else if (varChance < 9) {
+				// 30% chance to be normal.
+				if (random.Next(0, 3) == 0) {
+					// 10% chance to be a normal trap.
+					return CreateRandomForCreature(false, true);
+				}
+				return CreateRandomForCreature(false, false);
+			} else {
+				if (random.Next(0, 4) == 0) {
+					// 7.5% chance to be a terraform.
+					return CreateRandomForNonCreature(false, false);
+				} else {
+					// 2.5% chance to be a mastery.
+					return CreateRandomForNonCreature(false, false);
+				}
 			}
-			int randomValue = random.Next(0, ratioTotal) + 1;
-			int abilityCount = -1;
-			for (int i = 0; i < MAX_ABILITY_COUNT; i++) {
-				ratioTotal -= i;
-				if (randomValue >= ratioTotal) {
-					abilityCount = i;
+		}
+  }
+
+	private static Stats CreateRandomForCreature(bool isConstruct = false, bool isTrap = false) {
+		Random random = new();
+
+		List<ElementEnum> randomElements = [];
+		randomElements.Add(GetRandomElement(!isConstruct));
+		if (random.Next(0, 3) == 0) {
+			ElementEnum secondRandomElement = GetRandomElement();
+			if ((randomElements[0] != ElementEnum.HOLY || secondRandomElement != ElementEnum.UNHOLY) &&
+					(randomElements[0] != ElementEnum.UNHOLY || secondRandomElement != ElementEnum.HOLY)
+			) {
+				randomElements.Add(secondRandomElement);
+			}
+		}
+
+		List<RaceEnum> randomRaces = [];
+		randomRaces.Add(isConstruct ? GetRandomConstructRace() : GetRandomNonConstructRace());
+		if (random.Next(0, 3) == 0) {
+			randomRaces.Add(isConstruct ? GetRandomRace() : GetRandomNonConstructRace());
+		}
+
+		bool isHuman = false;
+		List<ClassEnum> randomClasses = [];
+		RaceGroupEnum[][] raceGroupsStrongAndWeak = DetermineRaceGroups([.. randomRaces]);
+		foreach (RaceGroupEnum[] raceGroupsArray in raceGroupsStrongAndWeak) {
+			foreach (RaceGroupEnum raceGroup in raceGroupsArray) {
+				if (raceGroup == RaceGroupEnum.HUMAN) {
+					isHuman = true;
 					break;
 				}
 			}
-
-			if (abilityCount < 0) {
-				throw new Exception("Randomly generated ability count less than zero. This should never happen.");
-			}
-			
-			abilities = new Ability[abilityCount];
-
-			maxActionPoints = random.Next(0, 2500) / 100 * 100;
-		  maxHitPoints = random.Next(0, 2500) / 100 * 100;
 		}
-		GD.Print("Generating " + abilities.Length + " abilities.");
+		if (isHuman) {
+			int randomVarForClasses = random.Next(0, 5);
+			if (randomVarForClasses > 0) {
+				randomClasses.Add(GetRandomClass());
+				if (randomVarForClasses == 4) {
+					randomClasses.Add(GetRandomClass());
+				}
+			}
+		}
 
-		if (randomNames == null) {
+		int abilityCount;
+		int varChance = random.Next(0, 5 + 4 + 3 + 2 + 1);
+		if (varChance < 5) {
+			// No abilities.
+			abilityCount = 0;
+		} else if (varChance < 5 + 4) {
+			// 1 ability.
+			abilityCount = 1;
+		} else if (varChance < 5 + 4 + 3) {
+			// 2 abilities.
+			abilityCount = 2;
+		} else if (varChance < 5 + 4 + 3 + 2) {
+			// 3 abilities.
+			abilityCount = 3;
+		} else {
+			// 4 abilities.
+			abilityCount = 4;
+		}
+
+		int randomActionPoints = random.Next(0, 2500) / 100 * 100;
+		int randomHitPoints = random.Next(0, 2500) / 100 * 100;
+		int totalPoints = randomActionPoints + randomHitPoints;
+		int tooManyPoints = totalPoints - 4000;
+		if (tooManyPoints > 0) {
+			int subtractFromActionPoints = random.Next(0, tooManyPoints + 1) / 100 * 100;
+			randomActionPoints -= subtractFromActionPoints;
+			randomHitPoints -= tooManyPoints - subtractFromActionPoints;	
+		}
+
+		return new Stats(
+			GetRandomName(),
+			[.. randomElements],
+			[.. randomClasses],
+	  [.. randomRaces],
+			[
+				Command.CommandType.APPROACH,
+				Command.CommandType.AVOID,
+				Command.CommandType.INTERCEPT
+			],
+			new Ability[abilityCount],
+			randomActionPoints,
+			randomHitPoints,
+			isTrap
+		);
+	}
+
+	private static Stats CreateRandomForNonCreature(bool isEquipment, bool isTrap = false) {
+		Random random = new();
+
+		List<ElementEnum> randomSupernaturalElements = [];
+		randomSupernaturalElements.Add(GetRandomElement(false));
+		List<ElementEnum> randomNaturalElements = [];
+		if (random.Next(0, 3) == 0) {
+			ElementEnum secondRandomElement = GetRandomElement();
+			if ((randomSupernaturalElements[0] != ElementEnum.HOLY || secondRandomElement != ElementEnum.UNHOLY) &&
+					(randomSupernaturalElements[0] != ElementEnum.UNHOLY || secondRandomElement != ElementEnum.HOLY)
+			) {
+				if (IsElementNatural(secondRandomElement)) {
+					randomNaturalElements.Add(secondRandomElement);
+				} else {
+					randomSupernaturalElements.Add(secondRandomElement);
+				}
+			}
+		}
+
+		int abilityCount;
+		int varChance = random.Next(0, 5 + 4 + 3 + 2 + 1);
+		if (varChance < 5) {
+			// No abilities.
+			abilityCount = 0;
+		} else if (varChance < 5 + 4) {
+			// 1 ability.
+			abilityCount = 1;
+		} else if (varChance < 5 + 4 + 3) {
+			// 2 abilities.
+			abilityCount = 2;
+		} else if (varChance < 5 + 4 + 3 + 2) {
+			// 3 abilities.
+			abilityCount = 3;
+		} else {
+			// 4 abilities.
+			abilityCount = 4;
+		}
+
+		return new Stats(
+			GetRandomName(),
+			[.. randomSupernaturalElements],
+			[.. randomNaturalElements],
+			isEquipment ? StructureEnum.EQUIPMENT : StructureEnum.NONE,
+			new Ability[abilityCount],
+			isTrap
+		);
+	}
+
+	private static ElementEnum GetRandomElement(bool allowNatural = true) {
+		Random random = new();
+		if (allowNatural) {
+			return (ElementEnum) random.Next(0, Enum.GetNames(typeof(ElementEnum)).Length);
+		}
+		
+		List<ElementEnum> supernaturalElements = [];
+		for (int i = 0; i < Enum.GetNames(typeof(ElementEnum)).Length; i++) {
+			if (!IsElementNatural((ElementEnum) i)) {
+				supernaturalElements.Add((ElementEnum) i);
+			}
+		}
+		return supernaturalElements[random.Next(0, supernaturalElements.Count)];
+	}
+
+	private static ClassEnum GetRandomClass() {
+		Random random = new();
+		return (ClassEnum) random.Next(0, Enum.GetNames(typeof(ClassEnum)).Length);
+	}
+
+	private static RaceEnum GetRandomRace() {
+		Random random = new();
+		return (RaceEnum) random.Next(0, Enum.GetNames(typeof(RaceEnum)).Length);
+	}
+
+	private static RaceEnum[] sNonConstructRaces = null;
+	private static RaceEnum GetRandomNonConstructRace() {
+		if (sNonConstructRaces == null) {
+			List<RaceEnum> nonConstructRaces = [];
+			foreach (RaceEnum race in Enum.GetValues(typeof(RaceEnum))) {
+				if (!IsRaceConstruct(race)) {
+					nonConstructRaces.Add(race);
+				}
+			}
+			sNonConstructRaces = [.. nonConstructRaces.Distinct()];
+		}
+		Random random = new();
+		return sNonConstructRaces[random.Next(0, sNonConstructRaces.Length)];
+	}
+
+	private static RaceEnum[] sConstructRaces = null;
+	private static RaceEnum GetRandomConstructRace() {
+		if (sConstructRaces == null) {
+			List<RaceEnum> constructRaces = [];
+			foreach (RaceEnum race in Enum.GetValues(typeof(RaceEnum))) {
+				if (IsRaceConstruct(race)) {
+					constructRaces.Add(race);
+				}
+			}
+			sConstructRaces = [.. constructRaces.Distinct()];
+		}
+		Random random = new();
+		return sConstructRaces[random.Next(0, sConstructRaces.Length)];
+	}
+
+	private static string[] sRandomNames = null;
+	private static string GetRandomName() {
+		if (sRandomNames == null) {
 			string path = "res://resources/frankish_names.txt";
-	  if (FileAccess.FileExists(path)) {
-		using FileAccess file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
-		randomNames = file.GetAsText().Split("\n");
-	  } else {
-				randomNames = ["Default Name"];
+			if (FileAccess.FileExists(path)) {
+				using FileAccess file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
+				sRandomNames = file.GetAsText().Split("\n");
+			} else {
+				sRandomNames = ["Default Name"];
 			}
 		}
-		string name = randomNames[random.Next(0, randomNames.Length)];
-
-	  return new Stats(name, elements, classes, races, abilities, maxActionPoints, maxHitPoints);
-  }
+		Random random = new();
+		return sRandomNames[random.Next(0, sRandomNames.Length)];
+	}
 
   private static int testLevelCalculationFlavorMissCount = 0;
   public static void TestLevelCalculationFlavor() {
@@ -477,24 +755,7 @@ public class Stats {
 					break;
 			}
 		}
-		return groups.Distinct().ToArray();
-  }
-
-  private static RaceGroupEnum[][] DetermineRaceGroups(RaceEnum[] racesStrong, RaceEnum[] racesWeak) {
-		List<RaceGroupEnum> groupsStrong = [];
-		List<RaceGroupEnum> groupsWeak = [];
-		
-		RaceGroupEnum[][] determinedStrong = DetermineRaceGroups(racesStrong);
-		groupsStrong.AddRange(determinedStrong[0]);
-		groupsWeak.AddRange(determinedStrong[1]);
-
-		RaceGroupEnum[][] determinedWeak = DetermineRaceGroups(racesWeak);
-		groupsWeak.AddRange(determinedWeak[0]);
-
-		return [
-	  [.. groupsStrong.Distinct()],
-	  [.. groupsWeak.Distinct()]
-	];
+		return [.. groups.Distinct()];
   }
 
   private static RaceGroupEnum[][] DetermineRaceGroups(RaceEnum[] races) {
@@ -629,9 +890,9 @@ public class Stats {
 		}
 
 		return [
-		[.. groupsStrong.Distinct()],
-		[.. groupsWeak.Distinct()]
-	];
+			[.. groupsStrong.Distinct()],
+			[.. groupsWeak.Distinct()]
+		];
   }
 
   private static ICollection<RaceGroupEnum> DetermineRaceGroupsExtra(ICollection<RaceGroupEnum> raceGroups) {
@@ -646,5 +907,30 @@ public class Stats {
 		}
 		return [.. groupsExtra.Distinct()];
   }
+
+	private static bool IsElementNatural(ElementEnum element) {
+		return element switch {
+			ElementEnum.RAY or
+			ElementEnum.LIGHTNING or
+			ElementEnum.WATER or
+			ElementEnum.MIST or
+			ElementEnum.FROST or
+			ElementEnum.POISON or
+			ElementEnum.FIRE or
+			ElementEnum.LASER or
+			ElementEnum.LAVA or
+			ElementEnum.DIRT or
+			ElementEnum.METAL or
+			ElementEnum.WOOD or
+			ElementEnum.FLESH or
+			ElementEnum.WIND or
+			ElementEnum.THUNDER => true,
+			_ => false,
+		};
+	}
+
+	private static bool IsRaceConstruct(RaceEnum race) {
+		return DetermineRaceGroups([race])[0].Contains(RaceGroupEnum.CONSTRUCT);
+	}
 }
 }

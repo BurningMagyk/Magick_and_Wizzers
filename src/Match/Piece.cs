@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 namespace Match {
-public class Piece {
+public class Piece : ITarget {
 	public enum SizeEnum { TINY, SMALL, MEDIUM, LARGE, HUGE, GARGANTUAN, COLOSSAL }
 	private enum MovementState { DONE, STRAIGHT, DIAGONAL }
   private static int sNextIdForPiece = 0;
@@ -28,9 +28,9 @@ public class Piece {
   private Tile tile, prevTile;
 	private MovementState mMovementState = MovementState.DONE;
 	private int mMovementProgress = 0;
-	private int mSpeed = 1; // Tiles per tick.
-  public Command.CommandType[] AvailableCommandTypes { get; private set; }
-  public List<Command> mCommands = [];
+	private int mSpeed = 1; // Tiles per tick. Should be set from stats.
+	private int maxCommandTargets = 2; // Should be set from stats.
+  public Command[] mCommands;
 	public bool Toroidal { get; set;}
 
   // Called when the node enters the scene tree for the first time.
@@ -38,25 +38,15 @@ public class Piece {
 		Name = stats.Name + " " + sNextIdForPiece++;
 		mDisplayNode = displayNode;
 		displayNode.SetGamePiece(this, 0, 0); // Just one central game piece for now.
-
-		// Command stuff should come from the stats. Use defaults for now.
-		AvailableCommandTypes = [
-			Command.CommandType.APPROACH,
-	  	Command.CommandType.AVOID,
-	  	Command.CommandType.INTERCEPT
-		];
-  }
-
-	public void AddCommand(Command command) {
-		mCommands.Add(command);
-		if (mCommands.Count == 1) {
-			command.IsPrimary = true;
+		mCommands = new Command[stats.AvailableCommandTypes.Length];
+		for (int i = 0; i < stats.AvailableCommandTypes.Length; i++) {
+			mCommands[i] = new Command(
+				stats.AvailableCommandTypes[i],
+				maxCommandTargets
+			);
 		}
-	}
-
-	public bool HasCommands() {
-		return mCommands.Count > 0;
-	}
+		Stats = stats;
+  }
 
 	public string GetCommandDescriptions() {
 		string description = "";
@@ -137,58 +127,56 @@ public class Piece {
 		}
 	}
 
+	public Tile[] GetTiles(Tile.PartitionTypeEnum partition) {
+		return Tile.GetTilesWithPartition(partition);
+	}
+
+	public override string ToString() {
+		return $"Piece: {Name}";
+	}
+
   private DirectionEnum DetermineMoveDirection(Tile[,] grid, Command[] activeCommands) {
 		if (activeCommands.Length == 0) {
 			return DirectionEnum.NONE;
 		}
 
-		Command primaryCommand = null;
+		List<Tile> tilesToApproach = [];
+		// Get the APPROACH command.
+		Command approachCommand = null;
 		foreach (Command command in activeCommands) {
-			if (command.IsPrimary) {
-				primaryCommand = command;
-				break;;
-			}
-		}
-		if (primaryCommand == null) {
-			throw new Exception("No primary command found among active commands.");
-		}
-
-		// Get all target tiles.
-		List<Tile> targetTiles = [];
-		foreach (Target target in primaryCommand.GetTargets()) {
-			Tile[] tilesFromTarget = target.GetTiles(GetPartitionType(Size));
-			foreach (Tile tile in tilesFromTarget) {
-				if (!targetTiles.Contains(tile)) {
-					targetTiles.Add(tile);
-				}
+			if (command.Type == Command.CommandType.APPROACH) {
+				approachCommand = command;
+				break;
 			}
 		}
 
-		List<Tile> secondaryApproachTiles = [];
-		foreach (Command command in activeCommands) {
-			if (command == primaryCommand || command.Type != Command.CommandType.APPROACH) {
-				continue;
-			}
-			foreach (Target target in primaryCommand.GetTargets()) {
+		if (approachCommand != null) {
+			foreach (ITarget target in approachCommand.GetTargets()) {
 				Tile[] tilesFromTarget = target.GetTiles(GetPartitionType(Size));
 				foreach (Tile tile in tilesFromTarget) {
-					if (!secondaryApproachTiles.Contains(tile)) {
-						secondaryApproachTiles.Add(tile);
+					if (!tilesToApproach.Contains(tile)) {
+						tilesToApproach.Add(tile);
 					}
 				}
 			}
 		}
 
-		List<Tile> secondaryAvoidTiles = [];
+		List<Tile> tilesToAvoid = [];
+		// Get the AVOID command.
+		Command avoidCommand = null;
 		foreach (Command command in activeCommands) {
-			if (command == primaryCommand || command.Type != Command.CommandType.AVOID) {
-				continue;
+			if (command.Type == Command.CommandType.AVOID) {
+				avoidCommand = command;
+				break;
 			}
-			foreach (Target target in primaryCommand.GetTargets()) {
+		}
+
+		if (avoidCommand != null) {
+			foreach (ITarget target in avoidCommand.GetTargets()) {
 				Tile[] tilesFromTarget = target.GetTiles(GetPartitionType(Size));
 				foreach (Tile tile in tilesFromTarget) {
-					if (!secondaryAvoidTiles.Contains(tile)) {
-						secondaryAvoidTiles.Add(tile);
+					if (!tilesToAvoid.Contains(tile)) {
+						tilesToAvoid.Add(tile);
 					}
 				}
 			}
@@ -196,41 +184,36 @@ public class Piece {
 
 		// Check that all target tiles are the correct partition type.
 		Tile.PartitionTypeEnum requiredPartition = GetPartitionType(Size);
-		foreach (Tile tile in targetTiles) {
+		foreach (Tile tile in tilesToApproach) {
 			if (tile.PartitionType != requiredPartition) {
 				throw new Exception($"Target tile {tile.Name} does not match piece partition type {requiredPartition}.");
 			}
 		}
-		foreach (Tile tile in secondaryApproachTiles) {
-			if (tile.PartitionType != requiredPartition) {
-				throw new Exception($"Target tile {tile.Name} does not match piece partition type {requiredPartition}.");
-			}
-		}
-		foreach (Tile tile in secondaryAvoidTiles) {
+		foreach (Tile tile in tilesToAvoid) {
 			if (tile.PartitionType != requiredPartition) {
 				throw new Exception($"Target tile {tile.Name} does not match piece partition type {requiredPartition}.");
 			}
 		}
 
-		// Determine which target is closest to this piece using A*.
+		// TODO - rewrite A* to handle multiple target tiles.
 		int lowestCost = int.MaxValue;
 		DirectionEnum bestDirection = DirectionEnum.NONE;
-		GD.Print("targetTiles count: " + targetTiles.Count);
-		foreach (Tile targetTile in targetTiles) {
-			DirectionEnum startingDirectionToTarget = AStar(
-				grid,
-				Tile,
-				targetTile,
-				[.. secondaryApproachTiles],
-				[.. secondaryAvoidTiles],
-				Toroidal,
-				out int cost
-			);
-			if (cost < lowestCost) {
-				lowestCost = cost;
-				bestDirection = startingDirectionToTarget;
-			}
-		}
+		// GD.Print("targetTiles count: " + targetTiles.Count);
+		// foreach (Tile targetTile in targetTiles) {
+		// 	DirectionEnum startingDirectionToTarget = AStar(
+		// 		grid,
+		// 		Tile,
+		// 		targetTile,
+		// 		[.. secondaryApproachTiles],
+		// 		[.. secondaryAvoidTiles],
+		// 		Toroidal,
+		// 		out int cost
+		// 	);
+		// 	if (cost < lowestCost) {
+		// 		lowestCost = cost;
+		// 		bestDirection = startingDirectionToTarget;
+		// 	}
+		// }
 
 		return bestDirection;
 	}

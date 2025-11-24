@@ -2,6 +2,8 @@ using Display;
 using Godot;
 using Match;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace UI {
 public partial class UI : Node {
@@ -507,6 +509,46 @@ public partial class UI : Node {
 				return this;
 			}
 			return Prev;
+		}
+	}
+
+	public static ViewStateEnum DetermineViewStateForTargetTypes(Type[] targetTypes) {
+		if (targetTypes.Length == 0) {
+			throw new Exception("No target types provided for determining ViewState.");
+		} else if (targetTypes.Length == 1) {
+			return DetermineViewStateForTargetType(targetTypes[0]);
+		} else {
+			List<ViewStateEnum> viewStates = [];
+			foreach (Type targetType in targetTypes) {
+				viewStates.Add(DetermineViewStateForTargetType(targetType));
+			}
+			if (viewStates.Distinct().Count() == 1) {
+				return viewStates[0];
+			} else {
+				throw new Exception(
+					"Multiple differing target types provided for determining ViewState: "
+					+ string.Join(", ", targetTypes.Select(t => t.ToString()))
+					+ "."
+				);
+			}
+		}
+	}
+
+	public static ViewStateEnum DetermineViewStateForTargetType(Type targetType) {
+		if (targetType == typeof(Match.Piece)) {
+			return ViewStateEnum.DESIGNATE_BOARD;
+		} else if (targetType == typeof(Tile)) {
+			return ViewStateEnum.DESIGNATE_BOARD;
+		} else if (targetType == typeof(Activity)) {
+			return ViewStateEnum.DESIGNATE_BOARD;
+		} else if (targetType == typeof(Card)) {
+			return ViewStateEnum.DESIGNATE_HAND;
+		} else if (targetType == typeof(string)) {
+			return ViewStateEnum.DESIGNATE_LIST;
+		} else if (targetType == typeof(Command)) {
+			return ViewStateEnum.COMMAND_LIST;
+		} else {
+			throw new Exception("Unknown target type " + targetType.ToString() + " for determining ViewState.");
 		}
 	}
 

@@ -142,6 +142,9 @@ public class Tile {
 		return Coordinate.X == t.Coordinate.X && Coordinate.Y == t.Coordinate.Y && PartitionType == t.PartitionType;
 	}
 
+	public override string ToString() {
+		return $"Tile at {Coordinate} ({PartitionType})";
+	}
 	public override int GetHashCode() => HashCode.Combine(Coordinate.X, Coordinate.Y, PartitionType);
 
 	public static readonly (int dx, int dy, int cost)[] DirectionsCostMatrix = [
