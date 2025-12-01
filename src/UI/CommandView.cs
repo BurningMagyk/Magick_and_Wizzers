@@ -19,8 +19,7 @@ public partial class CommandView : CanvasLayer, IView {
   private PackedScene itemBase;
 	private Rect2 viewPortRect;
   private readonly Item[] items = new Item[MAX_COMMAND_COUNT];
-	private int commandCountSupposed;
-	private readonly Dictionary<Item, Command.CommandType> itemCommandTypes = [];
+	private readonly Dictionary<Item, Command> itemCommands = [];
   private readonly Dictionary<Piece, int> hoveredItemIndexPerPiece = [];
 	private Piece currentActor;
 	private int hoveredItemIndex;
@@ -62,7 +61,7 @@ public partial class CommandView : CanvasLayer, IView {
 
   public new void Show() {
 		// Hover the current item. We expect SetCommandTypes to have been called before Show.
-		if (hoveredItemIndex >= commandCountSupposed || hoveredItemIndex == -1) {
+		if (hoveredItemIndex >= currentActor.Commands.Length || hoveredItemIndex == -1) {
 			HoverItem(Main.DirectionEnum.NONE);
 		} else {
 			items[hoveredItemIndex].Hover();
@@ -89,11 +88,10 @@ public partial class CommandView : CanvasLayer, IView {
   }
 
 	public void SetActor(Piece actor) {
-		Command.CommandType[] availableCommandTypes = actor.AvailableCommandTypes;
-		commandCountSupposed = availableCommandTypes.Length;
-		if (commandCountSupposed > MAX_COMMAND_COUNT) {
+		int commandCount = actor.Commands.Length;
+		if (commandCount > MAX_COMMAND_COUNT) {
 			throw new Exception(
-				"Amount of command types (" + commandCountSupposed + ") exceeds max amount (" + MAX_COMMAND_COUNT
+				"Amount of command types (" + commandCount + ") exceeds max amount (" + MAX_COMMAND_COUNT
 				+ ") for CommandView"
 			);
 		}
@@ -107,24 +105,24 @@ public partial class CommandView : CanvasLayer, IView {
 
 		for (int i = 0; i < MAX_COMMAND_COUNT; i++) {
 			Item item = items[i];
-			if (i < commandCountSupposed) {
-				if (itemCommandTypes.TryGetValue(item, out Command.CommandType prevCommandType)
-					&& prevCommandType != availableCommandTypes[i]
+			if (i < commandCount) {
+				if (itemCommands.TryGetValue(item, out Command prevCommandType)
+					&& prevCommandType != actor.Commands[i]
 				) {
 					// It complains if we try adding the item if it's already been added before.
-					itemCommandTypes.Remove(item);
+					itemCommands.Remove(item);
 				}
-				itemCommandTypes.Add(item, availableCommandTypes[i]);
+				itemCommands.Add(item, actor.Commands[i]);
 				item.Available = true; // This should depend on the piece but for now, make all available.
 				
 				// Position them according to how many are visible.
 				item.Position = new Vector2(
 					(viewPortRect.Size.X - items[i].Size.X) / 2,
-					(viewPortRect.Size.Y / 2) + (i - availableCommandTypes.Length / 2F) * (items[i].Size.Y + SPACING)
+					(viewPortRect.Size.Y / 2) + (i - commandCount / 2F) * (items[i].Size.Y + SPACING)
 				);
 
-				item.Name = availableCommandTypes[i].ToString();
-				item.SetText(availableCommandTypes[i].ToString());
+				item.Name = actor.Commands[i].ToString();
+				item.SetText(actor.Commands[i].ToString());
 				item.Show();
 			} else {
 				item.Hide();
@@ -185,12 +183,12 @@ public partial class CommandView : CanvasLayer, IView {
 
   private void SelectHoveredItem() {
 		// Emits signal to call OnSelectItem, defined in UI class.
-		SelectCommand?.Invoke(ItemToCommand(items[hoveredItemIndex]), SelectTypeEnum.FINAL);
+		SelectCommand?.Invoke(itemCommands[items[hoveredItemIndex]], SelectTypeEnum.FINAL);
   }
 
 	private void DetailHoveredItem() {
 		// Emits signal to call OnSelectItem, defined in UI class.
-		SelectCommand?.Invoke(ItemToCommand(items[hoveredItemIndex]), SelectTypeEnum.DETAIL);
+		SelectCommand?.Invoke(itemCommands[items[hoveredItemIndex]], SelectTypeEnum.DETAIL);
 	}
 
   private int GetUppermostItemIndex(int startIndex = 0) {
@@ -217,17 +215,7 @@ public partial class CommandView : CanvasLayer, IView {
 			availableCount++;
 			}
 		}
-	return availableCount;
-  }
-
-  private Command ItemToCommand(Item item) {
-		return itemCommandTypes[item] switch {
-			// These need to be using range specified by other items in this view, leave it like this for now.
-			Command.CommandType.APPROACH => Command.Approach(currentActor, Command.RangeEnum.ADJACENT),
-			Command.CommandType.AVOID => Command.Avoid(currentActor, Command.RangeEnum.FAR),
-			Command.CommandType.INTERACT => Command.Interact(currentActor),
-			_ => throw new Exception("Unknown command type " + itemCommandTypes[item] + " in CommandView.itemToCommand"),
-		};
+	  return availableCount;
   }
 }
 }

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b16cbmshoau4u" path="res://src/UI/Item.cs" id="1_tgced"]
 [ext_resource type="Texture2D" uid="uid://ca8su2dgr3l22" path="res://resources/command_textures/sleeve.png" id="2_fu50b"]
-[ext_resource type="Texture2D" uid="uid://tq0rndtm0rsj" path="res://resources/command_textures/item_active_background.png" id="3_joo5h"]
+[ext_resource type="Texture2D" uid="uid://di0dajdlylfag" path="res://resources/command_textures/item_background_relaxed.png" id="3_tgced"]
 
 [node name="Surrender Item" type="Control"]
 layout_mode = 3
@@ -19,7 +19,7 @@ texture = ExtResource("2_fu50b")
 layout_mode = 0
 offset_right = 362.0
 offset_bottom = 83.0
-texture = ExtResource("3_joo5h")
+texture = ExtResource("3_tgced")
 expand_mode = 1
 
 [node name="Label" type="Label" parent="."]

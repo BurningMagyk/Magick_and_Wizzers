@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 namespace Main {
-public class Card {
+public class Card : Match.ITarget {
   
   public string Name { get; set; }
   public Stats Stats { get; set; }
@@ -14,6 +14,10 @@ public class Card {
     Illustration = illustration;
   }
 
+  public Match.Tile[] GetTiles(Match.Tile.PartitionTypeEnum partition) {
+		return null;
+	}
+
   public override string ToString() {
     return $"Card: {Name}";
   }
@@ -22,6 +26,14 @@ public class Card {
     return new Card(
       "Random Name",
       Stats.CreateRandom(),
+      GD.Load<Texture2D>("res://resources/card_textures/card_art/Trololololo_Road.png")
+    );
+  }
+
+  public static Card CreateRandomCreatureCard() {
+    return new Card(
+      "Random Creature Name",
+      Stats.CreateRandomForCreature(),
       GD.Load<Texture2D>("res://resources/card_textures/card_art/Trololololo_Road.png")
     );
   }

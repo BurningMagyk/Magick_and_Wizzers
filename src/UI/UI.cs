@@ -137,7 +137,7 @@ public partial class UI : Node {
 			ProgressViewState(ViewStateEnum.COMMAND_LIST);
 			return SelectTypeEnum.FINAL;
 		} else if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
-			if ((command.Feed(piece.GamePiece) && selectTypeEnum == SelectTypeEnum.SERIES)
+			if ((command.FeedTarget(piece.GamePiece) && selectTypeEnum == SelectTypeEnum.SERIES)
 				|| selectTypeEnum == SelectTypeEnum.FINAL
 			) {
 				ProgressSteppedViewState(command);
@@ -156,7 +156,7 @@ public partial class UI : Node {
 			ProgressViewState(ViewStateEnum.DETAIL);
 			return SelectTypeEnum.DETAIL;
 		} else if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
-			if ((command.Feed(tile.GameTile) && selectTypeEnum == SelectTypeEnum.SERIES)
+			if ((command.FeedTarget(tile.GameTile) && selectTypeEnum == SelectTypeEnum.SERIES)
 				|| selectTypeEnum == SelectTypeEnum.FINAL
 			) {
 				ProgressSteppedViewState(command);
@@ -172,7 +172,7 @@ public partial class UI : Node {
 	/// <returns> True if the selection was successful </returns>
   private SelectTypeEnum OnSelectActivity(Match.Activity activity, Command command, SelectTypeEnum selectTypeEnum) {
 		if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_BOARD) {
-			if ((command.Feed(activity) && selectTypeEnum == SelectTypeEnum.SERIES)
+			if ((command.FeedTarget(activity) && selectTypeEnum == SelectTypeEnum.SERIES)
 				|| selectTypeEnum == SelectTypeEnum.FINAL
 			) {
 				ProgressSteppedViewState(command);
@@ -191,7 +191,7 @@ public partial class UI : Node {
 			ProgressViewState(ViewStateEnum.DETAIL);
 			return SelectTypeEnum.DETAIL;
 		} else if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_HAND) {
-			if ((command.Feed(card.GameCard) && selectTypeEnum == SelectTypeEnum.SERIES)
+			if ((command.FeedTarget(card.GameCard) && selectTypeEnum == SelectTypeEnum.SERIES)
 				|| selectTypeEnum == SelectTypeEnum.FINAL
 			) {
 				ProgressSteppedViewState(command);
@@ -221,7 +221,7 @@ public partial class UI : Node {
 	/// <returns> True if the selection was successful </returns>
   private SelectTypeEnum OnSelectItem(string item, Command command, SelectTypeEnum selectTypeEnum) {
 		if (mViewState.ViewStateEnum == ViewStateEnum.DESIGNATE_LIST) {
-			if ((command.Feed(item) && selectTypeEnum == SelectTypeEnum.SERIES)
+			if ((command.FeedSpec(item) && selectTypeEnum == SelectTypeEnum.SERIES)
 				|| (selectTypeEnum == SelectTypeEnum.FINAL)
 			) {
 				ProgressSteppedViewState(command);
@@ -273,7 +273,6 @@ public partial class UI : Node {
 	private void ProgressSteppedViewState(Command command) {
 		ViewStateEnum steppedView = command.StepView();
 		if (steppedView == ViewStateEnum.NONE) {
-			command.Complete();
 			ProgressViewState(ViewStateEnum.MEANDER_BOARD);
 		} else if (steppedView == ViewStateEnum.DESIGNATE_HAND) {
 			mHandView.SetCommand(command);

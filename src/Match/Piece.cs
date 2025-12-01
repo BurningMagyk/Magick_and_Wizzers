@@ -19,7 +19,8 @@ public class Piece : ITarget {
 		  mDisplayNode.Scale = new Vector3(size, size, size);
 	  }
   }
-  public Main.Stats Stats { get; set; }
+	public Command[] Commands { get => mCommands; private set => mCommands = value; }
+  public Stats Stats { get; set; }
   public string Name { get; private set; }
   public Player MasteringPlayer { get; set; }
 	public SizeEnum Size { get; set; }
@@ -30,7 +31,7 @@ public class Piece : ITarget {
 	private int mMovementProgress = 0;
 	private int mSpeed = 1; // Tiles per tick. Should be set from stats.
 	private int maxCommandTargets = 2; // Should be set from stats.
-  public Command[] mCommands;
+  private Command[] mCommands;
 	public bool Toroidal { get; set;}
 
   // Called when the node enters the scene tree for the first time.
@@ -51,7 +52,14 @@ public class Piece : ITarget {
 	public string GetCommandDescriptions() {
 		string description = "";
 		foreach (Command command in mCommands) {
-			description += command.Describe() + "\n";
+			string commandDescription = command.Describe();
+			if (commandDescription == null) {
+				continue;
+			}
+			description += commandDescription + "\n";
+		}
+		if (description.Length == 0) {
+			return "You have yet to command me.";
 		}
 		return description;
 	}

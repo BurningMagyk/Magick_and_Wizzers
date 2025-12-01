@@ -26,7 +26,7 @@ public class Match {
 			DisplayNode = displayBoard
 		};
 
-	ui.Moved += OnUIMoved;
+	  ui.Moved += OnUIMoved;
 	  ui.ChangedHoverType += OnUIChangedHoverType;
 	  ui.Played += OnPlayed;
 	  ui.PassRound += OnPassRound;

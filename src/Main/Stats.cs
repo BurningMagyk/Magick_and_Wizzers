@@ -97,6 +97,9 @@ public class Stats {
 		raceGroupsStrong = raceGroups[0];
 		raceGroupsWeak = raceGroups[1];
 
+		if (availableCommandTypes.Length == 0) {
+			throw new Exception("Creature must have at least one available command type.");
+		}
 		AvailableCommandTypes = availableCommandTypes;
 		this.abilities = abilities;
 
@@ -227,13 +230,13 @@ public class Stats {
 		}
   }
 
-	private static Stats CreateRandomForCreature(bool isConstruct = false, bool isTrap = false) {
+	public static Stats CreateRandomForCreature(bool isConstruct = false, bool isTrap = false) {
 		Random random = new();
 
 		List<ElementEnum> randomElements = [];
-		randomElements.Add(GetRandomElement(!isConstruct));
+		randomElements.Add(GetRandomElement([.. randomElements], !isConstruct));
 		if (random.Next(0, 3) == 0) {
-			ElementEnum secondRandomElement = GetRandomElement();
+			ElementEnum secondRandomElement = GetRandomElement([.. randomElements], !isConstruct);
 			if ((randomElements[0] != ElementEnum.HOLY || secondRandomElement != ElementEnum.UNHOLY) &&
 					(randomElements[0] != ElementEnum.UNHOLY || secondRandomElement != ElementEnum.HOLY)
 			) {
@@ -242,9 +245,13 @@ public class Stats {
 		}
 
 		List<RaceEnum> randomRaces = [];
-		randomRaces.Add(isConstruct ? GetRandomConstructRace() : GetRandomNonConstructRace());
+		randomRaces.Add(
+			isConstruct ? GetRandomConstructRace([.. randomRaces]) : GetRandomNonConstructRace([.. randomRaces])
+		);
 		if (random.Next(0, 3) == 0) {
-			randomRaces.Add(isConstruct ? GetRandomRace() : GetRandomNonConstructRace());
+			randomRaces.Add(
+				isConstruct ? GetRandomRace([.. randomRaces]) : GetRandomNonConstructRace([.. randomRaces])
+			);
 		}
 
 		bool isHuman = false;
@@ -261,9 +268,9 @@ public class Stats {
 		if (isHuman) {
 			int randomVarForClasses = random.Next(0, 5);
 			if (randomVarForClasses > 0) {
-				randomClasses.Add(GetRandomClass());
+				randomClasses.Add(GetRandomClass([.. randomClasses]));
 				if (randomVarForClasses == 4) {
-					randomClasses.Add(GetRandomClass());
+					randomClasses.Add(GetRandomClass([.. randomClasses]));
 				}
 			}
 		}
@@ -301,7 +308,7 @@ public class Stats {
 			GetRandomName(),
 			[.. randomElements],
 			[.. randomClasses],
-	  [.. randomRaces],
+		  [.. randomRaces],
 			[
 				Command.CommandType.APPROACH,
 				Command.CommandType.AVOID,
@@ -318,10 +325,10 @@ public class Stats {
 		Random random = new();
 
 		List<ElementEnum> randomSupernaturalElements = [];
-		randomSupernaturalElements.Add(GetRandomElement(false));
+		randomSupernaturalElements.Add(GetRandomElement([.. randomSupernaturalElements], false));
 		List<ElementEnum> randomNaturalElements = [];
 		if (random.Next(0, 3) == 0) {
-			ElementEnum secondRandomElement = GetRandomElement();
+			ElementEnum secondRandomElement = GetRandomElement([.. randomSupernaturalElements], false);
 			if ((randomSupernaturalElements[0] != ElementEnum.HOLY || secondRandomElement != ElementEnum.UNHOLY) &&
 					(randomSupernaturalElements[0] != ElementEnum.UNHOLY || secondRandomElement != ElementEnum.HOLY)
 			) {
@@ -362,33 +369,52 @@ public class Stats {
 		);
 	}
 
-	private static ElementEnum GetRandomElement(bool allowNatural = true) {
-		Random random = new();
-		if (allowNatural) {
-			return (ElementEnum) random.Next(0, Enum.GetNames(typeof(ElementEnum)).Length);
-		}
-		
-		List<ElementEnum> supernaturalElements = [];
+	private static ElementEnum GetRandomElement(ElementEnum[] excludingElements, bool allowNatural = true) {
+		List<ElementEnum> availableToChoose = [];
 		for (int i = 0; i < Enum.GetNames(typeof(ElementEnum)).Length; i++) {
-			if (!IsElementNatural((ElementEnum) i)) {
-				supernaturalElements.Add((ElementEnum) i);
+			ElementEnum element = (ElementEnum) i;
+			if (excludingElements.Contains(element)) {
+				continue;
+			}
+			if (allowNatural || !IsElementNatural(element)) {
+				availableToChoose.Add(element);
 			}
 		}
-		return supernaturalElements[random.Next(0, supernaturalElements.Count)];
+
+		Random random = new();
+		return availableToChoose[random.Next(0, availableToChoose.Count)];
 	}
 
-	private static ClassEnum GetRandomClass() {
+	private static ClassEnum GetRandomClass(ClassEnum[] excludingClasses) {
+		List<ClassEnum> availableToChoose = [];
+		for (int i = 0; i < Enum.GetNames(typeof(ClassEnum)).Length; i++) {
+			ClassEnum classEnum = (ClassEnum) i;
+			if (excludingClasses.Contains(classEnum)) {
+				continue;
+			}
+			availableToChoose.Add(classEnum);
+		}
+
 		Random random = new();
-		return (ClassEnum) random.Next(0, Enum.GetNames(typeof(ClassEnum)).Length);
+		return availableToChoose[random.Next(0, availableToChoose.Count)];
 	}
 
-	private static RaceEnum GetRandomRace() {
+	private static RaceEnum GetRandomRace(RaceEnum[] excludingRaces) {
+		List<RaceEnum> availableToChoose = [];
+		for (int i = 0; i < Enum.GetNames(typeof(RaceEnum)).Length; i++) {
+			RaceEnum race = (RaceEnum) i;
+			if (excludingRaces.Contains(race)) {
+				continue;
+			}
+			availableToChoose.Add(race);
+		}
+
 		Random random = new();
-		return (RaceEnum) random.Next(0, Enum.GetNames(typeof(RaceEnum)).Length);
+		return availableToChoose[random.Next(0, availableToChoose.Count)];
 	}
 
 	private static RaceEnum[] sNonConstructRaces = null;
-	private static RaceEnum GetRandomNonConstructRace() {
+	private static RaceEnum GetRandomNonConstructRace(RaceEnum[] excludingRaces) {
 		if (sNonConstructRaces == null) {
 			List<RaceEnum> nonConstructRaces = [];
 			foreach (RaceEnum race in Enum.GetValues(typeof(RaceEnum))) {
@@ -398,12 +424,21 @@ public class Stats {
 			}
 			sNonConstructRaces = [.. nonConstructRaces.Distinct()];
 		}
+
+		List<RaceEnum> availableToChoose = [];
+		foreach (RaceEnum race in sNonConstructRaces) {
+			if (excludingRaces.Contains(race)) {
+				continue;
+			}
+			availableToChoose.Add(race);
+		}
+
 		Random random = new();
-		return sNonConstructRaces[random.Next(0, sNonConstructRaces.Length)];
+		return availableToChoose[random.Next(0, availableToChoose.Count)];
 	}
 
 	private static RaceEnum[] sConstructRaces = null;
-	private static RaceEnum GetRandomConstructRace() {
+	private static RaceEnum GetRandomConstructRace(RaceEnum[] excludingRaces) {
 		if (sConstructRaces == null) {
 			List<RaceEnum> constructRaces = [];
 			foreach (RaceEnum race in Enum.GetValues(typeof(RaceEnum))) {
@@ -413,8 +448,17 @@ public class Stats {
 			}
 			sConstructRaces = [.. constructRaces.Distinct()];
 		}
+
+		List<RaceEnum> availableToChoose = [];
+		foreach (RaceEnum race in sConstructRaces) {
+			if (excludingRaces.Contains(race)) {
+				continue;
+			}
+			availableToChoose.Add(race);
+		}
+
 		Random random = new();
-		return sConstructRaces[random.Next(0, sConstructRaces.Length)];
+		return availableToChoose[random.Next(0, availableToChoose.Count)];
 	}
 
 	private static string[] sRandomNames = null;

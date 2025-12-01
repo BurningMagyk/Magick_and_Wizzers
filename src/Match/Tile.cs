@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Match {
-public class Tile {
+public class Tile : ITarget {
 	public const int STRT_COST = 5, DIAG_COST = 7;
 	public const int PARTITION_TYPE_COUNT = 3;
 	public enum PartitionTypeEnum { CARUCATE, VIRGATE, BOVATE, HECTARE, ACRE }
@@ -123,6 +123,10 @@ public class Tile {
 				GD.Print("  " + ((DirectionEnum) i).ToString() + ": null");
 			}
 		}
+	}
+
+	public Tile[] GetTiles(PartitionTypeEnum partition) {
+		return GetTilesWithPartition(partition);
 	}
 
 	public void PrintChildren() {
