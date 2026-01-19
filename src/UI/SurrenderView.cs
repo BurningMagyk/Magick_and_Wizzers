@@ -3,11 +3,6 @@ using System;
 
 namespace UI {
 public partial class SurrenderView : CanvasLayer, IView {
-  public delegate SelectTypeEnum SelectItemDelegate(SelectTypeEnum selectTypeEnum);
-  public SelectItemDelegate SelectItem;
-  public delegate bool GoBackDelegate();
-  public GoBackDelegate GoBack;
-
   public bool Showing { get; private set; }
   public bool InputEnabled { get; set; } = true;
 
@@ -55,9 +50,12 @@ public partial class SurrenderView : CanvasLayer, IView {
       SelectHoveredItem();
     }
     if (Input.IsActionJustPressed("back")) {
-			GoBack?.Invoke();
+			Select?.Invoke(null, WizardStep.SelectType.BACK);
 		}
   }
+
+  public delegate void SelectDelegate(object target, WizardStep.SelectType selectType);
+	public SelectDelegate Select;
 
   public new void Show() {
 	  base.Show();
@@ -84,7 +82,10 @@ public partial class SurrenderView : CanvasLayer, IView {
 
   private void SelectHoveredItem() {
 		// Emits signal to call OnSelectItem, defined in UI class.
-		SelectItem?.Invoke(hoveredItemIndex == 0 ? SelectTypeEnum.SURRENDER : SelectTypeEnum.ALT);
+		Select?.Invoke(
+      null,
+      hoveredItemIndex == 0 ? WizardStep.SelectType.SURRENDER : WizardStep.SelectType.BACK
+    );
   }
 
   private void HoverDefaultItem() {

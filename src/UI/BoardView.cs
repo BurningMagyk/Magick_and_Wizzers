@@ -84,50 +84,32 @@ public partial class BoardView : CanvasLayer, IView {
 		Joystick[0] = new Vector2I(horizontalPan, verticalPan);
 
 		if (Input.IsActionJustPressed("pass")) {
-			SelectMisc?.Invoke(SelectTypeEnum.FINAL);
+			Select?.Invoke(null, WizardStep.SelectType.PASS);
 		}
 		if (Input.IsActionJustPressed("select")) {
 			if (mHoveredPiece != null) {
-				SelectPiece?.Invoke(mHoveredPiece, mCurrentCommand, SelectTypeEnum.FINAL);
+				Select?.Invoke(mHoveredPiece, WizardStep.SelectType.STANDARD);
 			} else if (HoveredTile != null) {
-				SelectTile?.Invoke(HoveredTile, mCurrentCommand, SelectTypeEnum.FINAL);
+				Select?.Invoke(HoveredTile, WizardStep.SelectType.STANDARD);
 			}
 		}
 		if (Input.IsActionJustPressed("hand")) {
-			SelectMisc?.Invoke(SelectTypeEnum.ALT);
+			Select?.Invoke(null, WizardStep.SelectType.HAND);
 		}
 		if (Input.IsActionJustPressed("detail")) {
 			if (mHoveredPiece != null) {
-				SelectPiece?.Invoke(mHoveredPiece, null, SelectTypeEnum.DETAIL);
+				Select?.Invoke(mHoveredPiece, WizardStep.SelectType.DETAIL);
 			} else if (HoveredTile != null) {
-				SelectTile?.Invoke(HoveredTile, null, SelectTypeEnum.DETAIL);
+				Select?.Invoke(HoveredTile, WizardStep.SelectType.DETAIL);
 			}
 		}
 		if (Input.IsActionJustPressed("surrender")) {
-			SelectMisc?.Invoke(SelectTypeEnum.SURRENDER);
+			Select?.Invoke(null, WizardStep.SelectType.SURRENDER);
 		}
   }
 
-  public delegate SelectTypeEnum SelectPieceDelegate(
-		Display.Piece piece,
-		Command command,
-		SelectTypeEnum selectTypeEnum
-	);
-  public SelectPieceDelegate SelectPiece;
-  public delegate SelectTypeEnum SelectTileDelegate(
-		Display.ITile tile,
-		Command command,
-		SelectTypeEnum selectTypeEnum
-	);
-  public SelectTileDelegate SelectTile;
-  public delegate SelectTypeEnum SelectActivityDelegate(
-		Activity activity,
-		Command command,
-		SelectTypeEnum selectTypeEnum
-	);
-  public SelectActivityDelegate SelectActivity;
-	public delegate SelectTypeEnum SelectMiscDelegate(SelectTypeEnum selectTypeEnum);
-	public SelectMiscDelegate SelectMisc;
+	public delegate void SelectDelegate(object target, WizardStep.SelectType selectType);
+	public SelectDelegate Select;
 
   public void SetViewPortRect(Rect2 viewPortRect) {
 	  crosshair.Position = new Vector2(viewPortRect.Size.X / 2, viewPortRect.Size.Y / 2);

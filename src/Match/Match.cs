@@ -73,7 +73,6 @@ public class Match {
 
 	public void OnPassRound() {
 		// Force every user into ViewStateEnum.THEATER.
-		mUi.ProgressToTheater();
 		mResolving = true;
 	}
 
@@ -100,7 +99,7 @@ public class Match {
 		mResolving = false;
 		mAccumulatedTime = 0;
 		mAccumulatedTicks = 0;
-		mUi.ProgressFromTheater();
+		// mUi.ProgressFromTheater();
 	}
 
 	private Piece GenerateDefaultMaster(string playerName, Main.Card card, Vector2I position) {

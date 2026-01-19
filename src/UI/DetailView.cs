@@ -3,28 +3,24 @@ using System;
 
 namespace UI {
 public partial class DetailView : CanvasLayer, IView {
-  public delegate SelectTypeEnum SelectItemDelegate(
-	  SelectTypeEnum selectTypeEnum
-  );
-  public SelectItemDelegate SelectItem;
   public bool Showing { get; private set; }
   public bool InputEnabled { get; set; } = true;
 
-  public delegate bool GoBackDelegate();
-  public GoBackDelegate GoBack;
-
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
-	Hide();
+	  Hide();
   }
 
   public override void _Input(InputEvent @event) {
 	if (!Showing) { return; }
 
-	if (Input.IsActionJustPressed("detail") || Input.IsActionJustPressed("back")) {
-	  GoBack?.Invoke();
-	}
+	  if (Input.IsActionJustPressed("detail") || Input.IsActionJustPressed("back")) {
+		Select?.Invoke(null, WizardStep.SelectType.BACK);
+	  }
   }
+
+  public delegate void SelectDelegate(object target, WizardStep.SelectType selectType);
+	public SelectDelegate Select;
 
   public new void Show() {
 	base.Show();

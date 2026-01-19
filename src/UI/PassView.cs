@@ -3,10 +3,6 @@ using System;
 
 namespace UI {
 public partial class PassView : CanvasLayer, IView {
-  public delegate void ConfirmPassDelegate();
-  public ConfirmPassDelegate ConfirmPass;
-  public delegate bool GoBackDelegate();
-  public GoBackDelegate GoBack;
 
   public bool Showing { get; private set; }
   public bool InputEnabled { get; set; } = true;
@@ -22,12 +18,15 @@ public partial class PassView : CanvasLayer, IView {
     if (!Showing) { return; }
 
     if (Input.IsActionJustPressed("pass")) {
-      ConfirmPass?.Invoke();
+      Select?.Invoke(null, WizardStep.SelectType.STANDARD);
     }
     if (Input.IsActionJustPressed("back")) {
-			GoBack?.Invoke();
+			Select?.Invoke(null, WizardStep.SelectType.BACK);
 		}
   }
+
+  public delegate void SelectDelegate(object target, WizardStep.SelectType selectType);
+	public SelectDelegate Select;
 
   public new void Show() {
 	  base.Show();

@@ -37,7 +37,7 @@ public class Piece : ITarget {
   // Called when the node enters the scene tree for the first time.
   public Piece(Stats stats, Display.Piece displayNode) {
 		Name = stats.Name + " " + sNextIdForPiece++;
-		mDisplayNode = displayNode;
+	 	mDisplayNode = displayNode;
 		displayNode.SetGamePiece(this, 0, 0); // Just one central game piece for now.
 		mCommands = new Command[stats.AvailableCommandTypes.Length];
 		for (int i = 0; i < stats.AvailableCommandTypes.Length; i++) {

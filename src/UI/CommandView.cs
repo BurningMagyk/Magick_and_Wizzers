@@ -8,11 +8,6 @@ public partial class CommandView : CanvasLayer, IView {
 	private const int MAX_COMMAND_COUNT = 5;
 	private const int SPACING = 20;
 
-  public delegate SelectTypeEnum SelectCommandDelegate(Command command, SelectTypeEnum selectTypeEnum);
-  public SelectCommandDelegate SelectCommand;
-  public delegate bool GoBackDelegate();
-  public GoBackDelegate GoBack;
-
   public bool Showing { get; private set; }
   public bool InputEnabled { get; set; } = true;
 
@@ -55,9 +50,12 @@ public partial class CommandView : CanvasLayer, IView {
 			DetailHoveredItem();
 		}
 		if (Input.IsActionJustPressed("back")) {
-			GoBack?.Invoke();
+			Select?.Invoke(null, WizardStep.SelectType.BACK);
 		}
   }
+
+	public delegate void SelectDelegate(object target, WizardStep.SelectType selectType);
+	public SelectDelegate Select;
 
   public new void Show() {
 		// Hover the current item. We expect SetCommandTypes to have been called before Show.
@@ -183,12 +181,12 @@ public partial class CommandView : CanvasLayer, IView {
 
   private void SelectHoveredItem() {
 		// Emits signal to call OnSelectItem, defined in UI class.
-		SelectCommand?.Invoke(itemCommands[items[hoveredItemIndex]], SelectTypeEnum.FINAL);
+		Select?.Invoke(itemCommands[items[hoveredItemIndex]], WizardStep.SelectType.STANDARD);
   }
 
 	private void DetailHoveredItem() {
 		// Emits signal to call OnSelectItem, defined in UI class.
-		SelectCommand?.Invoke(itemCommands[items[hoveredItemIndex]], SelectTypeEnum.DETAIL);
+		Select?.Invoke(itemCommands[items[hoveredItemIndex]], WizardStep.SelectType.DETAIL);
 	}
 
   private int GetUppermostItemIndex(int startIndex = 0) {

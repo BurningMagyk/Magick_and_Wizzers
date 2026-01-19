@@ -13,9 +13,9 @@ public class Command {
 	  INTERACT, // Interact with any target
 
 	  // Reactive commands
-	  INTERCEPT, // Execute command when actor enters range of recipient
-	  LINGER, // Execute command when actor leaves range of recipient
-	  BRIDLE, // Execute command when actor interacts with recipient
+	  INTERCEPT, // Execute command when target enters range of recipient
+	  LINGER, // Execute command when target leaves range of recipient
+	  BRIDLE, // Execute command when target interacts with recipient
 	
 	  // Passive commands
 	  AMBLE, // Move slowly
@@ -35,7 +35,7 @@ public class Command {
 
 	// For commands that need UI input from multiple views.
 	// Will typically just be [ViewStateEnum.DESIGNATE_BOARD] unless it's CommandType.INTERACT.
-  public ViewStateEnum[] ViewSteps { get; private set; }
+  public IView.State[] ViewSteps { get; private set; }
   public TargetOption[] TargetOptions { get; private set; }
 
   private readonly List<ITarget> targets = [];
@@ -45,70 +45,56 @@ public class Command {
 	
   public Command(
 	  CommandType type,
-	int maxTargetCount,
-	Ability sourceAbility = null
+		int maxTargetCount,
+		Ability sourceAbility = null
   ) {
 	  Type = type;
-	MaxTargetCount = maxTargetCount;
-	Reset();
-  }
-
-  public ViewStateEnum StepView() {
-	  if (ViewSteps.Length == 0) {
-		  return ViewStateEnum.NONE;
-	  }
-
-	  ViewStateEnum viewStep = ViewSteps[0];
-
-	  ViewStateEnum[] temp = new ViewStateEnum[ViewSteps.Length - 1];
-	  Array.Copy(ViewSteps, 1, temp, 0, temp.Length);
-	  ViewSteps = temp;
-
-	  return viewStep;
+		MaxTargetCount = maxTargetCount;
+		Reset();
   }
 
   public void Relax() {
-	IsRelaxed = true;
-	IsComplete = true;
+		IsRelaxed = true;
+		IsComplete = true;
   }
 
   public bool FeedTarget(ITarget target) {
-	targets.Add(target);
-	// For now, just accept one target and then consider the command fully fed.
-	IsComplete = true;
-	return true;
+		targets.Add(target);
+		// For now, just accept one target and then consider the command fully fed.
+		IsComplete = true;
+		return true;
   }
 
   public bool FeedSpec(string spec) {
-	this.spec = spec;
-	IsComplete = true;
-	return true;
+		this.spec = spec;
+		IsComplete = true;
+		return true;
   }
 
   public bool FeedRange(RangeEnum range) {
-	Range = range;
-	IsComplete = true;
-	return true;
+		Range = range;
+		IsComplete = true;
+		return true;
   }
 
   public bool FeedActor(Piece actor) {
-	Actor = actor;
-	IsComplete = true;
-	return true;
+		Actor = actor;
+		IsComplete = true;
+		return true;
   }
 
   public void FeedTrigger(Command command) {
-	triggers.Add(command);
+		triggers.Add(command);
   }
 
   public void Reset() {
-	Actor = null;
-	Range = RangeEnum.NOT_APPLICABLE;
-	targets.Clear();
-	triggers.Clear();
-	ViewSteps = DetermineViewSteps(out TargetOption[] targetOptions);
-	TargetOptions = targetOptions;
-	IsComplete = false;
+		Actor = null;
+		Range = RangeEnum.NOT_APPLICABLE;
+		targets.Clear();
+		triggers.Clear();
+		// ViewSteps = DetermineViewSteps(out TargetOption[] targetOptions);
+		// TargetOptions = targetOptions;
+		IsComplete = false;
   }
 
   public ITarget[] GetTargets() {
@@ -125,85 +111,85 @@ public class Command {
 		   Type == CommandType.INTERACT;
   }
 
-  public ViewStateEnum[] DetermineViewSteps(out TargetOption[] targetOptions) {
-	if (Type == CommandType.APPROACH || Type == CommandType.AVOID) {
-	  List<ViewStateEnum> steps = [];
-	  List<TargetOption> targetOptionsList = [];
-	  for (int i = 0; i < MaxTargetCount * 2; i++) {
-		steps.Add(ViewStateEnum.DESIGNATE_BOARD);
-		targetOptionsList.Add(new TargetOption([typeof(Tile), typeof(Piece), typeof(Activity)]));
-	  }
-	  targetOptions = [.. targetOptionsList];
-	  return [.. steps];
-	} else if (
-	  Type == CommandType.OBSTRUCT ||
-	  Type == CommandType.LINGER ||
-	  Type == CommandType.INTERCEPT ||
-	  Type == CommandType.BRIDLE
-	) {
-	  List<ViewStateEnum> steps = [];
-	  List<TargetOption> targetOptionsList = [];
-	  for (int i = 0; i < MaxTargetCount; i++) {
-		steps.Add(ViewStateEnum.DESIGNATE_BOARD);
-		// The actors.
-		targetOptionsList.Add(new TargetOption([typeof(Piece), typeof(Activity)]));
-	  }
-	  for (int i = 0; i < MaxTargetCount; i++) {
-		steps.Add(ViewStateEnum.DESIGNATE_BOARD);
-		// The recipients.
-		targetOptionsList.Add(new TargetOption([typeof(Tile), typeof(Piece), typeof(Activity)]));
-	  }
-	  if (Type != CommandType.OBSTRUCT) {
-		for (int i = 0; i < MaxTargetCount; i++) {
-		  // Choose which other commands will be triggered by this one.
-		  steps.Add(ViewStateEnum.COMMAND_LIST);
-		  targetOptionsList.Add(new TargetOption([typeof(Command)]));
-		}
-	  }
-	  targetOptions = [.. targetOptionsList];
-	  return [.. steps];
-	} else if (Type == CommandType.INTERACT) {
-	  List<ViewStateEnum> steps = [];
-	  List<TargetOption> targetOptionsList = [];
-	  if (SourceAbility == null) {
-		// Basic attack.
-		for (int i = 0; i < MaxTargetCount; i++) {
-		  steps.Add(ViewStateEnum.DESIGNATE_BOARD);
-		  targetOptionsList.Add(new TargetOption([typeof(Tile), typeof(Piece), typeof(Activity)]));
-		}
-	  } else {
-		// Ability.
-		for (int i = 0; i < SourceAbility.TargetOptions.Length; i++) {
-		  steps.Add(UI.UI.DetermineViewStateForTargetTypes(SourceAbility.TargetOptions[i].Types));
-		}
-	  }
-	  if (targetOptionsList.Count == 0 && SourceAbility.TargetOptions.Length != steps.Count) {
-		throw new Exception(
-          "Mismatch between number of target options and number of view steps for INTERACT command."
-		);
-	  }
-	  targetOptions = SourceAbility.TargetOptions;
-	  return [.. steps];
-	}
-	targetOptions = [];
-	return [];
-  }
+  // public IView.State[] DetermineViewSteps(out TargetOption[] targetOptions) {
+	// 	if (Type == CommandType.APPROACH || Type == CommandType.AVOID) {
+	// 		List<IView.State> steps = [];
+	// 		List<TargetOption> targetOptionsList = [];
+	// 		for (int i = 0; i < MaxTargetCount * 2; i++) {
+	// 		steps.Add(IView.State.DESIGNATE_BOARD);
+	// 		targetOptionsList.Add(new TargetOption([typeof(Tile), typeof(Piece), typeof(Activity)]));
+	// 		}
+	// 		targetOptions = [.. targetOptionsList];
+	// 		return [.. steps];
+	// 	} else if (
+	// 		Type == CommandType.OBSTRUCT ||
+	// 		Type == CommandType.LINGER ||
+	// 		Type == CommandType.INTERCEPT ||
+	// 		Type == CommandType.BRIDLE
+	// 	) {
+	// 		List<IView.State> steps = [];
+	// 		List<TargetOption> targetOptionsList = [];
+	// 		for (int i = 0; i < MaxTargetCount; i++) {
+	// 			steps.Add(IView.State.DESIGNATE_BOARD);
+	// 			// The actors.
+	// 			targetOptionsList.Add(new TargetOption([typeof(Piece), typeof(Activity)]));
+	// 		}
+	// 		for (int i = 0; i < MaxTargetCount; i++) {
+	// 			steps.Add(IView.State.DESIGNATE_BOARD);
+	// 			// The recipients.
+	// 			targetOptionsList.Add(new TargetOption([typeof(Tile), typeof(Piece), typeof(Activity)]));
+	// 		}
+	// 		if (Type != CommandType.OBSTRUCT) {
+	// 			for (int i = 0; i < MaxTargetCount; i++) {
+	// 				// Choose which other commands will be triggered by this one.
+	// 				steps.Add(ViewStateEnum.COMMAND_LIST);
+	// 				targetOptionsList.Add(new TargetOption([typeof(Command)]));
+	// 			}
+	// 		}
+	// 		targetOptions = [.. targetOptionsList];
+	// 		return [.. steps];
+	// 	} else if (Type == CommandType.INTERACT) {
+	// 		List<ViewStateEnum> steps = [];
+	// 		List<TargetOption> targetOptionsList = [];
+	// 		if (SourceAbility == null) {
+	// 			// Basic attack.
+	// 			for (int i = 0; i < MaxTargetCount; i++) {
+	// 				steps.Add(ViewStateEnum.DESIGNATE_BOARD);
+	// 				targetOptionsList.Add(new TargetOption([typeof(Tile), typeof(Piece), typeof(Activity)]));
+	// 			}
+	// 		} else {
+	// 			// Ability.
+	// 			for (int i = 0; i < SourceAbility.TargetOptions.Length; i++) {
+	// 				steps.Add(UI.UI.DetermineViewStateForTargetTypes(SourceAbility.TargetOptions[i].Types));
+	// 			}
+	// 		}
+	// 		if (targetOptionsList.Count == 0 && SourceAbility.TargetOptions.Length != steps.Count) {
+	// 			throw new Exception(
+	// 						"Mismatch between number of target options and number of view steps for INTERACT command."
+	// 			);
+	// 		}
+	// 		targetOptions = SourceAbility.TargetOptions;
+	// 		return [.. steps];
+	// 	}
+	// 	targetOptions = [];
+	// 	return [];
+  // }
 
   public string Describe() {
-	if (Type == CommandType.LAYER) {
-	  return null;
-	}
+		if (Type == CommandType.LAYER) {
+			return null;
+		}
 
-	if (Actor == null) {
-	  return null;
-	}
+		if (Actor == null) {
+			return null;
+		}
 
-	string mainDescription = $"{Type} command for {Actor.Name}";
-	if (targets.Count == 0) {
-	  return mainDescription + " with no targets.";
-	}
-	return mainDescription + " targeting the following: " +
-	  string.Join(", ", targets);
+		string mainDescription = $"{Type} command for {Actor.Name}";
+		if (targets.Count == 0) {
+			return mainDescription + " with no targets.";
+		}
+		return mainDescription + " targeting the following: " +
+			string.Join(", ", targets);
   }
 }
 }

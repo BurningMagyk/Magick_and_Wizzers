@@ -1,11 +1,12 @@
 using System;
 
 namespace Match {
-public class TargetOption {
-  public Type[] Types { get; set; }
-
-  public TargetOption(Type[] types) {
-    Types = types;
-  }
+public enum TargetOption {
+  NONE,
+  TILE,
+  PIECE,
+  ACTIVITY,
+  CARD,
+  ITEM
 }
 }

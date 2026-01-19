@@ -9,15 +9,6 @@ public partial class HandView : CanvasLayer, IView {
   
   public enum HandViewMode { BROWSE, SELECTED }
 
-	public delegate SelectTypeEnum SelectCardDelegate(
-		Card card,
-		Command command,
-		SelectTypeEnum selectTypeEnum
-	);
-  public SelectCardDelegate SelectCard;
-  public delegate bool GoBackDelegate();
-  public GoBackDelegate GoBack;
-
   public bool Showing { get; private set; }
 	public bool InputEnabled { get; set; } = true;
   
@@ -61,9 +52,12 @@ public partial class HandView : CanvasLayer, IView {
 			SelectHoveredCard(true);
 		}
 		if (Input.IsActionJustPressed("hand") || Input.IsActionJustPressed("back")) {
-			GoBack?.Invoke();
+			Select?.Invoke(null, WizardStep.SelectType.BACK);
 		}
   }
+
+	public delegate void SelectDelegate(object target, WizardStep.SelectType selectType);
+	public SelectDelegate Select;
 
   public new void Show() {
 	  base.Show();
@@ -187,10 +181,9 @@ public partial class HandView : CanvasLayer, IView {
 		}
 
 		// Emits signal to call OnSelectCard, defined in UI class.
-		SelectCard?.Invoke(
+		Select?.Invoke(
 			cardsInHand[hoveredCardIndex],
-			mCurrentCommand,
-			forDetail ? SelectTypeEnum.DETAIL : SelectTypeEnum.FINAL
+			forDetail ? WizardStep.SelectType.DETAIL : WizardStep.SelectType.STANDARD
 		);
   }
 
