@@ -166,7 +166,7 @@ public class Stats {
 	) { }
 
   public bool IsCreature() {
-	  return races.Length > 0;
+	  return races != null && races.Length > 0;
   }
 	public int GetAbilityCount() {
 		return abilities.Length;

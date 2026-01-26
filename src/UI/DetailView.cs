@@ -11,11 +11,11 @@ public partial class DetailView : CanvasLayer, IView {
 	  Hide();
   }
 
-  public override void _Input(InputEvent @event) {
+  public void Input(UI.InputType inputType, bool press) {
 	if (!Showing) { return; }
 
-	  if (Input.IsActionJustPressed("detail") || Input.IsActionJustPressed("back")) {
-		Select?.Invoke(null, WizardStep.SelectType.BACK);
+	  if (inputType == UI.InputType.DETAIL && press) {
+		  Select?.Invoke(null, WizardStep.SelectType.BACK);
 	  }
   }
 
@@ -23,15 +23,15 @@ public partial class DetailView : CanvasLayer, IView {
 	public SelectDelegate Select;
 
   public new void Show() {
-	base.Show();
+	  base.Show();
 
-	Showing = true;
+	  Showing = true;
   }
 
   public new void Hide() {
-	base.Hide();
+	  base.Hide();
 
-	Showing = false;
+	  Showing = false;
   }
 
   public void SetViewPortRect(Rect2 viewPortRect) {

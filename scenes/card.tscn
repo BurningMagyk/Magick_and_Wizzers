@@ -9,6 +9,7 @@ layout_mode = 3
 anchors_preset = 0
 offset_right = 170.0
 offset_bottom = 224.0
+rotation = -0.0027247085
 script = ExtResource("1_auth0")
 
 [node name="Background" type="ColorRect" parent="."]

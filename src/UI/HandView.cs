@@ -36,22 +36,22 @@ public partial class HandView : CanvasLayer, IView {
   // Called every frame. 'delta' is the elapsed time since the previous frame.
   public override void _Process(double delta) { }
 
-  public override void _Input(InputEvent @event) {
+  public void Input(UI.InputType inputType, bool press) {
 		if (!Showing || !InputEnabled) { return; }
 
-		if (Input.IsActionJustPressed("d_left")) {
+		if (inputType == UI.InputType.D_LEFT && press) {
 			HoverCard(Main.DirectionEnum.WEST);
 		}
-		if (Input.IsActionJustPressed("d_right")) {
+		if (inputType == UI.InputType.D_RIGHT && press) {
 			HoverCard(Main.DirectionEnum.EAST);
 		}
-		if (Input.IsActionJustPressed("select")) {
+		if (inputType == UI.InputType.SELECT && press) {
 			SelectHoveredCard(false);
 		}
-		if (Input.IsActionJustPressed("detail")) {
+		if (inputType == UI.InputType.DETAIL && press) {
 			SelectHoveredCard(true);
 		}
-		if (Input.IsActionJustPressed("hand") || Input.IsActionJustPressed("back")) {
+		if (inputType == UI.InputType.HAND && press) {
 			Select?.Invoke(null, WizardStep.SelectType.BACK);
 		}
   }
@@ -173,7 +173,7 @@ public partial class HandView : CanvasLayer, IView {
 		hoveredCard.Hover();
   }
 
-  private void SelectHoveredCard(bool forDetail) {
+  private void SelectHoveredCard(bool forDetail) { // TODO - should be progressing to next WizardStep
 		if (hoveredCardIndex == -1
 			|| hoveredCardIndex >= cardsInHand.Length
 			|| cardsInHand[hoveredCardIndex] == null) {

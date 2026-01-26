@@ -14,15 +14,12 @@ public partial class PassView : CanvasLayer, IView {
 	  Hide();
   }
 
-  public override void _Input(InputEvent @event) {
+  public void Input(UI.InputType inputType, bool press) {
     if (!Showing) { return; }
 
-    if (Input.IsActionJustPressed("pass")) {
+    if (inputType == UI.InputType.PASS && press) {
       Select?.Invoke(null, WizardStep.SelectType.STANDARD);
     }
-    if (Input.IsActionJustPressed("back")) {
-			Select?.Invoke(null, WizardStep.SelectType.BACK);
-		}
   }
 
   public delegate void SelectDelegate(object target, WizardStep.SelectType selectType);

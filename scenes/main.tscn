@@ -75,9 +75,11 @@ offset_right = 200.0
 offset_bottom = 150.0
 
 [node name="Hand View" type="CanvasLayer" parent="UI"]
+visible = false
 script = ExtResource("7_dvira")
 
 [node name="Command View" type="CanvasLayer" parent="UI"]
+visible = false
 script = ExtResource("14_xwtol")
 
 [node name="Background" type="TextureRect" parent="UI/Command View"]
@@ -85,6 +87,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="Pass View" type="CanvasLayer" parent="UI"]
+visible = false
 script = ExtResource("16_muem4")
 
 [node name="tmp" type="RichTextLabel" parent="UI/Pass View"]
@@ -102,6 +105,7 @@ grow_vertical = 2
 text = "Placeholder Text for Pass View"
 
 [node name="Surrender View" type="CanvasLayer" parent="UI"]
+visible = false
 script = ExtResource("17_dp3eg")
 
 [node name="Message" type="RichTextLabel" parent="UI/Surrender View"]
@@ -120,6 +124,7 @@ text = "DO YOU WISH
 TO SURRENDER?"
 
 [node name="Detail View" type="CanvasLayer" parent="UI"]
+visible = false
 script = ExtResource("15_14yq0")
 
 [node name="tmp" type="RichTextLabel" parent="UI/Detail View"]

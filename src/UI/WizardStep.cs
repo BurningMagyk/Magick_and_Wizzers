@@ -3,6 +3,7 @@ using Match;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 
@@ -15,72 +16,78 @@ public class WizardStep {
 	  IView.State.DESIGNATE_HAND,
 	  IView.State.CAST
   ];
+	private static readonly IView.State[] VIEW_STATES_IRREVERSIBLE = [
+	  IView.State.MEANDER_BOARD,
+	  IView.State.THEATER
+	];
 
-  public static readonly WizardStep ROOT = new(null, null, IView.State.MEANDER_BOARD, true);
-  public static readonly WizardStep HAND = new(ROOT, SelectionSpecs.ForHand(null), IView.State.MEANDER_HAND);
-  public static readonly WizardStep PASS = new(ROOT, SelectionSpecs.ForPass(), IView.State.PASS);
+  public static readonly WizardStep ROOT = new(null, IView.State.MEANDER_BOARD);
+  public static readonly WizardStep HAND = new(
+	  ROOT, // Get to HAND from ROOT.
+	  IView.State.MEANDER_HAND,
+		[SelectType.HAND, typeof(Piece)] // User must used HAND key/button on a Piece to get to HAND step.
+  );
+  public static readonly WizardStep PASS = new(
+		ROOT, // Get to PASS from ROOT.
+		IView.State.PASS,
+		[SelectType.PASS] // User must use PASS key/button to get to PASS step.
+	);
   public static readonly WizardStep SURRENDER = new(
-	  ROOT,
-	  SelectionSpecs.ForSurrender(),
-	  IView.State.SURRENDER
+	  ROOT, // Get to SURRENDER from ROOT.
+	  IView.State.SURRENDER,
+		[SelectType.SURRENDER] // User must use SURRENDER key/button to get to SURRENDER step.
   );
   public static readonly WizardStep THEATER = new(
-	  PASS,
-	  SelectionSpecs.ForPass(),
-	  IView.State.THEATER,
-    true
-  );
+	  PASS, // Get to THEATER from PASS.
+	  IView.State.THEATER
+  ); // Does not rely on user input to get to THEATER step.
 
-  private readonly WizardStep prevStep;
-  private readonly Dictionary<SelectionSpecs, WizardStep> nextSteps = [];
-  private readonly bool irreversible;
+  private readonly Dictionary<Specs, WizardStep> nextSteps = [];
 
   public IView.State ViewState { get; private set; }
 
   public WizardStep Progress(object target, SelectType selectType) {
-	  foreach (SelectionSpecs specs in nextSteps.Keys.ToArray()) {
-	    if (specs.Matches(target, selectType)) {
-		    return nextSteps[specs];
-	    }
-	  }
+		foreach (KeyValuePair<Specs, WizardStep> entry in nextSteps) {
+			if (entry.Key.Matches(target, selectType)) {
+				return entry.Value;
+			}
+		}
 	  return null;
   }
 
-  public WizardStep Regress() {
-	  return prevStep;
-  }
-
   private WizardStep(
-    WizardStep prevStep,
-    SelectionSpecs selectionSpecs,
-    IView.State viewState,
-    bool irreversible = false
+	  WizardStep prevStep, // To add this step as a next step of prevStep.
+	  IView.State viewState,
+	  object[] specsArgs = null // What are the specifications for coming to this step.
   ) {
-    // TODO - When we add the method that connects a new step, use this flag to disable the way back.
-    this.irreversible = irreversible;
-
-    if (irreversible) {
-      this.prevStep = null;
-    } else {
-      this.prevStep = prevStep;
-    }
-
 	  ViewState = viewState;
-
-	  if (prevStep != null) {
-		  prevStep.nextSteps[selectionSpecs] = this;
-	  }
 
 	  // Automatically make a detail step for certain view states.
 	  if (VIEW_STATES_WITH_DETAIL.Contains(viewState)) {
-		WizardStep detailStep = new WizardStep(
-		  this,
-		  SelectionSpecs.ForDetail(),
-		  IView.State.DETAIL
-		);
-	  // Selecting DETAIL from the detail step returns to this step.
-	  detailStep.nextSteps[SelectionSpecs.ForDetail()] = this;
+		  WizardStep detailStep = new(
+			  this,
+			  IView.State.DETAIL,
+			  [SelectType.DETAIL, typeof(Card), typeof(Piece), typeof(Tile)]
+		  );
+		  // Selecting DETAIL from the detail step returns to this step.
+		  detailStep.nextSteps[new Specs([SelectType.DETAIL])] = this;
 	  }
+
+		if (prevStep == null) {
+			return;
+		}
+
+		// Automatically set a regression step except for certain view states.
+		if (!VIEW_STATES_IRREVERSIBLE.Contains(viewState)) {
+		  nextSteps[new Specs([SelectType.BACK])] = prevStep;
+		}
+
+		// Set an additional regression step for the detail step.
+		if (viewState == IView.State.DETAIL) {
+			nextSteps[new Specs([SelectType.DETAIL])] = prevStep;
+		}
+
+		prevStep.nextSteps[new Specs(specsArgs)] = this;
   }
 
   public enum SelectType {
@@ -94,103 +101,95 @@ public class WizardStep {
 	  SURRENDER // select button, backspace key
   }
 
-  private class SelectionSpecs {
-	private readonly SelectType selectType;
-	private readonly TargetOption[] targetOptions;
-	private readonly TargetSpecs targetSpecs;
+  private class Specs {
+	  private readonly SelectType selectType = SelectType.STANDARD; // The type of selection made by the user.
+	  private readonly HashSet<Type> classArgs; // Piece, Tile, Card, Activity, etc.
+	  private readonly HashSet<object> statArgs; // Race, Element, Cost, etc.
 
-  private static TargetOption GetTargetOptionFor(object target) {
-	if (target == null) {
-	  return TargetOption.NONE;
-	  } else if (target is Tile || target is Display.ITile) {
-		  return TargetOption.TILE;
-	  } else if (target is Piece || target is Display.Piece) {
-		  return TargetOption.PIECE;
-	  } else if (target is Activity) {
-		  return TargetOption.ACTIVITY;
-	  } else if (target is Card || target is Main.Card) {
-		  return TargetOption.CARD;
-	  } else if (target is Item) {
-		  return TargetOption.ITEM;
-	  } else {
-		  throw new ArgumentException("Target of type \"" + target.GetType().ToString() + "\" is not valid for selection.");
-	  }
-  }
+		public Specs(object[] args) {
+			if (args == null || args.Length == 0) {
+				classArgs = [];
+				statArgs = [];
+				return;
+			}
 
-	private SelectionSpecs(SelectType selectType, TargetOption[] targetOptions, TargetSpecs targetSpecs = null) {
-	  this.selectType = selectType;
-	  if (targetOptions != null && targetOptions.Length == 0) {
-		  throw new ArgumentException("Target options cannot be empty. Make it null if we don't want to check them.");
-	  }
-	  this.targetOptions = targetOptions;
-	  this.targetSpecs = targetSpecs;
-	}
+			List<Type> classArgsList = [];
+			List<object> statArgsList = [];
 
-	public bool Matches(object target, SelectType selectType) {
-	  // The target has an invalid type.
-	  TargetOption targetOption = GetTargetOptionFor(target);
+			foreach (object arg in args) {
+				if (arg == null) {
+					throw new ArgumentException("Specs arguments cannot be null.");
+				} else if (arg is SelectType selectTypeArg) {
+					selectType = selectTypeArg;
+				} else if (arg is Type typeArg) {
+					classArgsList.Add(ToOrthodoxType(typeArg));
+				} else {
+					Type argType = arg.GetType();
+					if (argType.IsEnum && argType.IsNested && argType.DeclaringType == typeof(Main.Stats)) {
+						statArgsList.Add(arg);
+					} else {
+						throw new ArgumentException("Argument of type \"" + argType.ToString() + "\" is not valid for selection.");
+					}
+				}
+			}
 
-	  // The user's select type must be valid for this SelectionSpecs.
-	  if (this.selectType != selectType) {
-		  return false;
-	  }
+			classArgs = [.. classArgsList.Distinct()];
+			statArgs = [.. statArgsList.Distinct()];
+		}
 
-	  // If there are no options to match with, matching the user's select type is enough.
-	  if (targetOptions == null) {
-		  return true;
-	  }
+		public bool Matches(object target, SelectType selectType) {
+			if (this.selectType != selectType) {
+				return false;
+			}
 
-	  // The target must be a valid option for this SelectionSpecs.
-	  if (!targetOptions.Contains(targetOption)) {
-		  return false;
-	  }
+			if (classArgs.Count == 0 && statArgs.Count == 0) {
+				return true;
+			}
 
-	  // If there are no specs to match with, the previous checks are enough.
-	  if (targetSpecs == null) {
-		  return true;
-	  }
+			if (target == null) {
+				return false;
+			}
+			Type targetType = target.GetType();
 
-	  // The target must match the specs for this SelectionSpecs.
-	  return targetSpecs.Matches(target);
-	}
+			if (classArgs.Count > 0) {
+				bool classMatch = false;
+				foreach (Type classArg in classArgs) {
+					//GD.Print("Checking if target type " + ToOrthodoxType(targetType).ToString() + " equals class arg " + classArg.ToString() + ".");
+					if (ToOrthodoxType(targetType) == classArg) {
+						classMatch = true;
+						break;
+					}
+				}
+				if (!classMatch) {
+					return false;
+				}
+			}
 
-	public static SelectionSpecs ForStandard(TargetOption[] targetOptions, TargetSpecs targetSpecs = null) {
-	  return new SelectionSpecs(SelectType.STANDARD, targetOptions, targetSpecs);
-	}
+			if (statArgs.Count > 0) {
+				// TODO - check if target has a Stats member variable, return false if not.
+				foreach (object statArg in statArgs) {
+					// TODO - check that the Stats object includes every statArg, return false if even one is missing.
+				}
+			}
 
-	public static SelectionSpecs ForHand(TargetOption[] targetOptions, TargetSpecs targetSpecs = null) {
-	  return new SelectionSpecs(SelectType.HAND, targetOptions, targetSpecs);
-	}
+			return true;
+		}
 
-	public static SelectionSpecs ForSkip(TargetOption[] targetOptions, TargetSpecs targetSpecs = null) {
-	  return new SelectionSpecs(SelectType.STANDARD_SKIP, targetOptions, targetSpecs);
-	}
-
-	public static SelectionSpecs ForSkip() {
-	  return new SelectionSpecs(SelectType.BACK_SKIP, null, null);
-	}
-
-	public static SelectionSpecs ForBack() {
-	  return new SelectionSpecs(SelectType.BACK, null, null);
-	}
-
-	public static SelectionSpecs ForDetail() {
-	  TargetOption[] options = [
-		  TargetOption.TILE,
-		  TargetOption.PIECE,
-		  TargetOption.CARD
-	  ];
-	  TargetSpecs specs = new();
-	  return new SelectionSpecs(SelectType.DETAIL, options, specs);
-	}
-
-	public static SelectionSpecs ForPass() {
-	  return new SelectionSpecs(SelectType.PASS, null, null);
-	}
-
-	public static SelectionSpecs ForSurrender() {
-	  return new SelectionSpecs(SelectType.SURRENDER, null, null);
-	}
+		private static Type ToOrthodoxType(Type type) {
+			if (typeof(Display.Piece).IsAssignableFrom(type) || typeof(Piece).IsAssignableFrom(type)) {
+				return typeof(Piece);
+			} else if (typeof(Display.ITile).IsAssignableFrom(type) || typeof(Tile).IsAssignableFrom(type)) {
+				return typeof(Tile);
+			} else if (typeof(Main.Card).IsAssignableFrom(type) || typeof(Card).IsAssignableFrom(type)) {
+				return typeof(Main.Card);
+			} else if (typeof(Activity).IsAssignableFrom(type)) {
+				return typeof(Activity);
+			} else if (typeof(Item).IsAssignableFrom(type)) {
+				return typeof(Item);
+			} else {
+				throw new Exception("Unknown type \"" + type.ToString() + "\" for orthodox conversion.");
+			}
+		}
   }
 
   // public static WizardStep Create(WizardStep prevStep, )

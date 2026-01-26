@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using Match;
+using Main;
 
 namespace UI {
 public partial class BoardView : CanvasLayer, IView {
@@ -20,6 +21,7 @@ public partial class BoardView : CanvasLayer, IView {
 	private Label commandInfoDisplay;
   private Display.Piece mHoveredPiece;
 	private Command mCurrentCommand;
+	private bool[] panPressed = [false, false, false, false];
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
@@ -58,52 +60,60 @@ public partial class BoardView : CanvasLayer, IView {
 		}
   }
 
-  public override void _Input(InputEvent @event) {
+  public void Input(UI.InputType inputType, bool press) {
 		if (!Showing || !InputEnabled) { return; }
 
-		if (Input.IsActionJustPressed("d_left")) {
+		if (inputType == UI.InputType.D_LEFT && press) {
 			
 		}
-		if (Input.IsActionJustPressed("d_right")) {
+		if (inputType == UI.InputType.D_RIGHT && press) {
 			
 		}
 
-		int horizontalPan = 0, verticalPan = 0;
-		if (Input.IsActionPressed("pan_left")) {
-			horizontalPan -= 1;
+		int horizontalPan = Joystick[0].X, verticalPan = Joystick[0].Y;
+		if (inputType == UI.InputType.PAN_LEFT) {
+	  panPressed[(int) DirectionEnum.WEST] = press;
+			horizontalPan = press ? -1 : panPressed[(int) DirectionEnum.EAST] ? 1 : 0;
 		}
-		if (Input.IsActionPressed("pan_right")) {
-			horizontalPan += 1;
+		if (inputType == UI.InputType.PAN_RIGHT) {
+			panPressed[(int) DirectionEnum.EAST] = press;
+			horizontalPan = press ? 1 : panPressed[(int) DirectionEnum.WEST] ? -1 : 0;
 		}
-		if (Input.IsActionPressed("pan_up")) {
-			verticalPan -= 1;
+		if (inputType == UI.InputType.PAN_UP) {
+			panPressed[(int) DirectionEnum.NORTH] = press;
+			verticalPan = press ? -1 : panPressed[(int) DirectionEnum.SOUTH] ? 1 : 0;
 		}
-		if (Input.IsActionPressed("pan_down")) {
-			verticalPan += 1;
+		if (inputType == UI.InputType.PAN_DOWN) {
+			panPressed[(int) DirectionEnum.SOUTH] = press;
+			verticalPan = press ? 1 : panPressed[(int) DirectionEnum.NORTH] ? -1 : 0;
 		}
 		Joystick[0] = new Vector2I(horizontalPan, verticalPan);
 
-		if (Input.IsActionJustPressed("pass")) {
+		if (inputType == UI.InputType.PASS && press) {
 			Select?.Invoke(null, WizardStep.SelectType.PASS);
 		}
-		if (Input.IsActionJustPressed("select")) {
+		if (inputType == UI.InputType.SELECT && press) {
 			if (mHoveredPiece != null) {
 				Select?.Invoke(mHoveredPiece, WizardStep.SelectType.STANDARD);
 			} else if (HoveredTile != null) {
 				Select?.Invoke(HoveredTile, WizardStep.SelectType.STANDARD);
 			}
 		}
-		if (Input.IsActionJustPressed("hand")) {
-			Select?.Invoke(null, WizardStep.SelectType.HAND);
+		if (inputType == UI.InputType.HAND && press) {
+			if (mHoveredPiece != null) {
+				Select?.Invoke(mHoveredPiece, WizardStep.SelectType.HAND);
+			} else if (HoveredTile != null) {
+				Select?.Invoke(HoveredTile, WizardStep.SelectType.HAND);
+			}
 		}
-		if (Input.IsActionJustPressed("detail")) {
+		if (inputType == UI.InputType.DETAIL && press) {
 			if (mHoveredPiece != null) {
 				Select?.Invoke(mHoveredPiece, WizardStep.SelectType.DETAIL);
 			} else if (HoveredTile != null) {
 				Select?.Invoke(HoveredTile, WizardStep.SelectType.DETAIL);
 			}
 		}
-		if (Input.IsActionJustPressed("surrender")) {
+		if (inputType == UI.InputType.SURRENDER) {
 			Select?.Invoke(null, WizardStep.SelectType.SURRENDER);
 		}
   }

@@ -34,22 +34,22 @@ public partial class CommandView : CanvasLayer, IView {
 	  Hide();
   }
 
-  public override void _Input(InputEvent @event) {
+  public void Input(UI.InputType inputType, bool press) {
 	  if (!Showing || !InputEnabled) { return; }
 
-	  if (Input.IsActionJustPressed("d_up")) {
+	  if (inputType == UI.InputType.D_UP && press) {
 			HoverItem(Main.DirectionEnum.NORTH);
 		}
-		if (Input.IsActionJustPressed("d_down")) {
+		if (inputType == UI.InputType.D_DOWN && press) {
 			HoverItem(Main.DirectionEnum.SOUTH);
 		}
-		if (Input.IsActionJustPressed("select")) {
+		if (inputType == UI.InputType.SELECT && press) {
 			SelectHoveredItem();
 		}
-		if (Input.IsActionJustPressed("detail")) {
+		if (inputType == UI.InputType.DETAIL && press) {
 			DetailHoveredItem();
 		}
-		if (Input.IsActionJustPressed("back")) {
+		if (inputType == UI.InputType.BACK && press) {
 			Select?.Invoke(null, WizardStep.SelectType.BACK);
 		}
   }

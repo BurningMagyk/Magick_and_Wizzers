@@ -33,25 +33,22 @@ public partial class SurrenderView : CanvasLayer, IView {
 	  Hide();
   }
 
-  public override void _Input(InputEvent @event) {
+  public void Input(UI.InputType inputType, bool press) {
     if (!Showing || !InputEnabled) { return; }
 
-    if (Input.IsActionJustPressed("d_left")) {
+    if (inputType == UI.InputType.D_LEFT && press) {
 			menuItems[1].Unhover();
 		  menuItems[0].Hover();
       hoveredItemIndex = 0;
 		}
-		if (Input.IsActionJustPressed("d_right")) {
+		if (inputType == UI.InputType.D_RIGHT && press) {
       menuItems[0].Unhover();
 		  menuItems[1].Hover();
       hoveredItemIndex = 1;
 		}
-    if (Input.IsActionJustPressed("select")) {
+    if (inputType == UI.InputType.SELECT && press) {
       SelectHoveredItem();
     }
-    if (Input.IsActionJustPressed("back")) {
-			Select?.Invoke(null, WizardStep.SelectType.BACK);
-		}
   }
 
   public delegate void SelectDelegate(object target, WizardStep.SelectType selectType);

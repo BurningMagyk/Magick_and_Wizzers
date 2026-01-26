@@ -36,7 +36,6 @@ public class Command {
 	// For commands that need UI input from multiple views.
 	// Will typically just be [ViewStateEnum.DESIGNATE_BOARD] unless it's CommandType.INTERACT.
   public IView.State[] ViewSteps { get; private set; }
-  public TargetOption[] TargetOptions { get; private set; }
 
   private readonly List<ITarget> targets = [];
   private readonly List<Command> triggers = [];

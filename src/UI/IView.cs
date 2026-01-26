@@ -8,6 +8,7 @@ public interface IView {
 
   void Show();
   void Hide();
+  void Input(UI.InputType inputType, bool press);
   void SetViewPortRect(Rect2 viewPortRect);
 
   public enum State {

@@ -8,6 +8,22 @@ using System.Linq;
 namespace UI {
 public partial class UI : Node {
   private const float CAMERA_SPEED = 1F;
+	private static readonly Dictionary<string, InputType> STRING_TO_INPUT_TYPE = new() {
+		{"select", InputType.SELECT},
+		{"hand", InputType.HAND},
+		{"back", InputType.BACK},
+		{"detail", InputType.DETAIL},
+		{"pass", InputType.PASS},
+		{"surrender", InputType.SURRENDER},
+		{"pan_left", InputType.PAN_LEFT},
+		{"pan_right", InputType.PAN_RIGHT},
+		{"pan_up", InputType.PAN_UP},
+		{"pan_down", InputType.PAN_DOWN},
+		{"d_left", InputType.D_LEFT},
+		{"d_right", InputType.D_RIGHT},
+		{"d_up", InputType.D_UP},
+		{"d_down", InputType.D_DOWN}
+	};
 
   private BoardView mBoardView;
   private HandView mHandView;
@@ -19,6 +35,23 @@ public partial class UI : Node {
 
 	private WizardStep mWizardStep;
   private Vector2 mHoverPoint;
+
+	public enum InputType {
+		SELECT,
+		HAND,
+		BACK,
+		DETAIL,
+		PASS,
+		SURRENDER,
+		PAN_LEFT,
+		PAN_RIGHT,
+		PAN_UP,
+		PAN_DOWN,
+		D_LEFT,
+		D_RIGHT,
+		D_UP,
+		D_DOWN
+	}
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
@@ -51,7 +84,9 @@ public partial class UI : Node {
   }
 
   // Called every frame. 'delta' is the elapsed time since the previous frame.
-  public override void _Process(double delta) { }
+  public override void _Process(double delta) {
+
+	}
 
   public override void _PhysicsProcess(double delta) {
 		Vector3 oldCameraPosition = camera.Position;
@@ -69,9 +104,22 @@ public partial class UI : Node {
   }
 
   public override void _Input(InputEvent @event) {
-		// 	if (Input.IsKeyPressed(Key.G)) {
-		// 		GD.Print("test");
-		// 	}
+		if (@event is not InputEventKey && @event is not InputEventJoypadButton && @event is not InputEventJoypadMotion) {
+			return;
+		}
+
+		foreach (var entry in STRING_TO_INPUT_TYPE) {
+			if (entry.Value == InputType.BACK && Input.IsActionJustPressed(entry.Key)) {
+				OnSelect(null, WizardStep.SelectType.BACK);
+				continue;
+			}
+
+			if (Input.IsActionJustPressed(entry.Key)) {
+				ViewFrom(mWizardStep.ViewState).Input(entry.Value, true);
+			} else if (Input.IsActionJustReleased(entry.Key)) {
+				ViewFrom(mWizardStep.ViewState).Input(entry.Value, false);
+			}
+		}
   }
 
   public delegate void ChangedHoverTypeDelegate(Vector2I hoveredTileCoordinate, int hoveredTilePartitionType);
@@ -112,6 +160,23 @@ public partial class UI : Node {
 	  return mBoardView.HoverPartition;
   }
 
+	public void GoToView(IView.State viewState) {
+		// Hide all views except for board view that we just disable input.
+		mBoardView.InputEnabled = false;
+		mHandView.Hide();
+		mCommandView.Hide();
+		mPassView.Hide();
+		mSurrenderView.Hide();
+		mDetailView.Hide();
+
+		// Show the appropriate view.
+		IView view = ViewFrom(viewState);
+		view.Show();
+		if (view is BoardView) {
+			mBoardView.InputEnabled = true;
+		}
+	}
+
 	private void OnSelect(object target, WizardStep.SelectType selectType) {
 		WizardStep newStep = mWizardStep.Progress(target, selectType);
 		if (newStep == null) {
@@ -119,66 +184,28 @@ public partial class UI : Node {
 			GD.Print("Blocked step progression.");
 		} else {
 			mWizardStep = newStep;
+			// Play sound indicating successful selection.
 			GD.Print("Progressed to new step with view state: " + mWizardStep.ViewState.ToString() + ".");
+		  GoToView(mWizardStep.ViewState);
 		}
 	}
 
-	// public static ViewStateEnum DetermineViewStateForTargetTypes(Type[] targetTypes) {
-	// 	if (targetTypes.Length == 0) {
-	// 		throw new Exception("No target types provided for determining ViewState.");
-	// 	} else if (targetTypes.Length == 1) {
-	// 		return DetermineViewStateForTargetType(targetTypes[0]);
-	// 	} else {
-	// 		List<ViewStateEnum> viewStates = [];
-	// 		foreach (Type targetType in targetTypes) {
-	// 			viewStates.Add(DetermineViewStateForTargetType(targetType));
-	// 		}
-	// 		if (viewStates.Distinct().Count() == 1) {
-	// 			return viewStates[0];
-	// 		} else {
-	// 			throw new Exception(
-	// 				"Multiple differing target types provided for determining ViewState: "
-	// 				+ string.Join(", ", targetTypes.Select(t => t.ToString()))
-	// 				+ "."
-	// 			);
-	// 		}
-	// 	}
-	// }
-
-	// public static ViewStateEnum DetermineViewStateForTargetType(Type targetType) {
-	// 	if (targetType == typeof(Match.Piece)) {
-	// 		return ViewStateEnum.DESIGNATE_BOARD;
-	// 	} else if (targetType == typeof(Tile)) {
-	// 		return ViewStateEnum.DESIGNATE_BOARD;
-	// 	} else if (targetType == typeof(Activity)) {
-	// 		return ViewStateEnum.DESIGNATE_BOARD;
-	// 	} else if (targetType == typeof(Card)) {
-	// 		return ViewStateEnum.DESIGNATE_HAND;
-	// 	} else if (targetType == typeof(string)) {
-	// 		return ViewStateEnum.DESIGNATE_LIST;
-	// 	} else if (targetType == typeof(Command)) {
-	// 		return ViewStateEnum.COMMAND_LIST;
-	// 	} else {
-	// 		throw new Exception("Unknown target type " + targetType.ToString() + " for determining ViewState.");
-	// 	}
-	// }
-
 	private IView ViewFrom(IView.State viewStateEnum) {
-      return viewStateEnum switch {
+	  return viewStateEnum switch {
 				IView.State.PASS => mPassView,
 				IView.State.SURRENDER => mSurrenderView,
 				IView.State.DETAIL => mDetailView,
-        IView.State.MEANDER_BOARD => mBoardView,
-        IView.State.MEANDER_HAND => mHandView,
+		    IView.State.MEANDER_BOARD => mBoardView,
+		    IView.State.MEANDER_HAND => mHandView,
 				IView.State.COMMAND_LIST => mCommandView,
 				IView.State.DESIGNATE_BOARD => mBoardView,
 				IView.State.DESIGNATE_HAND => mHandView,
-				IView.State.DESIGNATE_LIST => mDetailView,
+				IView.State.DESIGNATE_LIST => mDetailView, // TODO - this is wrong
 				IView.State.THEATER => mBoardView,
 				IView.State.CAST => mHandView,
-        _ => throw new Exception("Cannot get view for ViewStateEnum: \"" + viewStateEnum.ToString() + "\"."),
-      };
-    }
+		_ => throw new Exception("Cannot get view for ViewStateEnum: \"" + viewStateEnum.ToString() + "\"."),
+	  };
+	}
 
   private static Vector3 GetPlaneIntersection(Vector3 origin, Vector3 direction) {
 		Vector3 planeNormal = new(0, 1, 0);
