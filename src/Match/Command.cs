@@ -24,171 +24,178 @@ public class Command {
   }
 
   public enum RangeEnum { NOT_APPLICABLE, ADJACENT, NEAR, MODERATE, FAR }
+	public enum StatusEnum { PENDING, COMPLETE, READY, RELAXED, DISABLED }
 
   public CommandType Type { get; private set; }
-  public int MaxTargetCount { get; set; }
+	public StatusEnum Status { get; private set; } = StatusEnum.PENDING;
+  public Ability Sauce { get; private set; } = null;
+
   public Piece Actor { get; private set; }
-  public RangeEnum Range { get; private set; }
-  public Ability SourceAbility { get; set; }
-  public bool IsComplete { get; private set; }
-  public bool IsRelaxed { get; private set; }
 
-	// For commands that need UI input from multiple views.
-	// Will typically just be [ViewStateEnum.DESIGNATE_BOARD] unless it's CommandType.INTERACT.
-  public IView.State[] ViewSteps { get; private set; }
+  public Vector2I TargetCountRange { get; private set; }
 
-  private readonly List<ITarget> targets = [];
-  private readonly List<Command> triggers = [];
-
-  private string spec = "";
+	private readonly List<WizardStep> wizardSteps = [];
+  private readonly List<object> targets = [];
+	private readonly List<RangeEnum> ranges = [];
 	
-  public Command(
+	// For basic stuff. Can have variable target count, but each matches the same spec.
+  private Command(
 	  CommandType type,
-		int maxTargetCount,
-		Ability sourceAbility = null
+		Piece actor,
+		object[] specsArgs,
+		int minTargetCount,
+		int maxTargetCount = -1
   ) {
 	  Type = type;
-		MaxTargetCount = maxTargetCount;
-		Reset();
-  }
-
-  public void Relax() {
-		IsRelaxed = true;
-		IsComplete = true;
-  }
-
-  public bool FeedTarget(ITarget target) {
-		targets.Add(target);
-		// For now, just accept one target and then consider the command fully fed.
-		IsComplete = true;
-		return true;
-  }
-
-  public bool FeedSpec(string spec) {
-		this.spec = spec;
-		IsComplete = true;
-		return true;
-  }
-
-  public bool FeedRange(RangeEnum range) {
-		Range = range;
-		IsComplete = true;
-		return true;
-  }
-
-  public bool FeedActor(Piece actor) {
 		Actor = actor;
-		IsComplete = true;
-		return true;
+		// If there are no specsArgs specified here, then we expect zero targets or for wizard steps to be added later.
+		if (specsArgs != null && specsArgs.Length > 0) {
+			wizardSteps.Add(WizardStep.CreateForCommand(specsArgs));
+		}
+		if (maxTargetCount == -1) {
+			maxTargetCount = minTargetCount;
+		}
+		TargetCountRange = new Vector2I(minTargetCount, maxTargetCount);
   }
 
-  public void FeedTrigger(Command command) {
-		triggers.Add(command);
-  }
+  // For special stuff. Has specific target count, but each can match different specs.
+  private Command(
+		CommandType type,
+		Piece actor,
+		object[][] specsArgsArray
+	) : this(type, actor, null, specsArgsArray.Length, specsArgsArray.Length) {
+		foreach (object[] specsArgs in specsArgsArray) {
+			wizardSteps.Add(WizardStep.CreateForCommand(specsArgs));
+		}
+	}
 
   public void Reset() {
-		Actor = null;
-		Range = RangeEnum.NOT_APPLICABLE;
 		targets.Clear();
-		triggers.Clear();
-		// ViewSteps = DetermineViewSteps(out TargetOption[] targetOptions);
-		// TargetOptions = targetOptions;
-		IsComplete = false;
-  }
-
-  public ITarget[] GetTargets() {
-	  return [.. targets];
-  }
-
-  public bool IsActive() {
-	if (IsRelaxed) {
-	  return false;
+		ranges.Clear();
+		Status = StatusEnum.PENDING;
 	}
-	return Type == CommandType.APPROACH ||
-		   Type == CommandType.OBSTRUCT ||
-		   Type == CommandType.AVOID ||
-		   Type == CommandType.INTERACT;
+
+  public void Relax() {
+		Status = StatusEnum.RELAXED;
   }
 
-  // public IView.State[] DetermineViewSteps(out TargetOption[] targetOptions) {
-	// 	if (Type == CommandType.APPROACH || Type == CommandType.AVOID) {
-	// 		List<IView.State> steps = [];
-	// 		List<TargetOption> targetOptionsList = [];
-	// 		for (int i = 0; i < MaxTargetCount * 2; i++) {
-	// 		steps.Add(IView.State.DESIGNATE_BOARD);
-	// 		targetOptionsList.Add(new TargetOption([typeof(Tile), typeof(Piece), typeof(Activity)]));
-	// 		}
-	// 		targetOptions = [.. targetOptionsList];
-	// 		return [.. steps];
-	// 	} else if (
-	// 		Type == CommandType.OBSTRUCT ||
-	// 		Type == CommandType.LINGER ||
-	// 		Type == CommandType.INTERCEPT ||
-	// 		Type == CommandType.BRIDLE
-	// 	) {
-	// 		List<IView.State> steps = [];
-	// 		List<TargetOption> targetOptionsList = [];
-	// 		for (int i = 0; i < MaxTargetCount; i++) {
-	// 			steps.Add(IView.State.DESIGNATE_BOARD);
-	// 			// The actors.
-	// 			targetOptionsList.Add(new TargetOption([typeof(Piece), typeof(Activity)]));
-	// 		}
-	// 		for (int i = 0; i < MaxTargetCount; i++) {
-	// 			steps.Add(IView.State.DESIGNATE_BOARD);
-	// 			// The recipients.
-	// 			targetOptionsList.Add(new TargetOption([typeof(Tile), typeof(Piece), typeof(Activity)]));
-	// 		}
-	// 		if (Type != CommandType.OBSTRUCT) {
-	// 			for (int i = 0; i < MaxTargetCount; i++) {
-	// 				// Choose which other commands will be triggered by this one.
-	// 				steps.Add(ViewStateEnum.COMMAND_LIST);
-	// 				targetOptionsList.Add(new TargetOption([typeof(Command)]));
-	// 			}
-	// 		}
-	// 		targetOptions = [.. targetOptionsList];
-	// 		return [.. steps];
-	// 	} else if (Type == CommandType.INTERACT) {
-	// 		List<ViewStateEnum> steps = [];
-	// 		List<TargetOption> targetOptionsList = [];
-	// 		if (SourceAbility == null) {
-	// 			// Basic attack.
-	// 			for (int i = 0; i < MaxTargetCount; i++) {
-	// 				steps.Add(ViewStateEnum.DESIGNATE_BOARD);
-	// 				targetOptionsList.Add(new TargetOption([typeof(Tile), typeof(Piece), typeof(Activity)]));
-	// 			}
-	// 		} else {
-	// 			// Ability.
-	// 			for (int i = 0; i < SourceAbility.TargetOptions.Length; i++) {
-	// 				steps.Add(UI.UI.DetermineViewStateForTargetTypes(SourceAbility.TargetOptions[i].Types));
-	// 			}
-	// 		}
-	// 		if (targetOptionsList.Count == 0 && SourceAbility.TargetOptions.Length != steps.Count) {
-	// 			throw new Exception(
-	// 						"Mismatch between number of target options and number of view steps for INTERACT command."
-	// 			);
-	// 		}
-	// 		targetOptions = SourceAbility.TargetOptions;
-	// 		return [.. steps];
-	// 	}
-	// 	targetOptions = [];
-	// 	return [];
+	// This method doesn't need to check whether the target matches specs because we expected the wizard step to have
+	// done that already.
+  public void Feed(object target) {
+		// Accept the target.
+		targets.Add(target);
+
+		// If we've reached the minimum target count, mark as complete.
+		if (targets.Count >= TargetCountRange.X) {
+			Status = StatusEnum.COMPLETE;
+		}
+  }
+	public RangeEnum SetRange(bool cycleForward) {
+		// Some commands don't use range.
+		if (
+			Type == CommandType.OBSTRUCT ||
+			Type == CommandType.AMBLE ||
+			Type == CommandType.SKULK ||
+			Type == CommandType.LAYER
+		) {
+			// Notifies UI that range is not applicable.
+			return RangeEnum.NOT_APPLICABLE;
+		}
+
+		if (ranges.Count <= targets.Count) {
+			// Expand ranges list to fit index.
+			for (int i = ranges.Count; i < targets.Count; i++) {
+				ranges.Add(RangeEnum.NOT_APPLICABLE);
+			}
+			ranges[targets.Count] = RangeEnum.ADJACENT;
+		}
+
+		RangeEnum currentRange = ranges[targets.Count];
+		if (cycleForward) {
+			if (currentRange == RangeEnum.FAR) {
+				return RangeEnum.FAR;
+			} else {
+				// Returning an unchanged RangeEnum notifies UI to play sound that range is at its limit going up.
+				ranges[targets.Count] = currentRange + 1;
+			}
+		} else {
+			if (currentRange == RangeEnum.ADJACENT) {
+				// Returning an unchanged RangeEnum notifies UI to play sound that range is at its limit going down.
+				return RangeEnum.ADJACENT;
+			} else {
+				ranges[targets.Count] = currentRange - 1;
+			}
+		}
+
+		// Notifies UI to play sound that range is being cycled through.
+		return ranges[targets.Count];
+	}
+
+	public Command GetTriggeredCommand(Board board) {
+		if (Type == CommandType.INTERCEPT) {
+			// Check whether the first two targets are in range.
+			Spacial instigator = (Spacial) targets[0];
+			Spacial recipient = (Spacial) targets[1];
+			RangeEnum range = ranges[0];
+			if (board.AreInRange(instigator, recipient, range)) {
+				// Return the command to be executed.
+				return (Command) targets[2];
+			}
+		}
+		if (Type == CommandType.LINGER) {
+
+		}
+	}
+
+  // public string Describe() {
+	// 	return "";
   // }
 
-  public string Describe() {
-		if (Type == CommandType.LAYER) {
-			return null;
-		}
+	public static Command CreateApproach(Piece actor) {
+		return new Command(CommandType.APPROACH, actor, [typeof(Piece), typeof(Tile)], 1);
+	}
+	public static Command CreateAvoid(Piece actor, int targetCount = 1) {
+		return new Command(CommandType.AVOID, actor, [typeof(Piece), typeof(Tile)], targetCount);
+	}
+	public static Command CreateObstruct(Piece actor) {
+		return new Command(CommandType.OBSTRUCT, actor, [[typeof(Piece)], [typeof(Piece), typeof(Tile)]]);
+	}
+	public static Command CreateInteract(Piece actor) {
+		return new Command(CommandType.INTERACT, actor, [typeof(Piece), typeof(Tile), typeof(Activity)], 1);
+	}
+	public static Command CreateIntercept(Piece actor) {
+		return new Command(CommandType.INTERCEPT, actor, [[typeof(Piece)], [typeof(Piece), typeof(Tile)], [typeof(Command)]]);
+	}
+	public static Command CreateLinger(Piece actor) {
+		return new Command(CommandType.LINGER, actor, [[typeof(Piece)], [typeof(Piece), typeof(Tile)], [typeof(Command)]]);
+	}
+	public static Command CreateBridle(Piece actor) {
+		return new Command(CommandType.BRIDLE, actor, [[typeof(Piece)], [typeof(Piece), typeof(Tile)], [typeof(Command)]]);
+	}
+	public static Command CreateAmble(Piece actor) {
+		return new Command(CommandType.AMBLE, actor, null, 0, 0);
+	}
+	public static Command CreateSkulk(Piece actor) {
+		return new Command(CommandType.SKULK, actor, null, 0, 0);
+	}
+	public static Command CreateLayer(Piece actor) {
+		return new Command(CommandType.LAYER, actor, null, 0, 0);
+	}
 
-		if (Actor == null) {
-			return null;
-		}
-
-		string mainDescription = $"{Type} command for {Actor.Name}";
-		if (targets.Count == 0) {
-			return mainDescription + " with no targets.";
-		}
-		return mainDescription + " targeting the following: " +
-			string.Join(", ", targets);
-  }
+	public static Command CreateFromType(CommandType type, Piece actor) {
+		return type switch {
+			CommandType.APPROACH => CreateApproach(actor),
+			CommandType.AVOID => CreateAvoid(actor),
+			CommandType.OBSTRUCT => CreateObstruct(actor),
+			CommandType.INTERACT => CreateInteract(actor),
+			CommandType.INTERCEPT => CreateIntercept(actor),
+			CommandType.LINGER => CreateLinger(actor),
+			CommandType.BRIDLE => CreateBridle(actor),
+			CommandType.AMBLE => CreateAmble(actor),
+			CommandType.SKULK => CreateSkulk(actor),
+			CommandType.LAYER => CreateLayer(actor),
+			_ => throw new Exception("Cannot create Command from unknown CommandType: \"" + type.ToString() + "\"."),
+		};
+	}
 }
 }

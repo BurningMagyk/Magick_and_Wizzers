@@ -34,6 +34,7 @@ public partial class UI : Node {
   private Camera3D camera;
 
 	private WizardStep mWizardStep;
+	private Command mCurrentCommand;
   private Vector2 mHoverPoint;
 
 	public enum InputType {
@@ -184,8 +185,11 @@ public partial class UI : Node {
 			GD.Print("Blocked step progression.");
 		} else {
 			mWizardStep = newStep;
-			// Play sound indicating successful selection.
+			// Play sound indicating successful selection. Sound varies depending on selectType.
 			GD.Print("Progressed to new step with view state: " + mWizardStep.ViewState.ToString() + ".");
+			// Pass the target into the current command if it exists.
+			mCurrentCommand?.Feed(target);
+			// Go to the new view.
 		  GoToView(mWizardStep.ViewState);
 		}
 	}
