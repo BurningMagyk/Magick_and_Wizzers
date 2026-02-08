@@ -25,8 +25,14 @@ public class WizardStep {
   public static readonly WizardStep HAND = new(
 	  ROOT, // Get to HAND from ROOT.
 	  IView.State.MEANDER_HAND,
-		[SelectType.HAND, typeof(Piece)] // User must used HAND key/button on a Piece to get to HAND step.
+		[SelectType.HAND, typeof(Piece)] // User must use HAND key/button on a Piece to get to HAND step.
   );
+	public static readonly WizardStep COMMAND = new(
+		ROOT,
+		IView.State.COMMAND_LIST,
+		[SelectType.STANDARD, typeof(Piece)] // User must use STANDARD key/button on a Piece to get to COMMAND step.
+		// TODO - add arg that the piece is under player's control.
+	);
   public static readonly WizardStep PASS = new(
 		ROOT, // Get to PASS from ROOT.
 		IView.State.PASS,
@@ -174,24 +180,57 @@ public class WizardStep {
 
 			return true;
 		}
-
-		private static Type ToOrthodoxType(Type type) {
-			if (typeof(Display.Piece).IsAssignableFrom(type) || typeof(Piece).IsAssignableFrom(type)) {
-				return typeof(Piece);
-			} else if (typeof(Display.ITile).IsAssignableFrom(type) || typeof(Tile).IsAssignableFrom(type)) {
-				return typeof(Tile);
-			} else if (typeof(Main.Card).IsAssignableFrom(type) || typeof(Card).IsAssignableFrom(type)) {
-				return typeof(Main.Card);
-			} else if (typeof(Activity).IsAssignableFrom(type)) {
-				return typeof(Activity);
-			} else if (typeof(Item).IsAssignableFrom(type)) {
-				return typeof(Item);
-			} else {
-				throw new Exception("Unknown type \"" + type.ToString() + "\" for orthodox conversion.");
-			}
-		}
   }
 
-  // public static WizardStep Create(WizardStep prevStep, )
+  public static WizardStep CreateForCommand(object[] specsArgs, bool special = false) {
+		foreach (object specsArg in specsArgs) {
+			if (specsArg is null or not Type) {
+				continue;
+			}
+
+			Type orthodoxType;
+			try {
+				orthodoxType = ToOrthodoxType(specsArg.GetType());
+			} catch (Exception) {
+				continue;
+			}
+			
+			return new WizardStep(COMMAND, ViewStateForType(orthodoxType, special), specsArgs);
+		}
+		throw new Exception("Cannot create WizardStep for command with given specs arguments.");
+	}
+
+	private static Type ToOrthodoxType(Type type) {
+		if (typeof(Display.Piece).IsAssignableFrom(type) || typeof(Piece).IsAssignableFrom(type)) {
+			return typeof(Piece);
+		} else if (typeof(Display.ITile).IsAssignableFrom(type) || typeof(Tile).IsAssignableFrom(type)) {
+			return typeof(Tile);
+		} else if (typeof(Main.Card).IsAssignableFrom(type) || typeof(Card).IsAssignableFrom(type)) {
+			return typeof(Main.Card);
+		} else if (typeof(Activity).IsAssignableFrom(type)) {
+			return typeof(Activity);
+		} else if (typeof(Item).IsAssignableFrom(type)) {
+			return typeof(Item);
+		} else {
+			throw new Exception("Unknown type \"" + type.ToString() + "\" for orthodox conversion.");
+		}
+	}
+
+	// Assume that type is already orthodox.
+	private static IView.State ViewStateForType(Type type, bool special) {
+		if (type == typeof(Piece)) {
+			return IView.State.DESIGNATE_BOARD;
+		} else if (type == typeof(Tile)) {
+			return IView.State.DESIGNATE_BOARD;
+		} else if (type == typeof(Main.Card)) {
+			return special ? IView.State.CAST : IView.State.DESIGNATE_HAND;
+		} else if (type == typeof(Activity)) {
+			return IView.State.DESIGNATE_BOARD;
+		} else if (type == typeof(Item)) {
+			return special ? IView.State.COMMAND_LIST : IView.State.DESIGNATE_LIST;
+		} else {
+			throw new Exception("Cannot get view state for unknown type \"" + type.ToString() + "\".");
+		}
+	}
 }
 }

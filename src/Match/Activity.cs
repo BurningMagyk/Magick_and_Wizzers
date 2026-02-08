@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 namespace Match {
-public class Activity : ITarget {
+public class Activity : Spacial {
 
   public override string ToString() {
     return "an activity";
