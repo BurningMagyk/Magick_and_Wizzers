@@ -63,11 +63,9 @@ public partial class Board : Node3D {
 		}
   }
 
-  public Piece CreatePiece(string uniqueName, Texture2D illustration) {
+  public Piece CreatePiece(string uniqueName) {
 		MeshInstance3D pieceMesh = mPieceScene.Instantiate() as MeshInstance3D;
-		StandardMaterial3D pieceMaterial = new() {
-			AlbedoTexture = illustration
-		};
+		StandardMaterial3D pieceMaterial = new();
 		pieceMesh.MaterialOverride = pieceMaterial;
 		pieceMesh.Name = uniqueName;
 		AddChild(pieceMesh);

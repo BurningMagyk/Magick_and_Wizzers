@@ -132,24 +132,44 @@ public class Command {
 	}
 
 	public Command GetTriggeredCommand(Board board) {
+		Spacial instigator = (Spacial) targets[0];
+		Spacial recipient = (Spacial) targets[1];
+
+		// Check whether the first two targets are in range.
+		if (!CanActorSee(instigator, board) || !CanActorSee(recipient, board)) {
+			return null;
+		}
+
+		RangeEnum range = ranges[0];
 		if (Type == CommandType.INTERCEPT) {
-			// Check whether the first two targets are in range.
-			Spacial instigator = (Spacial) targets[0];
-			Spacial recipient = (Spacial) targets[1];
-			RangeEnum range = ranges[0];
 			if (board.AreInRange(instigator, recipient, range)) {
 				// Return the command to be executed.
 				return (Command) targets[2];
 			}
+			return null;
+		} else if (Type == CommandType.LINGER) {
+			if (!board.AreInRange(instigator, recipient, range)) {
+				// Return the command to be executed.
+				return (Command) targets[2];
+			}
+			return null;
+		} else if (Type == CommandType.BRIDLE) {
+			// TODO - implement interaction checking.
+			return null;
 		}
-		if (Type == CommandType.LINGER) {
 
-		}
+		throw new Exception("Should not be calling this with type \"" + Type.ToString() + "\".");
 	}
 
   // public string Describe() {
 	// 	return "";
   // }
+
+	private bool CanActorSee(Spacial target, Board board) {
+		// TODO - implement line of sight and stuff.
+		// Automatically return true if target is not a Piece.
+		return true;
+	}
 
 	public static Command CreateApproach(Piece actor) {
 		return new Command(CommandType.APPROACH, actor, [typeof(Piece), typeof(Tile)], 1);
@@ -195,6 +215,16 @@ public class Command {
 			CommandType.SKULK => CreateSkulk(actor),
 			CommandType.LAYER => CreateLayer(actor),
 			_ => throw new Exception("Cannot create Command from unknown CommandType: \"" + type.ToString() + "\"."),
+		};
+	}
+
+	public static int RangeEnumToUnits(RangeEnum range) {
+		return range switch {
+			RangeEnum.ADJACENT => Board.DIAGONAL_UNITS,
+			RangeEnum.NEAR => Board.DIAGONAL_UNITS * 2,
+			RangeEnum.MODERATE => Board.DIAGONAL_UNITS * 4,
+			RangeEnum.FAR => Board.DIAGONAL_UNITS * 7,
+			_ => throw new Exception("Cannot convert RangeEnum to units for unknown RangeEnum: \"" + range.ToString() + "\"."),
 		};
 	}
 }

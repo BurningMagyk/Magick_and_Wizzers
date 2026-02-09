@@ -6,7 +6,6 @@ using System.Linq;
 
 namespace Match {
 public class Tile : Spacial {
-	public const int STRT_COST = 5, DIAG_COST = 7;
 	public const int PARTITION_TYPE_COUNT = 3;
 	public enum PartitionTypeEnum { CARUCATE, VIRGATE, BOVATE, HECTARE, ACRE }
 	public static readonly PartitionTypeEnum MIN_PARTITION =
@@ -151,33 +150,6 @@ public class Tile : Spacial {
 	}
 	public override int GetHashCode() => HashCode.Combine(Coordinate.X, Coordinate.Y, PartitionType);
 
-	public static readonly (int dx, int dy, int cost)[] DirectionsCostMatrix = [
-		( 1,  0, STRT_COST), (-1,  0, STRT_COST),
-		( 0,  1, STRT_COST), ( 0, -1, STRT_COST),
-		( 1,  1, DIAG_COST), ( 1, -1, DIAG_COST),
-		(-1,  1, DIAG_COST), (-1, -1, DIAG_COST)
-	];
-
-	public static int Heuristic(Tile a, Tile b) {
-		// Use Manhattan distance scaled to match 5/7 weighting
-		int dx = Math.Abs(a.Coordinate.X - b.Coordinate.X);
-		int dy = Math.Abs(a.Coordinate.Y - b.Coordinate.Y);
-		int diagonal = Math.Min(dx, dy);
-		int straight = Math.Abs(dx - dy);
-		return diagonal * 7 + straight * 5;
-	}
-
-	public static bool IsCloserToAny(Tile candidate, Tile current, Tile[] targets) {
-		foreach (var t in targets)
-		{
-			double distCurrent = Distance(current, t);
-			double distCandidate = Distance(candidate, t);
-			if (distCandidate < distCurrent)
-				return true;
-		}
-		return false;
-	}
-
 	public static DirectionEnum DetermineDirection(Tile from, Tile to) {
 		if (from.Equals(to)) {
 			return DirectionEnum.NONE;
@@ -204,10 +176,15 @@ public class Tile : Spacial {
 		}
 	}
 
-	private static double Distance(Tile a, Tile b) {
-		int dx = a.Coordinate.X - b.Coordinate.X;
-		int dy = a.Coordinate.Y - b.Coordinate.Y;
-		return Math.Sqrt(dx * dx + dy * dy);
+	public static int GetPositionAtSideOf(Spacial s, DirectionEnum direction) {
+		Tile[] tiles = s.GetTiles(MAX_PARTITION);
+		return direction switch {
+			DirectionEnum.NORTH => tiles.Min(t => t.Coordinate.Y),
+			DirectionEnum.SOUTH => tiles.Max(t => t.Coordinate.Y),
+			DirectionEnum.WEST => tiles.Min(t => t.Coordinate.X),
+			DirectionEnum.EAST => tiles.Max(t => t.Coordinate.X),
+			_ => throw new ArgumentException("Invalid direction for GetPosAtSideOf")
+		};
 	}
 }
 }

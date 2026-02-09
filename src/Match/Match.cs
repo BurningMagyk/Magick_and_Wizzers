@@ -35,7 +35,7 @@ public class Match {
 	  mPlayers = players;
 	
 	  // Set up players.
-	  Vector2I[] startingPositions = mBoard.GetStartingPositions(MatchType.FREE_FOR_ALL, mPlayers.Length);
+	  Vector2I[] startingPositions = Board.GetStartingPositions(MatchType.FREE_FOR_ALL, mPlayers.Length);
 	  for (int i = 0; i < mPlayers.Length; i++) {
 			Player player = mPlayers[i];
 			player.AddMaster(GenerateDefaultMaster(player.Name, player.MasterCard, startingPositions[i]));
@@ -66,7 +66,6 @@ public class Match {
 	  mBoard.AddPiece(
 		  card.GameCard.Stats,
 		  mBoard.GetTileAt(mUi.GetHoverCoordinate(), mUi.GetHoverPartition()),
-		  card.GameCard.Illustration,
 		  uniqueId++
 	  );
 	}
@@ -106,7 +105,7 @@ public class Match {
 	  return mBoard.AddPiece(
 			card.Stats,
 			mBoard.GetTileAt(position, Tile.MAX_PARTITION), // use default starting positions
-			card.Illustration,
+
 			uniqueId++
 	  );
 	}

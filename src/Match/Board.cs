@@ -108,16 +108,12 @@ public partial class Board {
 	}
 
 	public void FinalizeRound() {
-		foreach (Piece piece in pieces) {
-			piece.FinalizePosition();
-		}
 		// Resolve end-of-round effects here.
 	}
 
-	public Piece AddPiece(Stats stats, Tile targetTile, Texture2D illustration, int uniqueId) {
-		Piece piece = new(stats, mDisplayNode.CreatePiece(uniqueId + '-' + stats.Name, illustration)) {
-			Tile = targetTile,
-			Toroidal = mToroidal
+	public Piece AddPiece(Stats stats, Tile targetTile, int uniqueId) {
+		Piece piece = new(mDisplayNode.CreatePiece(uniqueId + '-' + stats.Name), stats) {
+			Tile = targetTile
 		};
 		pieces.Add(piece);
 		return piece;
@@ -145,7 +141,7 @@ public partial class Board {
 	/**
 	 * Free-for-all
 	*/
-	public Vector2I[] GetStartingPositions(Match.MatchType matchType, int playerCount) {
+	public static Vector2I[] GetStartingPositions(Match.MatchType matchType, int playerCount) {
 		int boardSizeTotal = BOARD_SIZE * (int) Math.Pow(2, (int) Tile.MAX_PARTITION);
 		int boardSpace = boardSizeTotal * boardSizeTotal;
 
@@ -232,50 +228,129 @@ public partial class Board {
 		);
 	}
 
-	// public int GetDistance(Vector2I posA, Vector2I posB) {
-	// 	int size = GetTotalSize();
-	// 	int horizontalToroidalDistance = Math.Min(
-	// 		Math.Abs(posA.X - posB.X),
-	// 		size - Math.Abs(posA.X - posB.X)
-	// 	);
-	// 	int verticalToroidalDistance = Math.Min(
-	// 		Math.Abs(posA.Y - posB.Y),
-	// 		size - Math.Abs(posA.Y - posB.Y)
-	// 	);
-	// 	bool horizontalDistanceGreater = horizontalToroidalDistance > verticalToroidalDistance;
-	// 	int diagonalDistance, remainingParallelDistance;
-	// 	if (horizontalDistanceGreater) {
-	// 		diagonalDistance = verticalToroidalDistance;
-	// 		remainingParallelDistance = horizontalToroidalDistance - diagonalDistance;
-	// 	} else {
-	// 		diagonalDistance = horizontalToroidalDistance;
-	// 		remainingParallelDistance = verticalToroidalDistance - diagonalDistance;
-	// 	}
-	// 	return diagonalDistance * 10 + remainingParallelDistance * STRAIGHT_UNITS;
-	// }
+	public bool AreInRange(Spacial s1, Spacial s2, Command.RangeEnum range) {
+		if (range == Command.RangeEnum.NOT_APPLICABLE) {
+			throw new ArgumentException("Range cannot be NOT_APPLICABLE for method \"AreInRange\".");
+		}
+		return Command.RangeEnumToUnits(range) >= CalculateOctileDistance(s1, s2, out _);
+	}
 
-	// public Vector2I GetFarthestPositionFrom(Vector2I[] positions, Vector2I[] choices) {
-	// 	int greatestDistance = 0;
-	// 	Vector2I farthestPosition = new Vector2I(0, 0);
-	// 	foreach (Vector2I choice in choices) {
-	// 		int distance = GetClosestDistanceFrom(positions, choice);
-	// 		if (distance > greatestDistance) {
-	// 			greatestDistance = distance;
-	// 			farthestPosition = choice;
-	// 		}
-	// 	}
-	// 	return farthestPosition;
-	// }
+	// TODO - needs testing
+	public int CalculateOctileDistance(Spacial s1, Spacial s2, out DirectionEnum directionToGo) {
+		int horizontalDirectionToGo = -2; // -2 means undetermined.
+		int horizontalDistance = 0;
 
-	// public int GetClosestDistanceFrom(Vector2I[] positions, Vector2I choice) {
-	// 	int closestDistance = int.MaxValue;
-	// 	foreach (Vector2I position in positions) {
-	// 		int distance = GetDistance(position, choice);
-	// 		if (distance < closestDistance) {
-	// 			closestDistance = distance;
-	// 		}
-	// 	}
-	// 	return closestDistance;
-	// }
+		int s1Left = Tile.GetPositionAtSideOf(s1, DirectionEnum.WEST);
+		int s2Right = Tile.GetPositionAtSideOf(s2, DirectionEnum.EAST);
+		int s1Right = Tile.GetPositionAtSideOf(s1, DirectionEnum.EAST);
+		int s2Left = Tile.GetPositionAtSideOf(s2, DirectionEnum.WEST);
+		if (s1Right >= s2Left && s1Left <= s2Right) {
+			// If the shapes overlap horizontally, no horizontal movement needed.
+			horizontalDirectionToGo = (int) DirectionEnum.NONE;
+			horizontalDistance = 0;
+		} else if (s1Left > s2Right) {
+			// s1 is to the right of s2.
+			int nonToroidalDistance = s1Left - s2Right;
+			if (mToroidal) {
+				// Check if it's shorter to go left (west) around the toroidal board.
+				int toroidalDistance = GetTotalSize() - s1Right + s2Left - 1;
+				if (toroidalDistance < nonToroidalDistance) {
+					horizontalDirectionToGo = (int) DirectionEnum.WEST;
+					horizontalDistance = toroidalDistance;
+				} else {
+					horizontalDirectionToGo = (int) DirectionEnum.EAST;
+					horizontalDistance = nonToroidalDistance;
+				}
+			} else {
+				horizontalDirectionToGo = (int) DirectionEnum.EAST;
+				horizontalDistance = nonToroidalDistance;
+			}
+		} else if (s1Right < s2Left) {
+			// s1 is to the left of s2.
+			int nonToroidalDistance = s2Left - s1Right;
+			if (mToroidal) {
+				// Check if it's shorter to go right (east) around the toroidal board.
+				int toroidalDistance = GetTotalSize() - s2Right + s1Right - 1;
+				if (toroidalDistance < nonToroidalDistance) {
+					horizontalDirectionToGo = (int) DirectionEnum.EAST;
+					horizontalDistance = toroidalDistance;
+				} else {
+					horizontalDirectionToGo = (int) DirectionEnum.WEST;
+					horizontalDistance = nonToroidalDistance;
+				}
+			} else {
+				horizontalDirectionToGo = (int) DirectionEnum.WEST;
+				horizontalDistance = nonToroidalDistance;
+			}
+		}
+
+		int verticalDirectionToGo = -2; // -2 means undetermined.
+		int verticalDistance = 0;
+
+		int s1Top = Tile.GetPositionAtSideOf(s1, DirectionEnum.NORTH);
+		int s2Bottom = Tile.GetPositionAtSideOf(s2, DirectionEnum.SOUTH);
+		int s1Bottom = Tile.GetPositionAtSideOf(s1, DirectionEnum.SOUTH);
+		int s2Top = Tile.GetPositionAtSideOf(s2, DirectionEnum.NORTH);
+		if (s1Bottom >= s2Top && s1Top <= s2Bottom) {
+			// If the shapes overlap vertically, no vertical movement needed.
+			verticalDirectionToGo = (int) DirectionEnum.NONE;
+			verticalDistance = 0;
+		} else if (s1Top > s2Bottom) {
+			// s1 is below s2.
+			int nonToroidalDistance = s1Top - s2Bottom;
+			if (mToroidal) {
+				// Check if it's shorter to go up (north) around the toroidal board.
+				int toroidalDistance = GetTotalSize() - s1Bottom + s2Top - 1;
+				if (toroidalDistance < nonToroidalDistance) {
+					verticalDirectionToGo = (int) DirectionEnum.NORTH;
+					verticalDistance = toroidalDistance;
+				} else {
+					verticalDirectionToGo = (int) DirectionEnum.SOUTH;
+					verticalDistance = nonToroidalDistance;
+				}
+			} else {
+				verticalDirectionToGo = (int) DirectionEnum.SOUTH;
+				verticalDistance = nonToroidalDistance;
+			}
+		} else if (s1Bottom < s2Top) {
+			// s1 is above s2.
+			int nonToroidalDistance = s2Top - s1Bottom;
+			if (mToroidal) {
+				// Check if it's shorter to go down (south) around the toroidal board.
+				int toroidalDistance = GetTotalSize() - s2Bottom + s1Top - 1;
+				if (toroidalDistance < nonToroidalDistance) {
+					verticalDirectionToGo = (int) DirectionEnum.SOUTH;
+					verticalDistance = toroidalDistance;
+				} else {
+					verticalDirectionToGo = (int) DirectionEnum.NORTH;
+					verticalDistance = nonToroidalDistance;
+				}
+			} else {
+				verticalDirectionToGo = (int) DirectionEnum.NORTH;
+				verticalDistance = nonToroidalDistance;
+			}
+		}
+
+		if (horizontalDirectionToGo == -2 || verticalDirectionToGo == -2) {
+			throw new Exception("Direction to go was not determined correctly.");
+		}
+
+		if (horizontalDirectionToGo == (int) DirectionEnum.NONE) {
+			directionToGo = (DirectionEnum) verticalDirectionToGo;
+			return verticalDistance * STRAIGHT_UNITS;
+		} else if (verticalDirectionToGo == (int) DirectionEnum.NONE) {
+			directionToGo = (DirectionEnum) horizontalDirectionToGo;
+			return horizontalDistance * STRAIGHT_UNITS;
+		} else {
+			// Both horizontal and vertical movement needed. Calculate octile distance.
+			if (horizontalDistance < verticalDistance) {
+				directionToGo = Util.Combine((DirectionEnum) horizontalDirectionToGo, (DirectionEnum) verticalDirectionToGo);
+				return horizontalDistance * DIAGONAL_UNITS + (verticalDistance - horizontalDistance) * STRAIGHT_UNITS;
+			} else {
+				directionToGo = Util.Combine((DirectionEnum) horizontalDirectionToGo, (DirectionEnum) verticalDirectionToGo);
+				return verticalDistance * DIAGONAL_UNITS + (horizontalDistance - verticalDistance) * STRAIGHT_UNITS;
+			}
+		}
+	}
 }
 }
