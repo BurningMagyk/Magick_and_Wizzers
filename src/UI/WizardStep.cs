@@ -160,7 +160,6 @@ public class WizardStep {
 			if (classArgs.Count > 0) {
 				bool classMatch = false;
 				foreach (Type classArg in classArgs) {
-					//GD.Print("Checking if target type " + ToOrthodoxType(targetType).ToString() + " equals class arg " + classArg.ToString() + ".");
 					if (ToOrthodoxType(targetType) == classArg) {
 						classMatch = true;
 						break;
@@ -190,7 +189,7 @@ public class WizardStep {
 
 			Type orthodoxType;
 			try {
-				orthodoxType = ToOrthodoxType(specsArg.GetType());
+				orthodoxType = ToOrthodoxType(specsArg as Type);
 			} catch (Exception) {
 				continue;
 			}
@@ -211,6 +210,8 @@ public class WizardStep {
 			return typeof(Activity);
 		} else if (typeof(Item).IsAssignableFrom(type)) {
 			return typeof(Item);
+		} else if (typeof(Command).IsAssignableFrom(type)) {
+			return typeof(Command);
 		} else {
 			throw new Exception("Unknown type \"" + type.ToString() + "\" for orthodox conversion.");
 		}
@@ -228,6 +229,8 @@ public class WizardStep {
 			return IView.State.DESIGNATE_BOARD;
 		} else if (type == typeof(Item)) {
 			return special ? IView.State.COMMAND_LIST : IView.State.DESIGNATE_LIST;
+		} else if (type == typeof(Command)) {
+			return IView.State.COMMAND_LIST;
 		} else {
 			throw new Exception("Cannot get view state for unknown type \"" + type.ToString() + "\".");
 		}

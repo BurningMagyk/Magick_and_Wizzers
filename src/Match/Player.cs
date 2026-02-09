@@ -17,7 +17,6 @@ public class Player {
 
     public void AddMaster(Piece master) {
         mMasters.Add(master);
-        master.MasteringPlayer = this;
     }
 }
 }

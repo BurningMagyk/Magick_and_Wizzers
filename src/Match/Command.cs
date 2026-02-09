@@ -35,8 +35,7 @@ public class Command {
   public Vector2I TargetCountRange { get; private set; }
 
 	private readonly List<WizardStep> wizardSteps = [];
-  private readonly List<object> targets = [];
-	private readonly List<RangeEnum> ranges = [];
+  private readonly List<RangedTarget> targets = [];
 	
 	// For basic stuff. Can have variable target count, but each matches the same spec.
   private Command(
@@ -71,7 +70,6 @@ public class Command {
 
   public void Reset() {
 		targets.Clear();
-		ranges.Clear();
 		Status = StatusEnum.PENDING;
 	}
 
@@ -81,76 +79,45 @@ public class Command {
 
 	// This method doesn't need to check whether the target matches specs because we expected the wizard step to have
 	// done that already.
-  public void Feed(object target) {
+  public void Feed(object target, RangeEnum range = RangeEnum.NOT_APPLICABLE) {
 		// Accept the target.
-		targets.Add(target);
+		if (target is RangedTarget rangedTarget) {
+			targets.Add(rangedTarget);
+		} else {
+			targets.Add(new RangedTarget(target, range));
+		}
 
 		// If we've reached the minimum target count, mark as complete.
 		if (targets.Count >= TargetCountRange.X) {
 			Status = StatusEnum.COMPLETE;
 		}
   }
-	public RangeEnum SetRange(bool cycleForward) {
-		// Some commands don't use range.
-		if (
-			Type == CommandType.OBSTRUCT ||
-			Type == CommandType.AMBLE ||
-			Type == CommandType.SKULK ||
-			Type == CommandType.LAYER
-		) {
-			// Notifies UI that range is not applicable.
-			return RangeEnum.NOT_APPLICABLE;
-		}
 
-		if (ranges.Count <= targets.Count) {
-			// Expand ranges list to fit index.
-			for (int i = ranges.Count; i < targets.Count; i++) {
-				ranges.Add(RangeEnum.NOT_APPLICABLE);
-			}
-			ranges[targets.Count] = RangeEnum.ADJACENT;
-		}
-
-		RangeEnum currentRange = ranges[targets.Count];
-		if (cycleForward) {
-			if (currentRange == RangeEnum.FAR) {
-				return RangeEnum.FAR;
-			} else {
-				// Returning an unchanged RangeEnum notifies UI to play sound that range is at its limit going up.
-				ranges[targets.Count] = currentRange + 1;
-			}
-		} else {
-			if (currentRange == RangeEnum.ADJACENT) {
-				// Returning an unchanged RangeEnum notifies UI to play sound that range is at its limit going down.
-				return RangeEnum.ADJACENT;
-			} else {
-				ranges[targets.Count] = currentRange - 1;
-			}
-		}
-
-		// Notifies UI to play sound that range is being cycled through.
-		return ranges[targets.Count];
+	public bool IsReactive() {
+		return Type == CommandType.INTERCEPT || Type == CommandType.LINGER || Type == CommandType.BRIDLE;
 	}
 
 	public Command GetTriggeredCommand(Board board) {
-		Spacial instigator = (Spacial) targets[0];
-		Spacial recipient = (Spacial) targets[1];
+		Spacial instigator = (Spacial) targets[0].Target;
+		Spacial recipient = (Spacial) targets[1].Target;
+		Command triggeredCommand = (Command) targets[2].Target;
+		RangeEnum range = targets[1].Range;
 
 		// Check whether the first two targets are in range.
 		if (!CanActorSee(instigator, board) || !CanActorSee(recipient, board)) {
 			return null;
 		}
 
-		RangeEnum range = ranges[0];
 		if (Type == CommandType.INTERCEPT) {
 			if (board.AreInRange(instigator, recipient, range)) {
 				// Return the command to be executed.
-				return (Command) targets[2];
+				return triggeredCommand;
 			}
 			return null;
 		} else if (Type == CommandType.LINGER) {
 			if (!board.AreInRange(instigator, recipient, range)) {
 				// Return the command to be executed.
-				return (Command) targets[2];
+				return triggeredCommand;
 			}
 			return null;
 		} else if (Type == CommandType.BRIDLE) {
@@ -164,6 +131,8 @@ public class Command {
   // public string Describe() {
 	// 	return "";
   // }
+
+	public record RangedTarget(object Target, RangeEnum Range);
 
 	private bool CanActorSee(Spacial target, Board board) {
 		// TODO - implement line of sight and stuff.

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 namespace Match {
 public class Piece : Spacial {
 	public enum SizeEnum { TINY, SMALL, MEDIUM, LARGE, HUGE, GARGANTUAN, COLOSSAL }
+	public enum SpeedEnum { NONE, SLOW, WALK, RUN, FLY, EXTRA, SHOT }
   private static int sNextIdForPiece = 0;
 
 	public Command[] Commands { get => mCommands; private set => mCommands = value; }
@@ -15,7 +16,18 @@ public class Piece : Spacial {
 	public bool IsMaster { get; private set; } = false;
 
 	public SizeEnum Size { get => mMovement.Size; set => mMovement.Size = value; }
-	public Tile Tile { get => mMovement.CurrTile; set => mMovement.CurrTile = value; }
+	public Tile Tile {
+		get => mMovement.CurrTile;
+		set {
+			if (mMovement.CurrTile == null) {
+				// Set display node position when the tile is first set for this piece.
+				mDisplayNode.Position = value.DisplayTile.Position;
+			}
+
+			mMovement.CurrTile = value;
+		}
+	}
+	public Tile[] Path { get; private set; }
 
   private readonly Display.Piece mDisplayNode;
 	private readonly Movement mMovement = new();
@@ -56,30 +68,48 @@ public class Piece : Spacial {
 	// }
 
 	public void ResolveTick(Board board) {
-		// Check reactive commands.
+		// Check reactive commands to determine triggered commands.
 		List<Command> triggeredCommands = [];
 		foreach (Command command in mCommands) {
 			if (command.Status != Command.StatusEnum.COMPLETE) {
 				continue;
 			}
 			if (command.IsReactive()) {
-				
+				Command triggeredCommand = command.GetTriggeredCommand(board);
+				if (
+					triggeredCommand != null &&
+					!triggeredCommands.Contains(triggeredCommand) &&
+					triggeredCommand.Status == Command.StatusEnum.READY
+				) {
+					triggeredCommands.Add(triggeredCommand);
+				}
 			}
 		}
 
-		// Get active commands.
+		// Get non-triggered active commands.
 		List<Command> activeCommands = [];
 		foreach (Command command in mCommands) {
 			if (command.Status == Command.StatusEnum.COMPLETE) {
 				activeCommands.Add(command);
 			}
-			// TODO - check if any reactive commands trigger any ready commands to add to the list of active commands
 		}
 
-		// Move piece.
-		mMovement.ResolveSpeed(board, [.. activeCommands]);
-		
-		// Apply over-time effects here too.
+		// Add triggered active commands.
+		foreach (Command command in triggeredCommands) {
+			activeCommands.Add(command);
+		}
+
+		// Update path using A*.
+		Path = board.AStar([.. activeCommands], out DirectionEnum nextMoveDirection);
+
+		// Move piece according to its speed.
+		mMovement.ResolveSpeed(nextMoveDirection);
+
+		// Resolve overlapping pieces.
+		mMovement.ResolveOverlaps();
+
+		// Update display node position.
+		mDisplayNode.Position = Tile.DisplayTile.Position;
 	}
 
 	public Tile[] GetTiles(Tile.PartitionTypeEnum partition) {
@@ -91,158 +121,67 @@ public class Piece : Spacial {
 	}
 
 	private class Movement {
-		private enum State { NOT_BETWEEN, BETWEEN_STRAIGHT, BETWEEN_DIAGONAL }
+		private enum State { DEFINITE, STRAIGHT, DIAGONAL }
 
-		public int Speed { get; set; }
+		public SpeedEnum Speed {
+			get => mSpeedEnum;
+			set {
+				mSpeedEnum = value;
+				mSpeed = (int) Math.Pow((int) value, 2);
+			}
+		}
 		public int Progress { get; set; } = 0;
 		public SizeEnum Size { get; set; }
 
 		public Tile CurrTile { get; set; }
 		public Tile PrevTile { get; set; }
 
-		private State mState = State.NOT_BETWEEN;
-		
+		private State mState = State.DEFINITE;
 
-		public void ResolveSpeed(Board board, Command[] activeCommands) {
-			if (Speed == 0) {
+		private SpeedEnum mSpeedEnum = SpeedEnum.NONE;
+		private int mSpeed = 0;
+		
+		public void ResolveSpeed(DirectionEnum direction) {
+			if (Speed == SpeedEnum.NONE) {
 				return;
 			}
 
-			if (mState == State.NOT_BETWEEN) {
-				// Not between tiles. Determine move direction.
-				DirectionEnum moveDirection = DetermineMoveDirection(
-					board.Tiles[(int) GetPartitionType(Size)],
-					activeCommands
-				);
-				// Assume that prevTile is the current tile and that mMovementProgress is 0.
-				if (moveDirection > DirectionEnum.WEST) {
-					// Diagonal move
-					mState = State.BETWEEN_DIAGONAL;
-				} else if (moveDirection != DirectionEnum.NONE) {
-					// Straight move
-					mState = State.BETWEEN_STRAIGHT;
-				} else {
-					// No move
-					mState = State.NOT_BETWEEN;
-					return;
-				}
-				CurrTile = CurrTile.Neighbors[(int) moveDirection]; // Don't move the piece's display yet.
+			if (mState == State.DEFINITE) {
+				UpdateTile(direction);
 			}
 
 			// Move towards target tile.
-			Progress += Speed;
-			if (mState == State.BETWEEN_STRAIGHT && Progress >= Board.STRAIGHT_UNITS) {
-				mState = State.NOT_BETWEEN;
-				prevTile = tile;
-				ResolveMovement(mMovementProgress - Board.STRAIGHT_UNITS, board, activeCommands);
-			} else if (mMovementState == MovementState.DIAGONAL && mMovementProgress >= Tile.DIAG_COST) {
-				mMovementState = MovementState.DONE;
-				prevTile = tile;
-				ResolveMovement(mMovementProgress - Tile.DIAG_COST, board, activeCommands);
-			}
-
-			// Done moving during this tick.
-			Tile tileBeingMovedTo = CurrTile;
-			// Relocate display node.
-			CurrTile = PrevTile;
-			// Make the tile being moved to the current tile for next tick.
-			CurrTile = tileBeingMovedTo;
-		}
-
-		public void ResolveIncompletes() {
-			// This should resolve pieces that share tiles and relocated them. Don't bother for now.
-			if (mState != State.NOT_BETWEEN) {
-				// Relocate display node.
-				Tile = PrevTile;
-				Progress = 0;
-				mState = State.NOT_BETWEEN;
+			Progress += mSpeed;
+			if (mState == State.STRAIGHT && Progress >= Board.STRAIGHT_UNITS * 10) {
+				Progress -= Board.STRAIGHT_UNITS * 10;
+				UpdateTile(direction);
+			} else if (mState == State.DIAGONAL && Progress >= Board.STRAIGHT_UNITS * 10) {
+				Progress -= Board.STRAIGHT_UNITS * 10;
+				UpdateTile(direction);
 			}
 		}
 
 		public void ResolveOverlaps() {
+			// This should resolve pieces that share tiles and relocated them. Don't bother for now.
 		}
 
-		private DirectionEnum DetermineMoveDirection(Tile[,] grid, Command[] activeCommands) {
-			if (activeCommands.Length == 0) {
-				return DirectionEnum.NONE;
-			}
-
-			List<Tile> tilesToApproach = [];
-			// Get the APPROACH command.
-			Command approachCommand = null;
-			foreach (Command command in activeCommands) {
-				if (command.Type == Command.CommandType.APPROACH) {
-					approachCommand = command;
-					break;
+		private void UpdateTile(DirectionEnum direction) {
+			// Assume that prevTile is the current tile and that mMovementProgress is 0.
+				if (direction > DirectionEnum.WEST) {
+					// Diagonal move
+					mState = State.DIAGONAL;
+				} else if (direction != DirectionEnum.NONE) {
+					// Straight move
+					mState = State.STRAIGHT;
+				} else {
+					// No move
+					mState = State.DEFINITE;
+					return;
 				}
-			}
 
-			if (approachCommand != null) {
-				foreach (ITarget target in approachCommand.GetTargets()) {
-					Tile[] tilesFromTarget = target.GetTiles(GetPartitionType(Size));
-					foreach (Tile tile in tilesFromTarget) {
-						if (!tilesToApproach.Contains(tile)) {
-							tilesToApproach.Add(tile);
-						}
-					}
-				}
-			}
-
-			List<Tile> tilesToAvoid = [];
-			// Get the AVOID command.
-			Command avoidCommand = null;
-			foreach (Command command in activeCommands) {
-				if (command.Type == Command.CommandType.AVOID) {
-					avoidCommand = command;
-					break;
-				}
-			}
-
-			if (avoidCommand != null) {
-				foreach (ITarget target in avoidCommand.GetTargets()) {
-					Tile[] tilesFromTarget = target.GetTiles(GetPartitionType(Size));
-					foreach (Tile tile in tilesFromTarget) {
-						if (!tilesToAvoid.Contains(tile)) {
-							tilesToAvoid.Add(tile);
-						}
-					}
-				}
-			}
-
-			// Check that all target tiles are the correct partition type.
-			Tile.PartitionTypeEnum requiredPartition = GetPartitionType(Size);
-			foreach (Tile tile in tilesToApproach) {
-				if (tile.PartitionType != requiredPartition) {
-					throw new Exception($"Target tile {tile.Name} does not match piece partition type {requiredPartition}.");
-				}
-			}
-			foreach (Tile tile in tilesToAvoid) {
-				if (tile.PartitionType != requiredPartition) {
-					throw new Exception($"Target tile {tile.Name} does not match piece partition type {requiredPartition}.");
-				}
-			}
-
-			// TODO - rewrite A* to handle multiple target tiles.
-			int lowestCost = int.MaxValue;
-			DirectionEnum bestDirection = DirectionEnum.NONE;
-			// GD.Print("targetTiles count: " + targetTiles.Count);
-			// foreach (Tile targetTile in targetTiles) {
-			// 	DirectionEnum startingDirectionToTarget = AStar(
-			// 		grid,
-			// 		Tile,
-			// 		targetTile,
-			// 		[.. secondaryApproachTiles],
-			// 		[.. secondaryAvoidTiles],
-			// 		Toroidal,
-			// 		out int cost
-			// 	);
-			// 	if (cost < lowestCost) {
-			// 		lowestCost = cost;
-			// 		bestDirection = startingDirectionToTarget;
-			// 	}
-			// }
-
-			return bestDirection;
+				// These signify that this piece is moving towards a new tile.
+				PrevTile = CurrTile;
+				CurrTile = CurrTile.Neighbors[(int) direction];
 		}
 	}
 

@@ -102,10 +102,9 @@ public class Match {
 	}
 
 	private Piece GenerateDefaultMaster(string playerName, Main.Card card, Vector2I position) {
-	  return mBoard.AddPiece(
+	  return mBoard.AddMaster(
 			card.Stats,
 			mBoard.GetTileAt(position, Tile.MAX_PARTITION), // use default starting positions
-
 			uniqueId++
 	  );
 	}

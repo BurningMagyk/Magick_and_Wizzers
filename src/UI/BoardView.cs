@@ -184,7 +184,7 @@ public partial class BoardView : CanvasLayer, IView {
 			piece.Colorize(ColorizeEnum.HOVER);
 
 			// Update the command info.
-			commandInfoDisplay.Text = piece.GamePiece.GetCommandDescriptions();
+			// commandInfoDisplay.Text = piece.GamePiece.GetCommandDescriptions();
 		}
 	}
 }

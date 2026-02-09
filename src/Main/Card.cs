@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 namespace Main {
-public class Card : Match.ITarget {
+public class Card {
   
   public string Name { get; set; }
   public Stats Stats { get; set; }

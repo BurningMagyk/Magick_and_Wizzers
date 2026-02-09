@@ -59,7 +59,7 @@ public partial class CommandView : CanvasLayer, IView {
 
   public new void Show() {
 		// Hover the current item. We expect SetCommandTypes to have been called before Show.
-		if (hoveredItemIndex >= currentActor.Commands.Length || hoveredItemIndex == -1) {
+  		if (hoveredItemIndex >= currentActor.Commands.Length || hoveredItemIndex == -1) {
 			HoverItem(Main.DirectionEnum.NONE);
 		} else {
 			items[hoveredItemIndex].Hover();

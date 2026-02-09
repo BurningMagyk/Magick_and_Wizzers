@@ -119,6 +119,14 @@ public partial class Board {
 		return piece;
 	}
 
+	public Piece AddMaster(Stats stats, Tile targetTile, int uniqueId) {
+		Piece master = new(mDisplayNode.CreatePiece(uniqueId + '-' + stats.Name), stats, true) {
+			Tile = targetTile
+		};
+		pieces.Add(master);
+		return master;
+	}
+
 	public Tile GetTileAt(int xPos, int yPos, Tile.PartitionTypeEnum partitionType) {
 		int boardSizeTotal = BOARD_SIZE * (int) Math.Pow(2, (int) partitionType);
 		if (xPos < 0 || yPos < 0 || xPos >= boardSizeTotal || yPos >= boardSizeTotal) {
@@ -351,6 +359,11 @@ public partial class Board {
 				return verticalDistance * DIAGONAL_UNITS + (horizontalDistance - verticalDistance) * STRAIGHT_UNITS;
 			}
 		}
+	}
+
+	public Tile[] AStar(Command[] commands, out DirectionEnum nextMoveDirection) {
+		nextMoveDirection = DirectionEnum.NONE;
+		return null;
 	}
 }
 }
