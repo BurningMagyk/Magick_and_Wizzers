@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://in0o0olq8fgr"
-path.s3tc="res://.godot/imported/tile_hover_move.png-6dc008f4d11bd0e447b71904f940b17e.s3tc.ctex"
+uid="uid://ch1mxp0t6pfp0"
+path.s3tc="res://.godot/imported/tile_hover_away.png-7fa227514e26ac33ca14c1cca7e23f24.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,14 +11,16 @@ metadata={
 
 [deps]
 
-source_file="res://resources/tile_hover_move.png"
-dest_files=["res://.godot/imported/tile_hover_move.png-6dc008f4d11bd0e447b71904f940b17e.s3tc.ctex"]
+source_file="res://resources/tile_hover_away.png"
+dest_files=["res://.godot/imported/tile_hover_away.png-7fa227514e26ac33ca14c1cca7e23f24.s3tc.ctex"]
 
 [params]
 
 compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
@@ -26,6 +28,10 @@ mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
+process/channel_remap/red=0
+process/channel_remap/green=1
+process/channel_remap/blue=2
+process/channel_remap/alpha=3
 process/fix_alpha_border=true
 process/premult_alpha=false
 process/normal_map_invert_y=false

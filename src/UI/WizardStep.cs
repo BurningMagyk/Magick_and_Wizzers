@@ -57,11 +57,13 @@ public class WizardStep {
 
   public readonly string name;
 
+	public Command StepCommand { get; private set; } = null;
+
   public IView.State ViewState { get; private set; }
 
   public WizardStep Progress(object target, SelectType selectType) {
 		foreach (KeyValuePair<Specs, WizardStep> entry in nextSteps) {
-			GD.Print("Checking target \"" + target.ToString() + "\" against specs: " + entry.Key.ToString());
+			GD.Print("Checking target \"" + ((target == null) ? "null" : target.ToString()) + "\" against specs: " + entry.Key.ToString());
 			if (entry.Key.Matches(target, selectType)) {
 
 				GD.Print("Available next steps from \"" + entry.Value.name + "\":");
@@ -174,6 +176,16 @@ public class WizardStep {
 			}
 			Type targetType = target.GetType();
 
+			// If target is an array, extract the first element.
+			if (targetType.IsArray) {
+				Array targetArray = (Array) target;
+				if (targetArray.Length == 0) {
+					return false;
+				}
+				target = targetArray.GetValue(0);
+				targetType = target.GetType();
+			}
+
 			if (classArgs.Count > 0) {
 				bool classMatch = false;
 				foreach (Type classArg in classArgs) {
@@ -204,8 +216,8 @@ public class WizardStep {
 		}
   }
 
-  public static WizardStep CreateForCommand(string name, object[] specsArgs, bool special = false) {
-		foreach (object specsArg in specsArgs) {
+  public static WizardStep CreateForCommand(Command command, string name, bool special = false) {
+		foreach (object specsArg in command.specsArgs) {
 			if (specsArg is null or not Type) {
 				continue;
 			}
@@ -224,8 +236,9 @@ public class WizardStep {
 				[typeof(Command)]
 			);
 
+			wizardStep.StepCommand = command;
 			// Upon completing the command step, next step is back to the command view.
-			wizardStep.nextSteps[new Specs(specsArgs)] = COMMAND;
+			wizardStep.nextSteps[new Specs(command.specsArgs)] = COMMAND;
 
 			return wizardStep;
 		}

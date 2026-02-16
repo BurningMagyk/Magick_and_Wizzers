@@ -34,6 +34,8 @@ public class Command {
 
   public Vector2I TargetCountRange { get; private set; }
 
+	public readonly object[] specsArgs;
+
 	private readonly List<WizardStep> wizardSteps = [];
   private readonly List<RangedTarget> targets = [];
 	
@@ -47,11 +49,12 @@ public class Command {
   ) {
 	  Type = type;
 		Actor = actor;
+		this.specsArgs = specsArgs;
 		// If there are no specsArgs specified here, then we expect zero targets or for wizard steps to be added later.
 		if (specsArgs != null && specsArgs.Length > 0) {
 			string name = type.ToString() + " command for " + actor.Name + " with " + minTargetCount + " to "
 				+ (maxTargetCount == -1 ? "unlimited" : maxTargetCount.ToString()) + " targets";
-			wizardSteps.Add(WizardStep.CreateForCommand(name, specsArgs));
+			wizardSteps.Add(WizardStep.CreateForCommand(this, name));
 		}
 		if (maxTargetCount == -1) {
 			maxTargetCount = minTargetCount;
@@ -67,7 +70,7 @@ public class Command {
 	) : this(type, actor, null, specsArgsArray.Length, specsArgsArray.Length) {
 		foreach (object[] specsArgs in specsArgsArray) {
 			string name = type.ToString() + " command for " + actor.Name + " with target spec " + string.Join(", ", specsArgs);
-			wizardSteps.Add(WizardStep.CreateForCommand(name, specsArgs));
+			wizardSteps.Add(WizardStep.CreateForCommand(this, name));
 		}
 	}
 
@@ -82,12 +85,19 @@ public class Command {
 
 	// This method doesn't need to check whether the target matches specs because we expected the wizard step to have
 	// done that already.
-  public void Feed(object target, RangeEnum range = RangeEnum.NOT_APPLICABLE) {
+  public void Feed(object target) {
+	  if (target is Array arrayTargets) {
+			foreach (object arrayTarget in arrayTargets) {
+				Feed(arrayTarget);
+			}
+			return;
+		} 
+
 		// Accept the target.
 		if (target is RangedTarget rangedTarget) {
 			targets.Add(rangedTarget);
 		} else {
-			targets.Add(new RangedTarget(target, range));
+			targets.Add(new RangedTarget(target, RangeEnum.NOT_APPLICABLE));
 		}
 
 		// If we've reached the minimum target count, mark as complete.

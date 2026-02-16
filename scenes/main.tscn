@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://5h8krlppg2bv"]
+[gd_scene load_steps=18 format=3 uid="uid://5h8krlppg2bv"]
 
 [ext_resource type="Script" uid="uid://duq8otfh4ux1r" path="res://src/Main/Main.cs" id="1_d0b4a"]
 [ext_resource type="PackedScene" uid="uid://b2yvn8v5igbcx" path="res://scenes/tile.tscn" id="2_bo870"]
@@ -9,7 +9,8 @@
 [ext_resource type="Script" uid="uid://d3bwjcmohx4a0" path="res://src/UI/HandView.cs" id="7_dvira"]
 [ext_resource type="Texture2D" uid="uid://ca02dx33dsurg" path="res://resources/crosshair.png" id="8_3qukr"]
 [ext_resource type="Texture2D" uid="uid://bead4uk1ia01d" path="res://resources/tile_hover.png" id="8_a5pjv"]
-[ext_resource type="Texture2D" uid="uid://in0o0olq8fgr" path="res://resources/tile_hover_move.png" id="9_lgre4"]
+[ext_resource type="Texture2D" uid="uid://ch1mxp0t6pfp0" path="res://resources/tile_hover_away.png" id="9_muem4"]
+[ext_resource type="Texture2D" uid="uid://grd4tceval4j" path="res://resources/tile_hover_toward.png" id="10_dp3eg"]
 [ext_resource type="Texture2D" uid="uid://cf1vh6x8d8ad0" path="res://resources/tile_hover_interact.png" id="10_qaoui"]
 [ext_resource type="Texture2D" uid="uid://dl0k6wr2iw0uy" path="res://resources/tile_hover_cast.png" id="11_4ppjd"]
 [ext_resource type="Script" uid="uid://didlejw31cq6j" path="res://src/UI/CommandView.cs" id="14_xwtol"]
@@ -50,17 +51,22 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 
 visible = false
 texture = ExtResource("8_a5pjv")
 
-[node name="Hover Theater" type="Sprite3D" parent="UI/Board View"]
+[node name="Hover Away" type="Sprite3D" parent="UI/Board View"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0.05)
 visible = false
-texture = ExtResource("8_a5pjv")
+texture = ExtResource("9_muem4")
 
-[node name="Hover Move" type="Sprite3D" parent="UI/Board View"]
+[node name="Hover Toward" type="Sprite3D" parent="UI/Board View"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0.05)
 visible = false
-texture = ExtResource("9_lgre4")
+texture = ExtResource("10_dp3eg")
 
 [node name="Hover Interact" type="Sprite3D" parent="UI/Board View"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0.05)
+visible = false
+texture = ExtResource("10_qaoui")
+
+[node name="Hover React" type="Sprite3D" parent="UI/Board View"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0.05)
 visible = false
 texture = ExtResource("10_qaoui")

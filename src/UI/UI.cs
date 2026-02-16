@@ -34,7 +34,6 @@ public partial class UI : Node {
   private Camera3D camera;
 
 	private WizardStep mWizardStep;
-	private Command mCurrentCommand;
   private Vector2 mHoverPoint;
 
 	public enum InputType {
@@ -139,13 +138,8 @@ public partial class UI : Node {
   public PassRoundDelegate PassRound;
 
   public void HoverTile(ITile tile) {
-	if (mHandView.Showing) {
-	  mBoardView.Hover(null, true); // Hovered tile doesn't show up.
-	} else {
-	  mBoardView.Hover(tile, false); // Hovered tile shows up as normal.
-	  // mBoardView.Hover(tile, true); // Make hovered tile show up as ready to cast.
+		mBoardView.Hover(tile);
 	}
-  }
 
   public Vector2I GetHoverCoordinate() {
 		return mBoardView.GetHoverCoordinate(mHoverPoint);
@@ -176,6 +170,9 @@ public partial class UI : Node {
 		// Set it up with initial data.
 		if (view is BoardView) {
 			mBoardView.InputEnabled = true;
+			if (target is Command command) {
+				mBoardView.SetCommand(command);
+			}
 		} else if (view is CommandView) {
 			if (target is Display.Piece commander) {
 				mCommandView.SetActor(commander.GamePiece);
@@ -183,6 +180,7 @@ public partial class UI : Node {
 		}
 
 		if (viewState == IView.State.MEANDER_BOARD) {
+			mBoardView.Reset();
 			mCommandView.Reset();
 		}
 
@@ -200,7 +198,7 @@ public partial class UI : Node {
 			// Play sound indicating successful selection. Sound varies depending on selectType.
 			GD.Print("Progressed to new step with view state: " + mWizardStep.ViewState.ToString() + ".");
 			// Pass the target into the current command if it exists.
-			mCurrentCommand?.Feed(target);
+			mWizardStep.StepCommand?.Feed(target);
 			// Go to the new view.
 		  GoToView(mWizardStep.ViewState, target);
 		}

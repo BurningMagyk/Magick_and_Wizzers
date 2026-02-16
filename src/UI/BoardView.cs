@@ -5,8 +5,11 @@ using Main;
 
 namespace UI {
 public partial class BoardView : CanvasLayer, IView {
-  private enum HoverType { THEATER, NORMAL, MOVE, INTERACT, CAST }
+	// white, yellow, red, orange, blue, magenta
+  private enum HoverType { NORMAL, TOWARD, AWAY, INTERACT, CAST, REACT }
   private const float HOVER_SPRITE_LIFT = 0.1F;
+
+	private readonly bool[] panPressed = [false, false, false, false];
 
   public bool Showing { get; private set; }
 	public bool InputEnabled { get; set; } = true;
@@ -20,8 +23,6 @@ public partial class BoardView : CanvasLayer, IView {
   private Sprite3D[] hoverSprites;
 	private Label commandInfoDisplay;
   private Display.Piece mHoveredPiece;
-	private Command mCurrentCommand;
-	private bool[] panPressed = [false, false, false, false];
 
   // Called when the node enters the scene tree for the first time.
   public override void _Ready() {
@@ -56,7 +57,7 @@ public partial class BoardView : CanvasLayer, IView {
 				Hover(displayPiece);
 			}
 		} else {
-			Hover(null);
+			Hover((Display.Piece) null);
 		}
   }
 
@@ -72,7 +73,7 @@ public partial class BoardView : CanvasLayer, IView {
 
 		int horizontalPan = Joystick[0].X, verticalPan = Joystick[0].Y;
 		if (inputType == UI.InputType.PAN_LEFT) {
-	  panPressed[(int) DirectionEnum.WEST] = press;
+		panPressed[(int) DirectionEnum.WEST] = press;
 			horizontalPan = press ? -1 : panPressed[(int) DirectionEnum.EAST] ? 1 : 0;
 		}
 		if (inputType == UI.InputType.PAN_RIGHT) {
@@ -117,6 +118,21 @@ public partial class BoardView : CanvasLayer, IView {
 			Select?.Invoke(null, WizardStep.SelectType.SURRENDER);
 		}
   }
+	public new void Show() {
+		base.Show();
+		crosshair.Visible = true;
+		Showing = true;
+  }
+
+  public new void Hide() {
+		base.Hide();
+		crosshair.Visible = false;
+		Showing = false;
+  }
+
+	public void Reset() {
+		
+	}
 
 	public delegate void SelectDelegate(object target, WizardStep.SelectType selectType);
 	public SelectDelegate Select;
@@ -126,7 +142,24 @@ public partial class BoardView : CanvasLayer, IView {
   }
 
 	public void SetCommand(Command command) {
-		mCurrentCommand = command;
+		switch (command.Type) {
+			case Command.CommandType.APPROACH:
+			case Command.CommandType.OBSTRUCT:
+				hoverType = HoverType.TOWARD;
+				break;
+			case Command.CommandType.AVOID:
+				hoverType = HoverType.AWAY;
+				break;
+			case Command.CommandType.INTERACT:
+				// TODO - check whether this should be CAST instead
+				hoverType = HoverType.INTERACT;
+				break;
+			case Command.CommandType.INTERCEPT:
+			case Command.CommandType.LINGER:
+			case Command.CommandType.BRIDLE:
+				hoverType = HoverType.REACT;
+				break;
+		}
 	}
 
   public Vector2I GetHoverCoordinate(Vector2 point) {
@@ -139,7 +172,7 @@ public partial class BoardView : CanvasLayer, IView {
 		);
   }
 
-  public void Hover(Display.ITile tile, bool readyToCast) {
+  public void Hover(Display.ITile tile) {
 		if (tile == null) {
 			hoverSprites[(int) this.hoverType].Visible = false;
 			return;
@@ -147,28 +180,10 @@ public partial class BoardView : CanvasLayer, IView {
 
 		HoveredTile = tile;
 
-		HoverType hoverType = readyToCast ? HoverType.CAST : HoverType.NORMAL;
 		hoverSprites[(int) hoverType].Visible = true;
-		if (this.hoverType != hoverType) {
-			hoverSprites[(int) this.hoverType].Visible = false;
-			this.hoverType = hoverType;
-		}
-
 		hoverSprites[(int) hoverType].GlobalPosition = tile.Position
 			+ new Vector3(0, HOVER_SPRITE_LIFT, 0);
 		hoverSprites[(int) hoverType].Scale = new Vector3(tile.Size, tile.Size, 1);
-  }
-
-  public new void Show() {
-		base.Show();
-		crosshair.Visible = true;
-		Showing = true;
-  }
-
-  public new void Hide() {
-		base.Hide();
-		crosshair.Visible = false;
-		Showing = false;
   }
 
 	private void Hover(Display.Piece piece) {
