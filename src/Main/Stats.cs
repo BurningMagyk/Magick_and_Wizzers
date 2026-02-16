@@ -311,8 +311,8 @@ public class Stats {
 		  [.. randomRaces],
 			[
 				Command.CommandType.APPROACH,
-				Command.CommandType.AVOID,
-				Command.CommandType.INTERCEPT
+				Command.CommandType.AVOID//,
+				//Command.CommandType.INTERCEPT
 			],
 			new Ability[abilityCount],
 			randomActionPoints,
@@ -468,6 +468,9 @@ public class Stats {
 			if (FileAccess.FileExists(path)) {
 				using FileAccess file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
 				sRandomNames = file.GetAsText().Split("\n");
+				for (int i = 0; i < sRandomNames.Length; i++) {
+					sRandomNames[i] = sRandomNames[i].Trim();
+				}
 			} else {
 				sRandomNames = ["Default Name"];
 			}

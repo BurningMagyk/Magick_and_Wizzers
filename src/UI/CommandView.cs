@@ -2,6 +2,7 @@ using Godot;
 using Match;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace UI {
 public partial class CommandView : CanvasLayer, IView {
@@ -59,9 +60,10 @@ public partial class CommandView : CanvasLayer, IView {
 
   public new void Show() {
 		// Hover the current item. We expect SetCommandTypes to have been called before Show.
-  		if (hoveredItemIndex >= currentActor.Commands.Length || hoveredItemIndex == -1) {
+  	if (hoveredItemIndex >= currentActor.Commands.Length || hoveredItemIndex == -1) {
 			HoverItem(Main.DirectionEnum.NONE);
 		} else {
+			// TODO - If the item count is less than or equal to hoveredItemIndex, or item is disabled, call Unhover()
 			items[hoveredItemIndex].Hover();
 		}
 
@@ -77,8 +79,13 @@ public partial class CommandView : CanvasLayer, IView {
 		if (currentActor != null) {
 			hoveredItemIndexPerPiece[currentActor] = hoveredItemIndex;
 		}
+	}
+
+	/// <summary> Should be called when we're back to meandering the board. </summary>
+	public void Reset() {
 		currentActor = null;
-		Unhover();
+		itemCommands.Clear();
+		hoveredItemIndex = -1;
 	}
 
   public void SetViewPortRect(Rect2 viewPortRect) {
@@ -86,6 +93,11 @@ public partial class CommandView : CanvasLayer, IView {
   }
 
 	public void SetActor(Piece actor) {
+		if (currentActor != null) {
+			// Assume that we're coming back to command view if currentActor hasn't been cleared.
+			return;
+		}
+
 		int commandCount = actor.Commands.Length;
 		if (commandCount > MAX_COMMAND_COUNT) {
 			throw new Exception(
@@ -119,21 +131,19 @@ public partial class CommandView : CanvasLayer, IView {
 					(viewPortRect.Size.Y / 2) + (i - commandCount / 2F) * (items[i].Size.Y + SPACING)
 				);
 
-				item.Name = actor.Commands[i].ToString();
-				item.SetText(actor.Commands[i].ToString());
+				item.Name = actor.Commands[i].Type.ToString();
+				item.SetText(string.Concat(item.Name.ToString().AsSpan(0, 1), item.Name.ToString()[1..].ToLower()));
 				item.Show();
 			} else {
 				item.Hide();
 			}
+			item.Unhover();
 		}
   }
 
-  public void Unhover(bool forgetIndex = true) {
-		if (hoveredItemIndex > -1 && items[hoveredItemIndex] != null) {
-			items[hoveredItemIndex].Unhover();
-		}
-		if (forgetIndex) {
-			hoveredItemIndex = -1;
+  public void Unhover() {
+		foreach (Item item in items) {
+			item.Unhover();
 		}
   }
 
@@ -183,7 +193,7 @@ public partial class CommandView : CanvasLayer, IView {
 		// Emits signal to call OnSelectItem, defined in UI class.
 		Select?.Invoke(itemCommands[items[hoveredItemIndex]], WizardStep.SelectType.STANDARD);
   }
-
+ 
 	private void DetailHoveredItem() {
 		// Emits signal to call OnSelectItem, defined in UI class.
 		Select?.Invoke(itemCommands[items[hoveredItemIndex]], WizardStep.SelectType.DETAIL);

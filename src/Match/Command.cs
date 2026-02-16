@@ -49,7 +49,9 @@ public class Command {
 		Actor = actor;
 		// If there are no specsArgs specified here, then we expect zero targets or for wizard steps to be added later.
 		if (specsArgs != null && specsArgs.Length > 0) {
-			wizardSteps.Add(WizardStep.CreateForCommand(specsArgs));
+			string name = type.ToString() + " command for " + actor.Name + " with " + minTargetCount + " to "
+				+ (maxTargetCount == -1 ? "unlimited" : maxTargetCount.ToString()) + " targets";
+			wizardSteps.Add(WizardStep.CreateForCommand(name, specsArgs));
 		}
 		if (maxTargetCount == -1) {
 			maxTargetCount = minTargetCount;
@@ -64,7 +66,8 @@ public class Command {
 		object[][] specsArgsArray
 	) : this(type, actor, null, specsArgsArray.Length, specsArgsArray.Length) {
 		foreach (object[] specsArgs in specsArgsArray) {
-			wizardSteps.Add(WizardStep.CreateForCommand(specsArgs));
+			string name = type.ToString() + " command for " + actor.Name + " with target spec " + string.Join(", ", specsArgs);
+			wizardSteps.Add(WizardStep.CreateForCommand(name, specsArgs));
 		}
 	}
 

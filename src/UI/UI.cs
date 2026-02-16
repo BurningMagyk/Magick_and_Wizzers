@@ -161,7 +161,7 @@ public partial class UI : Node {
 	  return mBoardView.HoverPartition;
   }
 
-	public void GoToView(IView.State viewState) {
+	public void GoToView(IView.State viewState, object target) {
 		// Hide all views except for board view that we just disable input.
 		mBoardView.InputEnabled = false;
 		mHandView.Hide();
@@ -170,12 +170,24 @@ public partial class UI : Node {
 		mSurrenderView.Hide();
 		mDetailView.Hide();
 
-		// Show the appropriate view.
+		// Get the appropriate view.
 		IView view = ViewFrom(viewState);
-		view.Show();
+
+		// Set it up with initial data.
 		if (view is BoardView) {
 			mBoardView.InputEnabled = true;
+		} else if (view is CommandView) {
+			if (target is Display.Piece commander) {
+				mCommandView.SetActor(commander.GamePiece);
+			}
 		}
+
+		if (viewState == IView.State.MEANDER_BOARD) {
+			mCommandView.Reset();
+		}
+
+		// Show the view.
+		view.Show();
 	}
 
 	private void OnSelect(object target, WizardStep.SelectType selectType) {
@@ -190,23 +202,23 @@ public partial class UI : Node {
 			// Pass the target into the current command if it exists.
 			mCurrentCommand?.Feed(target);
 			// Go to the new view.
-		  GoToView(mWizardStep.ViewState);
+		  GoToView(mWizardStep.ViewState, target);
 		}
 	}
 
 	private IView ViewFrom(IView.State viewStateEnum) {
 	  return viewStateEnum switch {
-				IView.State.PASS => mPassView,
-				IView.State.SURRENDER => mSurrenderView,
-				IView.State.DETAIL => mDetailView,
+			IView.State.PASS => mPassView,
+			IView.State.SURRENDER => mSurrenderView,
+			IView.State.DETAIL => mDetailView,
 			IView.State.MEANDER_BOARD => mBoardView,
 			IView.State.MEANDER_HAND => mHandView,
-				IView.State.COMMAND_LIST => mCommandView,
-				IView.State.DESIGNATE_BOARD => mBoardView,
-				IView.State.DESIGNATE_HAND => mHandView,
-				IView.State.DESIGNATE_LIST => mDetailView, // TODO - this is wrong
-				IView.State.THEATER => mBoardView,
-				IView.State.CAST => mHandView,
+			IView.State.COMMAND_LIST => mCommandView,
+			IView.State.DESIGNATE_BOARD => mBoardView,
+			IView.State.DESIGNATE_HAND => mHandView,
+			IView.State.DESIGNATE_LIST => mDetailView, // TODO - this is wrong
+			IView.State.THEATER => mBoardView,
+			IView.State.CAST => mHandView,
 		_ => throw new Exception("Cannot get view for ViewStateEnum: \"" + viewStateEnum.ToString() + "\"."),
 	  };
 	}

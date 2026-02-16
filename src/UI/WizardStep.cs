@@ -21,40 +21,54 @@ public class WizardStep {
 	  IView.State.THEATER
 	];
 
-  public static readonly WizardStep ROOT = new(null, IView.State.MEANDER_BOARD);
+  public static readonly WizardStep ROOT = new("Root", null, IView.State.MEANDER_BOARD);
   public static readonly WizardStep HAND = new(
+	"Hand",
 	  ROOT, // Get to HAND from ROOT.
 	  IView.State.MEANDER_HAND,
 		[SelectType.HAND, typeof(Piece)] // User must use HAND key/button on a Piece to get to HAND step.
   );
 	public static readonly WizardStep COMMAND = new(
+		"Command Selection",
 		ROOT,
 		IView.State.COMMAND_LIST,
 		[SelectType.STANDARD, typeof(Piece)] // User must use STANDARD key/button on a Piece to get to COMMAND step.
 		// TODO - add arg that the piece is under player's control.
 	);
   public static readonly WizardStep PASS = new(
+		"Pass",
 		ROOT, // Get to PASS from ROOT.
 		IView.State.PASS,
 		[SelectType.PASS] // User must use PASS key/button to get to PASS step.
 	);
   public static readonly WizardStep SURRENDER = new(
+		"Surrender",
 	  ROOT, // Get to SURRENDER from ROOT.
 	  IView.State.SURRENDER,
 		[SelectType.SURRENDER] // User must use SURRENDER key/button to get to SURRENDER step.
   );
   public static readonly WizardStep THEATER = new(
+		"Theater",
 	  PASS, // Get to THEATER from PASS.
 	  IView.State.THEATER
   ); // Does not rely on user input to get to THEATER step.
 
   private readonly Dictionary<Specs, WizardStep> nextSteps = [];
 
+  public readonly string name;
+
   public IView.State ViewState { get; private set; }
 
   public WizardStep Progress(object target, SelectType selectType) {
 		foreach (KeyValuePair<Specs, WizardStep> entry in nextSteps) {
+			GD.Print("Checking target \"" + target.ToString() + "\" against specs: " + entry.Key.ToString());
 			if (entry.Key.Matches(target, selectType)) {
+
+				GD.Print("Available next steps from \"" + entry.Value.name + "\":");
+				foreach (KeyValuePair<Specs, WizardStep> nextEntry in entry.Value.nextSteps) {
+					GD.Print("  " + nextEntry.Value.name);
+				}
+
 				return entry.Value;
 			}
 		}
@@ -62,15 +76,18 @@ public class WizardStep {
   }
 
   private WizardStep(
+		string name,
 	  WizardStep prevStep, // To add this step as a next step of prevStep.
 	  IView.State viewState,
 	  object[] specsArgs = null // What are the specifications for coming to this step.
   ) {
+		this.name = name;
 	  ViewState = viewState;
 
 	  // Automatically make a detail step for certain view states.
 	  if (VIEW_STATES_WITH_DETAIL.Contains(viewState)) {
 		  WizardStep detailStep = new(
+				"Detail for " + name,
 			  this,
 			  IView.State.DETAIL,
 			  [SelectType.DETAIL, typeof(Card), typeof(Piece), typeof(Tile)]
@@ -179,9 +196,15 @@ public class WizardStep {
 
 			return true;
 		}
+
+		public override string ToString() {
+			string classArgsString = classArgs.Count > 0 ? "classArgs: [" + string.Join(", ", classArgs.Select(type => type.ToString())) + "]" : "no classArgs";
+			string statArgsString = statArgs.Count > 0 ? "statArgs: [" + string.Join(", ", statArgs.Select(arg => arg.ToString())) + "]" : "no statArgs";
+			return "selectType: " + selectType.ToString() + ", " + classArgsString + ", " + statArgsString;
+		}
   }
 
-  public static WizardStep CreateForCommand(object[] specsArgs, bool special = false) {
+  public static WizardStep CreateForCommand(string name, object[] specsArgs, bool special = false) {
 		foreach (object specsArg in specsArgs) {
 			if (specsArg is null or not Type) {
 				continue;
@@ -193,8 +216,18 @@ public class WizardStep {
 			} catch (Exception) {
 				continue;
 			}
-			
-			return new WizardStep(COMMAND, ViewStateForType(orthodoxType, special), specsArgs);
+
+			WizardStep wizardStep = new(
+				name + " (" + orthodoxType.Name + ")",
+				COMMAND,
+				ViewStateForType(orthodoxType, special),
+				[typeof(Command)]
+			);
+
+			// Upon completing the command step, next step is back to the command view.
+			wizardStep.nextSteps[new Specs(specsArgs)] = COMMAND;
+
+			return wizardStep;
 		}
 		throw new Exception("Cannot create WizardStep for command with given specs arguments.");
 	}
