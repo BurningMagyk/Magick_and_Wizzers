@@ -142,6 +142,8 @@ public partial class BoardView : CanvasLayer, IView {
   }
 
 	public void SetCommand(Command command) {
+		Hover((Display.ITile) null);
+
 		switch (command.Type) {
 			case Command.CommandType.APPROACH:
 			case Command.CommandType.OBSTRUCT:
@@ -160,6 +162,10 @@ public partial class BoardView : CanvasLayer, IView {
 				hoverType = HoverType.REACT;
 				break;
 		}
+
+		if (HoveredTile != null) {
+			Hover(HoveredTile);
+		}
 	}
 
   public Vector2I GetHoverCoordinate(Vector2 point) {
@@ -174,7 +180,7 @@ public partial class BoardView : CanvasLayer, IView {
 
   public void Hover(Display.ITile tile) {
 		if (tile == null) {
-			hoverSprites[(int) this.hoverType].Visible = false;
+			hoverSprites[(int) hoverType].Visible = false;
 			return;
 		}
 

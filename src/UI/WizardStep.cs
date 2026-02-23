@@ -121,6 +121,7 @@ public class WizardStep {
 	  HAND, // square button, E key
 	  BACK, // circle button, Q key
 	  BACK_SKIP, // circle button + left trigger, Q key + shift key
+		BACK_FORCE, // circle button + right trigger, Q key + control key
 	  DETAIL, // triangle button, F key
 	  PASS, // start button, enter key
 	  SURRENDER // select button, backspace key
@@ -128,18 +129,21 @@ public class WizardStep {
 
   private class Specs {
 	  private readonly SelectType selectType = SelectType.STANDARD; // The type of selection made by the user.
+		private readonly HashSet<object> objectArgs; // Specific objects.
 	  private readonly HashSet<Type> classArgs; // Piece, Tile, Card, Activity, etc.
-	  private readonly HashSet<object> statArgs; // Race, Element, Cost, etc.
+	  private readonly HashSet<Enum> statArgs; // Race, Element, Cost, etc.
 
 		public Specs(object[] args) {
 			if (args == null || args.Length == 0) {
+				objectArgs = [];
 				classArgs = [];
 				statArgs = [];
 				return;
 			}
 
+			List<object> objectArgsList = [];
 			List<Type> classArgsList = [];
-			List<object> statArgsList = [];
+			List<Enum> statArgsList = [];
 
 			foreach (object arg in args) {
 				if (arg == null) {
@@ -148,16 +152,18 @@ public class WizardStep {
 					selectType = selectTypeArg;
 				} else if (arg is Type typeArg) {
 					classArgsList.Add(ToOrthodoxType(typeArg));
-				} else {
-					Type argType = arg.GetType();
-					if (argType.IsEnum && argType.IsNested && argType.DeclaringType == typeof(Main.Stats)) {
-						statArgsList.Add(arg);
-					} else {
-						throw new ArgumentException("Argument of type \"" + argType.ToString() + "\" is not valid for selection.");
-					}
+				} else if (
+					arg.GetType().IsEnum &&
+					arg.GetType().IsNested &&
+					arg.GetType().DeclaringType == typeof(Main.Stats)
+				) {
+					statArgsList.Add((Enum) arg);
+				} else { // It's a specific object, like a specific piece or card.
+					objectArgsList.Add(arg);
 				}
 			}
 
+			objectArgs = [.. objectArgsList.Distinct()];
 			classArgs = [.. classArgsList.Distinct()];
 			statArgs = [.. statArgsList.Distinct()];
 		}
@@ -167,7 +173,7 @@ public class WizardStep {
 				return false;
 			}
 
-			if (classArgs.Count == 0 && statArgs.Count == 0) {
+			if (classArgs.Count == 0 && statArgs.Count == 0 && objectArgs.Count == 0) {
 				return true;
 			}
 
@@ -184,6 +190,11 @@ public class WizardStep {
 				}
 				target = targetArray.GetValue(0);
 				targetType = target.GetType();
+			}
+
+			// If objects are specified, target must be one of those objects.
+			if (objectArgs.Count > 0 && !objectArgs.Contains(target)) {
+				return false;
 			}
 
 			if (classArgs.Count > 0) {
@@ -231,12 +242,12 @@ public class WizardStep {
 
 			WizardStep wizardStep = new(
 				name + " (" + orthodoxType.Name + ")",
-				COMMAND,
+				COMMAND, // This is the command selection step that precedes this command step.
 				ViewStateForType(orthodoxType, special),
-				[typeof(Command)]
-			);
-
-			wizardStep.StepCommand = command;
+				[command]
+			) {
+				StepCommand = command
+			};
 			// Upon completing the command step, next step is back to the command view.
 			wizardStep.nextSteps[new Specs(command.specsArgs)] = COMMAND;
 

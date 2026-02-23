@@ -1,8 +1,12 @@
-[gd_scene load_steps=4 format=3 uid="uid://bh6ncm63hmvwt"]
+[gd_scene load_steps=8 format=3 uid="uid://bh6ncm63hmvwt"]
 
 [ext_resource type="Script" uid="uid://b16cbmshoau4u" path="res://src/UI/Item.cs" id="1_fxqmn"]
 [ext_resource type="Texture2D" uid="uid://ca8su2dgr3l22" path="res://resources/command_textures/sleeve.png" id="2_e1b6n"]
+[ext_resource type="Texture2D" uid="uid://c8omp0wuua2mt" path="res://resources/command_textures/item_background_pending.png" id="3_0bpo7"]
 [ext_resource type="Texture2D" uid="uid://di0dajdlylfag" path="res://resources/command_textures/item_background_relaxed.png" id="3_e1b6n"]
+[ext_resource type="Texture2D" uid="uid://dtbmche0u27r0" path="res://resources/command_textures/item_background_complete.png" id="4_q3j4q"]
+[ext_resource type="Texture2D" uid="uid://dfyhmdvg6ya1u" path="res://resources/command_textures/item_background_ready.png" id="5_ld1dg"]
+[ext_resource type="Texture2D" uid="uid://xhujqck5mx8u" path="res://resources/command_textures/item_background_disabled.png" id="7_taqui"]
 
 [node name="Command Item" type="Control"]
 layout_mode = 3
@@ -15,11 +19,43 @@ script = ExtResource("1_fxqmn")
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("2_e1b6n")
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background Pending" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 362.0
+offset_bottom = 83.0
+texture = ExtResource("3_0bpo7")
+expand_mode = 1
+
+[node name="Background Complete" type="TextureRect" parent="."]
+visible = false
+layout_mode = 0
+offset_right = 362.0
+offset_bottom = 83.0
+texture = ExtResource("4_q3j4q")
+expand_mode = 1
+
+[node name="Background Ready" type="TextureRect" parent="."]
+visible = false
+layout_mode = 0
+offset_right = 362.0
+offset_bottom = 83.0
+texture = ExtResource("5_ld1dg")
+expand_mode = 1
+
+[node name="Background Relaxed" type="TextureRect" parent="."]
+visible = false
 layout_mode = 0
 offset_right = 362.0
 offset_bottom = 83.0
 texture = ExtResource("3_e1b6n")
+expand_mode = 1
+
+[node name="Background Disabled" type="TextureRect" parent="."]
+visible = false
+layout_mode = 0
+offset_right = 362.0
+offset_bottom = 83.0
+texture = ExtResource("7_taqui")
 expand_mode = 1
 
 [node name="Label" type="Label" parent="."]

@@ -63,8 +63,46 @@ public partial class CommandView : CanvasLayer, IView {
   	if (hoveredItemIndex >= currentActor.Commands.Length || hoveredItemIndex == -1) {
 			HoverItem(Main.DirectionEnum.NONE);
 		} else {
-			// TODO - If the item count is less than or equal to hoveredItemIndex, or item is disabled, call Unhover()
-			items[hoveredItemIndex].Hover();
+			// Bring index back into range if somehow got out (probably from command count decreasing).
+			if (hoveredItemIndex < 0) {
+				hoveredItemIndex = 0;
+			} else if (hoveredItemIndex >= currentActor.Commands.Length) {
+				hoveredItemIndex = currentActor.Commands.Length - 1;
+			}
+
+			// Going up, check if we find an item that's pending. 
+			bool foundHoveringForward = false;
+			for (int i = hoveredItemIndex; i < currentActor.Commands.Length; i++) {
+				if (items[i].CommandObject.Status == Command.StatusEnum.PENDING) {
+					hoveredItemIndex = i;
+					foundHoveringForward = true;
+					break;
+				}
+			}
+
+			// Try going down if we didn't find anything going up.
+			bool foundHoveringBackward = false;
+			if (!foundHoveringForward) {
+				for (int i = hoveredItemIndex; i >= 0; i--) {
+					if (items[i].CommandObject.Status == Command.StatusEnum.PENDING) {
+						hoveredItemIndex = i;
+						foundHoveringBackward = true;
+						break;
+					}
+				}
+			}
+
+			Unhover();
+			if (!foundHoveringForward && !foundHoveringBackward) {
+				hoveredItemIndex = -1;
+			} else {
+				items[hoveredItemIndex].Hover();
+			}
+
+			// Update the item backgrounds to reflect the command status.
+			for (int i = 0; i < currentActor.Commands.Length; i++) {
+				items[i].SetStatus(items[i].CommandObject.Status);
+			}
 		}
 
 	  base.Show();
@@ -92,6 +130,7 @@ public partial class CommandView : CanvasLayer, IView {
 		this.viewPortRect = viewPortRect;
   }
 
+	/// <summary> Also call this if the actor's commands have changed. </summary>
 	public void SetActor(Piece actor) {
 		if (currentActor != null) {
 			// Assume that we're coming back to command view if currentActor hasn't been cleared.
@@ -123,7 +162,6 @@ public partial class CommandView : CanvasLayer, IView {
 					itemCommands.Remove(item);
 				}
 				itemCommands.Add(item, actor.Commands[i]);
-				item.Available = true; // This should depend on the piece but for now, make all available.
 				
 				// Position them according to how many are visible.
 				item.Position = new Vector2(
@@ -131,6 +169,9 @@ public partial class CommandView : CanvasLayer, IView {
 					(viewPortRect.Size.Y / 2) + (i - commandCount / 2F) * (items[i].Size.Y + SPACING)
 				);
 
+				item.CommandObject = actor.Commands[i];
+				// Item is meant to be used for generic purposes, so handle stuff like naming here instead of within the Item
+				// class.
 				item.Name = actor.Commands[i].Type.ToString();
 				item.SetText(string.Concat(item.Name.ToString().AsSpan(0, 1), item.Name.ToString()[1..].ToLower()));
 				item.Show();
@@ -150,8 +191,8 @@ public partial class CommandView : CanvasLayer, IView {
   private void HoverItem(Main.DirectionEnum direction) {
 		int hoveredItemIndexPrevious = hoveredItemIndex;
 
-		if (direction == Main.DirectionEnum.NONE || GetAvailableItemsCount() == 0) {
-			// Intend to unhover or no items available.
+		if (direction == Main.DirectionEnum.NONE || GetEnabledItemsCount() == 0) {
+			// Intend to unhover or all items are disabled.
 			Unhover();
 			return;
 		} else if (direction == Main.DirectionEnum.NORTH) {
@@ -216,14 +257,14 @@ public partial class CommandView : CanvasLayer, IView {
 	  return -1;
   }
 
-  private int GetAvailableItemsCount() {
-	int availableCount = 0;
+  private int GetEnabledItemsCount() {
+	int enabledCount = 0;
 		for (int i = 0; i < items.Length; i++) {
-			if (items[i].Available) {
-			availableCount++;
+			if (items[i].Visible) {
+				enabledCount++;
 			}
 		}
-	  return availableCount;
+	  return enabledCount;
   }
 }
 }

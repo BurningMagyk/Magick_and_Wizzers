@@ -172,6 +172,8 @@ public partial class UI : Node {
 			mBoardView.InputEnabled = true;
 			if (target is Command command) {
 				mBoardView.SetCommand(command);
+			} else {
+				mBoardView.SetCommand(null);
 			}
 		} else if (view is CommandView) {
 			if (target is Display.Piece commander) {
@@ -194,11 +196,28 @@ public partial class UI : Node {
 			// Play sound indicating blocked selection.
 			GD.Print("Blocked step progression.");
 		} else {
+			bool leaveCurrentStep = true;
+			if (mWizardStep.StepCommand != null) {
+				// Pass the target into the current command if it exists.
+				if (selectType == WizardStep.SelectType.STANDARD) {
+					leaveCurrentStep = mWizardStep.StepCommand.Feed(target);
+				} else if (selectType == WizardStep.SelectType.STANDARD_SKIP) {
+					leaveCurrentStep = mWizardStep.StepCommand.Feed(target, true);
+				} else if (selectType == WizardStep.SelectType.BACK) {
+					leaveCurrentStep = mWizardStep.StepCommand.Unfeed();
+				} else if (selectType == WizardStep.SelectType.BACK_SKIP) {
+					leaveCurrentStep = mWizardStep.StepCommand.Unfeed(true);
+				}
+			}
+
+			if (!leaveCurrentStep && selectType != WizardStep.SelectType.BACK_FORCE) {
+				return;
+			}
+
 			mWizardStep = newStep;
-			// Play sound indicating successful selection. Sound varies depending on selectType.
-			GD.Print("Progressed to new step with view state: " + mWizardStep.ViewState.ToString() + ".");
-			// Pass the target into the current command if it exists.
-			mWizardStep.StepCommand?.Feed(target);
+			// Play sound indicating successful selection. Sound varies depending on selectType and whether the new step is
+			// the same as the previous step.
+			GD.Print("Progressed to new step: " + newStep.name + ", with view state: " + mWizardStep.ViewState.ToString() + ".");
 			// Go to the new view.
 		  GoToView(mWizardStep.ViewState, target);
 		}

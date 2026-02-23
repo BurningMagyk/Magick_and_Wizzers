@@ -85,13 +85,14 @@ public class Command {
 
 	// This method doesn't need to check whether the target matches specs because we expected the wizard step to have
 	// done that already.
-  public void Feed(object target) {
+  public bool Feed(object target, bool trySkipping = false) {
+		GD.Print("Attempting to feed" + Type.ToString() + "command");
 	  if (target is Array arrayTargets) {
 			foreach (object arrayTarget in arrayTargets) {
 				Feed(arrayTarget);
 			}
-			return;
-		} 
+			return false;
+		}
 
 		// Accept the target.
 		if (target is RangedTarget rangedTarget) {
@@ -100,11 +101,41 @@ public class Command {
 			targets.Add(new RangedTarget(target, RangeEnum.NOT_APPLICABLE));
 		}
 
+		GD.Print("Fed " + targets.Count + " targets, max count should be: " + TargetCountRange.X);
 		// If we've reached the minimum target count, mark as complete.
 		if (targets.Count >= TargetCountRange.X) {
 			Status = StatusEnum.COMPLETE;
+			return targets.Count >= TargetCountRange.Y || trySkipping;
+		} else {
+			Status = StatusEnum.PENDING;
+			return false;
 		}
   }
+
+	public bool Unfeed(bool totally = false) {
+		GD.Print("Attempting to unfeed" + Type.ToString() + "command");
+		if (targets.Count == 0) {
+			return true;
+		}
+
+		if (totally) {
+			targets.Clear();
+			GD.Print("Unfed totally, max count should be: " + TargetCountRange.X);
+			Status = StatusEnum.PENDING;
+			return false;
+		}
+
+		targets.RemoveAt(targets.Count - 1);
+		GD.Print("Unfed down to " + targets.Count + " targets, max count should be: " + TargetCountRange.X);
+		// We may still be complete if we had more than the minimum target count.
+		if (targets.Count >= TargetCountRange.X) {
+			Status = StatusEnum.COMPLETE;
+		} else {
+			Status = StatusEnum.PENDING;
+		}
+
+		return false;
+	}
 
 	public bool IsReactive() {
 		return Type == CommandType.INTERCEPT || Type == CommandType.LINGER || Type == CommandType.BRIDLE;
