@@ -86,11 +86,16 @@ public class Command {
 	// This method doesn't need to check whether the target matches specs because we expected the wizard step to have
 	// done that already.
   public bool Feed(object target, bool trySkipping = false) {
-		GD.Print("Attempting to feed" + Type.ToString() + "command");
+		GD.Print("Attempting to feed " + Type.ToString() + " command");
 	  if (target is Array arrayTargets) {
 			foreach (object arrayTarget in arrayTargets) {
 				Feed(arrayTarget);
 			}
+			return false;
+		}
+
+		// Do not accept the target if we've already reached the maximum target count or if it's a duplicate.
+		if (targets.Count >= TargetCountRange.Y || ContainsTarget(target)) {
 			return false;
 		}
 
@@ -101,7 +106,7 @@ public class Command {
 			targets.Add(new RangedTarget(target, RangeEnum.NOT_APPLICABLE));
 		}
 
-		GD.Print("Fed " + targets.Count + " targets, max count should be: " + TargetCountRange.X);
+		GD.Print("Fed " + targets.Count + " targets, max count: " + TargetCountRange.X);
 		// If we've reached the minimum target count, mark as complete.
 		if (targets.Count >= TargetCountRange.X) {
 			Status = StatusEnum.COMPLETE;
@@ -113,20 +118,20 @@ public class Command {
   }
 
 	public bool Unfeed(bool totally = false) {
-		GD.Print("Attempting to unfeed" + Type.ToString() + "command");
+		GD.Print("Attempting to unfeed " + Type.ToString() + " command");
 		if (targets.Count == 0) {
 			return true;
 		}
 
 		if (totally) {
 			targets.Clear();
-			GD.Print("Unfed totally, max count should be: " + TargetCountRange.X);
+			GD.Print("Unfed totally, max count: " + TargetCountRange.X);
 			Status = StatusEnum.PENDING;
 			return false;
 		}
 
 		targets.RemoveAt(targets.Count - 1);
-		GD.Print("Unfed down to " + targets.Count + " targets, max count should be: " + TargetCountRange.X);
+		GD.Print("Unfed down to " + targets.Count + " targets, max count: " + TargetCountRange.X);
 		// We may still be complete if we had more than the minimum target count.
 		if (targets.Count >= TargetCountRange.X) {
 			Status = StatusEnum.COMPLETE;
@@ -184,6 +189,19 @@ public class Command {
 		return true;
 	}
 
+	private bool ContainsTarget(object target) {
+		if (target is RangedTarget rangedTarget) {
+			return targets.Contains(rangedTarget);
+		} else {
+			foreach (RangedTarget t in targets) {
+				if (t.Target == target) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	public static Command CreateApproach(Piece actor) {
 		return new Command(CommandType.APPROACH, actor, [typeof(Piece), typeof(Tile)], 1);
 	}
@@ -194,7 +212,7 @@ public class Command {
 		return new Command(CommandType.OBSTRUCT, actor, [[typeof(Piece)], [typeof(Piece), typeof(Tile)]]);
 	}
 	public static Command CreateInteract(Piece actor) {
-		return new Command(CommandType.INTERACT, actor, [typeof(Piece), typeof(Tile), typeof(Activity)], 1);
+		return new Command(CommandType.INTERACT, actor, [typeof(Piece), typeof(Tile), typeof(Activity)], 3, 6); // The [3, 6] is to test with
 	}
 	public static Command CreateIntercept(Piece actor) {
 		return new Command(CommandType.INTERCEPT, actor, [[typeof(Piece)], [typeof(Piece), typeof(Tile)], [typeof(Command)]]);

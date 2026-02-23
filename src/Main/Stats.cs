@@ -311,8 +311,8 @@ public class Stats {
 		  [.. randomRaces],
 			[
 				Command.CommandType.APPROACH,
-				Command.CommandType.AVOID//,
-				//Command.CommandType.INTERCEPT
+				Command.CommandType.AVOID,
+				Command.CommandType.INTERACT
 			],
 			new Ability[abilityCount],
 			randomActionPoints,
