@@ -27,7 +27,6 @@ public class Piece : Spacial {
 			mMovement.CurrTile = value;
 		}
 	}
-	public Tile[] Path { get; private set; }
 
   private readonly Display.Piece mDisplayNode;
 	private readonly Movement mMovement = new();
@@ -99,8 +98,9 @@ public class Piece : Spacial {
 			activeCommands.Add(command);
 		}
 
-		// Update path using A*.
-		Path = board.AStar([.. activeCommands], out DirectionEnum nextMoveDirection);
+		// Figure out next move using A*.
+		Tile[] path = board.AStar(Tile, activeCommands);
+		DirectionEnum nextMoveDirection = path.Length > 0 ? Board.GetDirectionTowards(Tile, path[0]) : DirectionEnum.NONE;
 
 		// Move piece according to its speed.
 		mMovement.ResolveSpeed(nextMoveDirection);
@@ -116,12 +116,16 @@ public class Piece : Spacial {
 		return Tile.GetTilesWithPartition(partition);
 	}
 
+	public Tile[] GetTiles() {
+		return GetTiles(GetPartitionType(Size));
+	}
+
 	public override string ToString() {
 		return $"Piece: {Name}";
 	}
 
 	private class Movement {
-		private enum State { DEFINITE, STRAIGHT, DIAGONAL }
+		private enum State { DEFINITE, ORTHOGONAL, DIAGONAL }
 
 		public SpeedEnum Speed {
 			get => mSpeedEnum;
@@ -152,11 +156,11 @@ public class Piece : Spacial {
 
 			// Move towards target tile.
 			Progress += mSpeed;
-			if (mState == State.STRAIGHT && Progress >= Board.STRAIGHT_UNITS * 10) {
-				Progress -= Board.STRAIGHT_UNITS * 10;
+			if (mState == State.ORTHOGONAL && Progress >= Board.ORTHOGONAL_UNITS * 10) {
+				Progress -= Board.ORTHOGONAL_UNITS * 10;
 				UpdateTile(direction);
-			} else if (mState == State.DIAGONAL && Progress >= Board.STRAIGHT_UNITS * 10) {
-				Progress -= Board.STRAIGHT_UNITS * 10;
+			} else if (mState == State.DIAGONAL && Progress >= Board.ORTHOGONAL_UNITS * 10) {
+				Progress -= Board.DIAGONAL_UNITS * 10;
 				UpdateTile(direction);
 			}
 		}
@@ -171,8 +175,8 @@ public class Piece : Spacial {
 					// Diagonal move
 					mState = State.DIAGONAL;
 				} else if (direction != DirectionEnum.NONE) {
-					// Straight move
-					mState = State.STRAIGHT;
+					// Orthogonal move
+					mState = State.ORTHOGONAL;
 				} else {
 					// No move
 					mState = State.DEFINITE;

@@ -1,3 +1,4 @@
+using Display;
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -24,20 +25,30 @@ public class Command {
   }
 
   public enum RangeEnum { NOT_APPLICABLE, ADJACENT, NEAR, MODERATE, FAR }
-	public enum StatusEnum { PENDING, COMPLETE, READY, RELAXED, DISABLED }
+	public enum StatusEnum { PENDING, COMPLETE, READY, RELAXED, DISABLED } // TODO - is there a point in having RELAXED?
 
   public CommandType Type { get; private set; }
-	public StatusEnum Status { get; private set; } = StatusEnum.PENDING;
+	public StatusEnum Status {
+		get => status;
+		private set {
+			status = value;
+			TotalTiles = CalculateTotalTilesFrom([.. targets]);
+		}
+	}
   public Ability Sauce { get; private set; } = null;
 
   public Piece Actor { get; private set; }
 
   public Vector2I TargetCountRange { get; private set; }
 
+	public Tile[] TotalTiles { get; private set; }
+
 	public readonly object[] specsArgs;
 
 	private readonly List<WizardStep> wizardSteps = [];
   private readonly List<RangedTarget> targets = [];
+
+	private StatusEnum status = StatusEnum.PENDING;
 	
 	// For basic stuff. Can have variable target count, but each matches the same spec.
   private Command(
@@ -95,15 +106,27 @@ public class Command {
 		}
 
 		// Do not accept the target if we've already reached the maximum target count or if it's a duplicate.
-		if (targets.Count >= TargetCountRange.Y || ContainsTarget(target)) {
+		if (targets.Count >= TargetCountRange.Y || ContainsRangedTarget(target)) {
 			return false;
 		}
 
 		// Accept the target.
 		if (target is RangedTarget rangedTarget) {
+			// Already in the format we want.
 			targets.Add(rangedTarget);
 		} else {
-			targets.Add(new RangedTarget(target, RangeEnum.NOT_APPLICABLE));
+			// Identify type and extract the game object.
+			object gameTarget;
+			if (target is Display.Piece displayPiece) {
+				gameTarget = displayPiece.GamePiece;
+			} else if (target is ITile displayTile) {
+				gameTarget = displayTile.GameTile;
+			} else if (target is Card uiCard) {
+				gameTarget = uiCard.GameCard;
+			} else {
+				gameTarget = target;
+			}
+			targets.Add(new RangedTarget(gameTarget, RangeEnum.NOT_APPLICABLE));
 		}
 
 		GD.Print("Fed " + targets.Count + " targets, max count: " + TargetCountRange.X);
@@ -140,6 +163,30 @@ public class Command {
 		}
 
 		return false;
+	}
+
+	public ITile[] GetPreviewTiles() {
+		if (Status != StatusEnum.COMPLETE) {
+			return null;
+		}
+
+		if (Type == CommandType.APPROACH) {
+
+		}
+
+		throw new Exception("Getting target tiles is not implemented for command type \"" + Type.ToString() + "\".");
+	}
+
+	public Piece[] GetPreviewPieces() {
+		if (Status != StatusEnum.COMPLETE) {
+			return null;
+		}
+
+		if (Type == CommandType.APPROACH) {
+
+		}
+
+		throw new Exception("Getting target pieces is not implemented for command type \"" + Type.ToString() + "\".");
 	}
 
 	public bool IsReactive() {
@@ -189,7 +236,7 @@ public class Command {
 		return true;
 	}
 
-	private bool ContainsTarget(object target) {
+	private bool ContainsRangedTarget(object target) {
 		if (target is RangedTarget rangedTarget) {
 			return targets.Contains(rangedTarget);
 		} else {
@@ -200,6 +247,21 @@ public class Command {
 			}
 		}
 		return false;
+	}
+
+	private Tile[] CalculateTotalTilesFrom(RangedTarget[] rangedTargets) {
+		List<Tile> totalTiles = [];
+		if (Type == CommandType.APPROACH || Type == CommandType.AVOID || Type == CommandType.INTERACT) {
+			foreach (RangedTarget rangedTarget in rangedTargets) {
+				if (rangedTarget.Target is Spacial spacialTarget) {
+					totalTiles.AddRange(Tile.BreathFrom(spacialTarget.GetTiles(), RangeEnumToUnits(rangedTarget.Range)));
+				}
+			}
+		} else {
+			// TODO - implement for other command types
+			throw new Exception("Calculating total tiles is not implemented for command type \"" + Type.ToString() + "\".");
+		}
+		return [.. totalTiles];
 	}
 
 	public static Command CreateApproach(Piece actor) {

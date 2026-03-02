@@ -143,24 +143,28 @@ public partial class BoardView : CanvasLayer, IView {
 
 	public void SetCommand(Command command) {
 		Hover((Display.ITile) null);
-
-		switch (command.Type) {
-			case Command.CommandType.APPROACH:
-			case Command.CommandType.OBSTRUCT:
-				hoverType = HoverType.TOWARD;
-				break;
-			case Command.CommandType.AVOID:
-				hoverType = HoverType.AWAY;
-				break;
-			case Command.CommandType.INTERACT:
-				// TODO - check whether this should be CAST instead
-				hoverType = HoverType.INTERACT;
-				break;
-			case Command.CommandType.INTERCEPT:
-			case Command.CommandType.LINGER:
-			case Command.CommandType.BRIDLE:
-				hoverType = HoverType.REACT;
-				break;
+		
+		if (command == null) {
+			hoverType = HoverType.NORMAL;
+		} else {
+			switch (command.Type) {
+				case Command.CommandType.APPROACH:
+				case Command.CommandType.OBSTRUCT:
+					hoverType = HoverType.TOWARD;
+					break;
+				case Command.CommandType.AVOID:
+					hoverType = HoverType.AWAY;
+					break;
+				case Command.CommandType.INTERACT:
+					// TODO - check whether this should be CAST instead
+					hoverType = HoverType.INTERACT;
+					break;
+				case Command.CommandType.INTERCEPT:
+				case Command.CommandType.LINGER:
+				case Command.CommandType.BRIDLE:
+					hoverType = HoverType.REACT;
+					break;
+			}
 		}
 
 		if (HoveredTile != null) {
@@ -186,7 +190,7 @@ public partial class BoardView : CanvasLayer, IView {
 
 		HoveredTile = tile;
 
-		hoverSprites[(int) hoverType].Visible = true;
+		hoverSprites[(int) hoverType].Visible = mHoveredPiece == null;
 		hoverSprites[(int) hoverType].GlobalPosition = tile.Position
 			+ new Vector3(0, HOVER_SPRITE_LIFT, 0);
 		hoverSprites[(int) hoverType].Scale = new Vector3(tile.Size, tile.Size, 1);
@@ -199,13 +203,21 @@ public partial class BoardView : CanvasLayer, IView {
 
 			// Clear the command info.
 			commandInfoDisplay.Text = "";
-		} else if (piece != mHoveredPiece) {
-			mHoveredPiece?.Colorize(ColorizeEnum.NONE);
-			mHoveredPiece = piece;
-			piece.Colorize(ColorizeEnum.HOVER);
 
-			// Update the command info.
-			// commandInfoDisplay.Text = piece.GamePiece.GetCommandDescriptions();
+			// Show tile hovering when not hovering a piece.
+			hoverSprites[(int) hoverType].Visible = true;
+		} else {
+			if (piece != mHoveredPiece) {
+				mHoveredPiece?.Colorize(ColorizeEnum.NONE);
+				mHoveredPiece = piece;
+				piece.Colorize(ColorizeEnum.HOVER);
+
+				// Update the command info.
+				// commandInfoDisplay.Text = piece.GamePiece.GetCommandDescriptions();
+			}
+
+			// Hide tile hovering when hovering a piece.
+			hoverSprites[(int) hoverType].Visible = false;
 		}
 	}
 }

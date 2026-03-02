@@ -70,6 +70,27 @@ public class Tile : Spacial {
 		}
 	}
 
+	public Tile[] NeighborsOrthogonal {
+		get {
+			return [
+				neighbors[(int) DirectionEnum.NORTH],
+				neighbors[(int) DirectionEnum.EAST],
+				neighbors[(int) DirectionEnum.SOUTH],
+				neighbors[(int) DirectionEnum.WEST]
+			];
+		}
+	}
+	public Tile[] NeighborsDiagonal {
+		get {
+			return [
+				neighbors[(int) DirectionEnum.NORTHEAST],
+				neighbors[(int) DirectionEnum.SOUTHEAST],
+				neighbors[(int) DirectionEnum.SOUTHWEST],
+				neighbors[(int) DirectionEnum.NORTHWEST]
+			];
+		}
+	}
+
 	public readonly Tile ParentTile;
 	private readonly Tile[,] tiles = new Tile[2, 2];
 
@@ -126,6 +147,10 @@ public class Tile : Spacial {
 
 	public Tile[] GetTiles(PartitionTypeEnum partition) {
 		return GetTilesWithPartition(partition);
+	}
+
+	public Tile[] GetTiles() {
+		return GetTilesWithPartition(PartitionType);
 	}
 
 	public void PrintChildren() {
@@ -185,6 +210,63 @@ public class Tile : Spacial {
 			DirectionEnum.EAST => tiles.Max(t => t.Coordinate.X),
 			_ => throw new ArgumentException("Invalid direction for GetPosAtSideOf")
 		};
+	}
+
+	public static List<Tile> BreathFrom(Tile[] start, int range) {
+		HashSet<Tile> visited = [.. start];
+		Dictionary<Tile, int> frontier = [];
+		foreach (Tile tile in start) {
+			frontier[tile] = range;
+		}
+
+		while (frontier.Count > 0) {
+			Dictionary<Tile, int> nextFrontier = [];
+
+			foreach (KeyValuePair<Tile, int> kvp in frontier) {
+				Tile tile = kvp.Key;
+				int remainingRange = kvp.Value;
+
+				if (remainingRange >= Board.ORTHOGONAL_UNITS) {
+					foreach (Tile neighbor in tile.NeighborsOrthogonal) {
+						if (neighbor != null && !visited.Contains(neighbor)) {
+							visited.Add(neighbor);
+							nextFrontier[neighbor] = remainingRange - Board.ORTHOGONAL_UNITS;
+						}
+					}
+				}
+				if (remainingRange >= Board.DIAGONAL_UNITS) {
+					foreach (Tile neighbor in tile.NeighborsDiagonal) {
+						if (neighbor != null && !visited.Contains(neighbor)) {
+							visited.Add(neighbor);
+							nextFrontier[neighbor] = remainingRange - Board.DIAGONAL_UNITS;
+						}
+					}
+				}
+			}
+
+			frontier = nextFrontier;
+		}
+
+		return [.. visited];
+	}
+
+	public static Tile[] AStar(Tile startTile, List<Command> commands) {
+		List<Tile> goalTiles = [];
+		List<Tile> avoidedTiles = [];
+		foreach (Command command in commands) {
+			if (command.Type == Command.CommandType.APPROACH || command.Type == Command.CommandType.OBSTRUCT) {
+				goalTiles.AddRange(command.TotalTiles);
+			} else if (command.Type == Command.CommandType.AVOID) {
+				avoidedTiles.AddRange(command.TotalTiles);
+			} else {
+				throw new ArgumentException("Unsupported command type for A*: " + command.Type);
+			}
+		}
+		return AStar(startTile, goalTiles, avoidedTiles, []);
+	}
+
+	public static Tile[] AStar(Tile startTile, List<Tile> goalTiles, List<Tile> avoidedTiles, List<Tile> invalidTiles) {
+		
 	}
 }
 }

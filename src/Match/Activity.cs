@@ -11,5 +11,9 @@ public class Activity : Spacial {
   public Tile[] GetTiles(Tile.PartitionTypeEnum partition) {
     return null;
   }
-}
+
+  public Tile[] GetTiles() {
+    return null;
+  }
+  }
 }

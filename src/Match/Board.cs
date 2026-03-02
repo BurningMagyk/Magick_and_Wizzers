@@ -8,7 +8,7 @@ using System.Linq;
 namespace Match {
 public partial class Board {
 	public const int BOARD_SIZE = 2;
-	public const int STRAIGHT_UNITS = 5;
+	public const int ORTHOGONAL_UNITS = 5;
 	public const int DIAGONAL_UNITS = 7;
 	public const int RANDOM_POSSIBLE_STARTING_POSITION_COUNT = 1000;
 
@@ -345,25 +345,29 @@ public partial class Board {
 
 		if (horizontalDirectionToGo == (int) DirectionEnum.NONE) {
 			directionToGo = (DirectionEnum) verticalDirectionToGo;
-			return verticalDistance * STRAIGHT_UNITS;
+			return verticalDistance * ORTHOGONAL_UNITS;
 		} else if (verticalDirectionToGo == (int) DirectionEnum.NONE) {
 			directionToGo = (DirectionEnum) horizontalDirectionToGo;
-			return horizontalDistance * STRAIGHT_UNITS;
+			return horizontalDistance * ORTHOGONAL_UNITS;
 		} else {
 			// Both horizontal and vertical movement needed. Calculate octile distance.
 			if (horizontalDistance < verticalDistance) {
 				directionToGo = Util.Combine((DirectionEnum) horizontalDirectionToGo, (DirectionEnum) verticalDirectionToGo);
-				return horizontalDistance * DIAGONAL_UNITS + (verticalDistance - horizontalDistance) * STRAIGHT_UNITS;
+				return horizontalDistance * DIAGONAL_UNITS + (verticalDistance - horizontalDistance) * ORTHOGONAL_UNITS;
 			} else {
 				directionToGo = Util.Combine((DirectionEnum) horizontalDirectionToGo, (DirectionEnum) verticalDirectionToGo);
-				return verticalDistance * DIAGONAL_UNITS + (horizontalDistance - verticalDistance) * STRAIGHT_UNITS;
+				return verticalDistance * DIAGONAL_UNITS + (horizontalDistance - verticalDistance) * ORTHOGONAL_UNITS;
 			}
 		}
 	}
 
-	public Tile[] AStar(Command[] commands, out DirectionEnum nextMoveDirection) {
-		nextMoveDirection = DirectionEnum.NONE;
-		return null;
+	public static DirectionEnum GetDirectionTowards(Tile fromTile, Tile toTile) {
+		for (int i = 0; i < fromTile.Neighbors.Length; i++) {
+			if (fromTile.Neighbors[i] == toTile) {
+				return (DirectionEnum) i;
+			}
+		}
+		throw new ArgumentException("The provided tile is not a neighbor of the fromTile.");
 	}
 }
 }
