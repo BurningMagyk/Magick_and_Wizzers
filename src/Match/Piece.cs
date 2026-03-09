@@ -99,8 +99,15 @@ public class Piece : Spacial {
 		}
 
 		// Figure out next move using A*.
-		Tile[] path = board.AStar(Tile, activeCommands);
-		DirectionEnum nextMoveDirection = path.Length > 0 ? Board.GetDirectionTowards(Tile, path[0]) : DirectionEnum.NONE;
+		Tile[] path = Tile.AStar(Tile, [], board.GetTotalSize(), board.Toroidal, Movement.TravelCost, activeCommands, 1000); // TODO - use non-magic number
+		DirectionEnum nextMoveDirection;
+		if (path.Length == 0 || path[0] == Tile) {
+			nextMoveDirection = DirectionEnum.NONE; // TODO - use just heuristic to determine direction here
+		} else if (Tile.IsNeighbor(Tile, path[0])) {
+			nextMoveDirection = Tile.DetermineDirection(Tile, path[0], board.Toroidal);	
+		} else {
+			throw new Exception("Invalid path returned by A*: " + path[0] + " is not a neighbor of " + Tile);
+		}
 
 		// Move piece according to its speed.
 		mMovement.ResolveSpeed(nextMoveDirection);
@@ -134,6 +141,7 @@ public class Piece : Spacial {
 				mSpeed = (int) Math.Pow((int) value, 2);
 			}
 		}
+
 		public int Progress { get; set; } = 0;
 		public SizeEnum Size { get; set; }
 
@@ -186,6 +194,17 @@ public class Piece : Spacial {
 				// These signify that this piece is moving towards a new tile.
 				PrevTile = CurrTile;
 				CurrTile = CurrTile.Neighbors[(int) direction];
+		}
+
+		public static int TravelCost(Tile t1, Tile t2) {
+			if (t1 == null || t2 == null || Tile.IsNeighbor(t1, t2)) {
+				return int.MaxValue;
+			}
+			if (t1.Coordinate.X == t2.Coordinate.X || t1.Coordinate.Y == t2.Coordinate.Y) {
+				return Board.ORTHOGONAL_UNITS;
+			} else {
+				return Board.DIAGONAL_UNITS;
+			}
 		}
 	}
 

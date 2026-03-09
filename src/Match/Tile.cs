@@ -175,16 +175,40 @@ public class Tile : Spacial {
 	}
 	public override int GetHashCode() => HashCode.Combine(Coordinate.X, Coordinate.Y, PartitionType);
 
-	public static DirectionEnum DetermineDirection(Tile from, Tile to) {
+	public static DirectionEnum DetermineDirection(Tile from, Tile to, bool toroidal) {
 		if (from.Equals(to)) {
 			return DirectionEnum.NONE;
 		} else if (from.Coordinate.X == to.Coordinate.X) {
+			if (toroidal && from.Neighbors[(int) DirectionEnum.NORTH].Equals(to)) {
+				return DirectionEnum.NORTH;
+			} else if (toroidal && from.Neighbors[(int) DirectionEnum.SOUTH].Equals(to)) {
+				return DirectionEnum.SOUTH;
+			}
 			return to.Coordinate.Y > from.Coordinate.Y ? DirectionEnum.SOUTH : DirectionEnum.NORTH;
 		} else if (from.Coordinate.Y == to.Coordinate.Y) {
+			if (toroidal && from.Neighbors[(int) DirectionEnum.EAST].Equals(to)) {
+				return DirectionEnum.EAST;
+			} else if (toroidal && from.Neighbors[(int) DirectionEnum.WEST].Equals(to)) {
+				return DirectionEnum.WEST;
+			}
 			return to.Coordinate.X > from.Coordinate.X ? DirectionEnum.EAST : DirectionEnum.WEST;
 		} else if (to.Coordinate.X > from.Coordinate.X) {
+			if (toroidal) {
+				if (from.Neighbors[(int) DirectionEnum.NORTHEAST].Equals(to)) {
+					return DirectionEnum.NORTHEAST;
+				} else if (from.Neighbors[(int) DirectionEnum.SOUTHEAST].Equals(to)) {
+					return DirectionEnum.SOUTHEAST;
+				}
+			}
 			return to.Coordinate.Y > from.Coordinate.Y ? DirectionEnum.SOUTHEAST : DirectionEnum.NORTHEAST;
 		} else {
+			if (toroidal) {
+				if (from.Neighbors[(int) DirectionEnum.NORTHWEST].Equals(to)) {
+					return DirectionEnum.NORTHWEST;
+				} else if (from.Neighbors[(int) DirectionEnum.SOUTHWEST].Equals(to)) {
+					return DirectionEnum.SOUTHWEST;
+				}
+			}
 			return to.Coordinate.Y > from.Coordinate.Y ? DirectionEnum.SOUTHWEST : DirectionEnum.NORTHWEST;
 		}
   }
@@ -212,9 +236,136 @@ public class Tile : Spacial {
 		};
 	}
 
-	public static List<Tile> BreathFrom(Tile[] start, int range) {
+		// TODO - needs testing
+	public static int CalculateOctileDistance(
+		Spacial s1,
+		Spacial s2,
+		int boardSize,
+		bool toroidal,
+		out DirectionEnum directionToGo
+	) {
+		int horizontalDirectionToGo = -2; // -2 means undetermined.
+		int horizontalDistance = 0;
+
+		int s1Left = GetPositionAtSideOf(s1, DirectionEnum.WEST);
+		int s2Right = GetPositionAtSideOf(s2, DirectionEnum.EAST);
+		int s1Right = GetPositionAtSideOf(s1, DirectionEnum.EAST);
+		int s2Left = GetPositionAtSideOf(s2, DirectionEnum.WEST);
+		if (s1Right >= s2Left && s1Left <= s2Right) {
+			// If the shapes overlap horizontally, no horizontal movement needed.
+			horizontalDirectionToGo = (int) DirectionEnum.NONE;
+			horizontalDistance = 0;
+		} else if (s1Left > s2Right) {
+			// s1 is to the right of s2.
+			int nonToroidalDistance = s1Left - s2Right;
+			if (toroidal) {
+				// Check if it's shorter to go left (west) around the toroidal board.
+				int toroidalDistance = boardSize - s1Right + s2Left - 1;
+				if (toroidalDistance < nonToroidalDistance) {
+					horizontalDirectionToGo = (int) DirectionEnum.WEST;
+					horizontalDistance = toroidalDistance;
+				} else {
+					horizontalDirectionToGo = (int) DirectionEnum.EAST;
+					horizontalDistance = nonToroidalDistance;
+				}
+			} else {
+				horizontalDirectionToGo = (int) DirectionEnum.EAST;
+				horizontalDistance = nonToroidalDistance;
+			}
+		} else if (s1Right < s2Left) {
+			// s1 is to the left of s2.
+			int nonToroidalDistance = s2Left - s1Right;
+			if (toroidal) {
+				// Check if it's shorter to go right (east) around the toroidal board.
+				int toroidalDistance = boardSize - s2Right + s1Right - 1;
+				if (toroidalDistance < nonToroidalDistance) {
+					horizontalDirectionToGo = (int) DirectionEnum.EAST;
+					horizontalDistance = toroidalDistance;
+				} else {
+					horizontalDirectionToGo = (int) DirectionEnum.WEST;
+					horizontalDistance = nonToroidalDistance;
+				}
+			} else {
+				horizontalDirectionToGo = (int) DirectionEnum.WEST;
+				horizontalDistance = nonToroidalDistance;
+			}
+		}
+
+		int verticalDirectionToGo = -2; // -2 means undetermined.
+		int verticalDistance = 0;
+
+		int s1Top = GetPositionAtSideOf(s1, DirectionEnum.NORTH);
+		int s2Bottom = GetPositionAtSideOf(s2, DirectionEnum.SOUTH);
+		int s1Bottom = GetPositionAtSideOf(s1, DirectionEnum.SOUTH);
+		int s2Top = GetPositionAtSideOf(s2, DirectionEnum.NORTH);
+		if (s1Bottom >= s2Top && s1Top <= s2Bottom) {
+			// If the shapes overlap vertically, no vertical movement needed.
+			verticalDirectionToGo = (int) DirectionEnum.NONE;
+			verticalDistance = 0;
+		} else if (s1Top > s2Bottom) {
+			// s1 is below s2.
+			int nonToroidalDistance = s1Top - s2Bottom;
+			if (toroidal) {
+				// Check if it's shorter to go up (north) around the toroidal board.
+				int toroidalDistance = boardSize - s1Bottom + s2Top - 1;
+				if (toroidalDistance < nonToroidalDistance) {
+					verticalDirectionToGo = (int) DirectionEnum.NORTH;
+					verticalDistance = toroidalDistance;
+				} else {
+					verticalDirectionToGo = (int) DirectionEnum.SOUTH;
+					verticalDistance = nonToroidalDistance;
+				}
+			} else {
+				verticalDirectionToGo = (int) DirectionEnum.SOUTH;
+				verticalDistance = nonToroidalDistance;
+			}
+		} else if (s1Bottom < s2Top) {
+			// s1 is above s2.
+			int nonToroidalDistance = s2Top - s1Bottom;
+			if (toroidal) {
+				// Check if it's shorter to go down (south) around the toroidal board.
+				int toroidalDistance = boardSize - s2Bottom + s1Top - 1;
+				if (toroidalDistance < nonToroidalDistance) {
+					verticalDirectionToGo = (int) DirectionEnum.SOUTH;
+					verticalDistance = toroidalDistance;
+				} else {
+					verticalDirectionToGo = (int) DirectionEnum.NORTH;
+					verticalDistance = nonToroidalDistance;
+				}
+			} else {
+				verticalDirectionToGo = (int) DirectionEnum.NORTH;
+				verticalDistance = nonToroidalDistance;
+			}
+		}
+
+		if (horizontalDirectionToGo == -2 || verticalDirectionToGo == -2) {
+			throw new Exception("Direction to go was not determined correctly.");
+		}
+
+		if (horizontalDirectionToGo == (int) DirectionEnum.NONE) {
+			directionToGo = (DirectionEnum) verticalDirectionToGo;
+			return verticalDistance * Board.ORTHOGONAL_UNITS;
+		} else if (verticalDirectionToGo == (int) DirectionEnum.NONE) {
+			directionToGo = (DirectionEnum) horizontalDirectionToGo;
+			return horizontalDistance * Board.ORTHOGONAL_UNITS;
+		} else {
+			// Both horizontal and vertical movement needed. Calculate octile distance.
+			if (horizontalDistance < verticalDistance) {
+				directionToGo = Util.Combine((DirectionEnum) horizontalDirectionToGo, (DirectionEnum) verticalDirectionToGo);
+				return horizontalDistance * Board.DIAGONAL_UNITS +
+					(verticalDistance - horizontalDistance) * Board.ORTHOGONAL_UNITS;
+			} else {
+				directionToGo = Util.Combine((DirectionEnum) horizontalDirectionToGo, (DirectionEnum) verticalDirectionToGo);
+				return verticalDistance * Board.DIAGONAL_UNITS +
+					(horizontalDistance - verticalDistance) * Board.ORTHOGONAL_UNITS;
+			}
+		}
+	}
+
+	public static List<Tile> BreathFrom(Tile[] start, int range, out Tile[] periphery) {
 		HashSet<Tile> visited = [.. start];
 		Dictionary<Tile, int> frontier = [];
+		List<Tile> peripheryList = [];
 		foreach (Tile tile in start) {
 			frontier[tile] = range;
 		}
@@ -226,14 +377,6 @@ public class Tile : Spacial {
 				Tile tile = kvp.Key;
 				int remainingRange = kvp.Value;
 
-				if (remainingRange >= Board.ORTHOGONAL_UNITS) {
-					foreach (Tile neighbor in tile.NeighborsOrthogonal) {
-						if (neighbor != null && !visited.Contains(neighbor)) {
-							visited.Add(neighbor);
-							nextFrontier[neighbor] = remainingRange - Board.ORTHOGONAL_UNITS;
-						}
-					}
-				}
 				if (remainingRange >= Board.DIAGONAL_UNITS) {
 					foreach (Tile neighbor in tile.NeighborsDiagonal) {
 						if (neighbor != null && !visited.Contains(neighbor)) {
@@ -242,31 +385,162 @@ public class Tile : Spacial {
 						}
 					}
 				}
+				if (remainingRange >= Board.ORTHOGONAL_UNITS) {
+					foreach (Tile neighbor in tile.NeighborsOrthogonal) {
+						if (neighbor != null && !visited.Contains(neighbor)) {
+							visited.Add(neighbor);
+							nextFrontier[neighbor] = remainingRange - Board.ORTHOGONAL_UNITS;
+						}
+					}
+				} else {
+					foreach (Tile neighbor in tile.Neighbors) {
+						if (neighbor != null && !visited.Contains(neighbor)) {
+							peripheryList.Add(neighbor);
+						}
+					}
+				}
 			}
 
 			frontier = nextFrontier;
 		}
 
+		periphery = [.. peripheryList];
 		return [.. visited];
 	}
 
-	public static Tile[] AStar(Tile startTile, List<Command> commands) {
-		List<Tile> goalTiles = [];
-		List<Tile> avoidedTiles = [];
+	public static Tile[] AStar(
+		Tile startTile,
+		Tile[] impassableTiles,
+		int boardSize,
+		bool toroidal,
+		Func<Tile, Tile, int> travelCost,
+		List<Command> commands,
+		int maxDistance
+	) {
+		HashSet<Tile> goalTiles = [];
+		HashSet<Tile> avoidedTiles = [];
+		HashSet<Tile> peripheralTiles = [];
+
 		foreach (Command command in commands) {
 			if (command.Type == Command.CommandType.APPROACH || command.Type == Command.CommandType.OBSTRUCT) {
-				goalTiles.AddRange(command.TotalTiles);
+				goalTiles.UnionWith(command.TotalTiles);
+				peripheralTiles.UnionWith(command.PeripheralTiles);
 			} else if (command.Type == Command.CommandType.AVOID) {
-				avoidedTiles.AddRange(command.TotalTiles);
+				avoidedTiles.UnionWith(command.TotalTiles);
 			} else {
 				throw new ArgumentException("Unsupported command type for A*: " + command.Type);
 			}
 		}
-		return AStar(startTile, goalTiles, avoidedTiles, []);
+
+		HashSet<Tile> invalidTiles = [.. avoidedTiles];
+		invalidTiles.UnionWith(impassableTiles);
+
+		if (avoidedTiles.Contains(startTile)) {
+			// Concatenate the escape path and the normal path.
+			Tile[] escapePath =
+				AStar(startTile, peripheralTiles, [.. impassableTiles], boardSize, toroidal, travelCost, maxDistance);
+			if (escapePath.Length == 0 || escapePath.Last().Equals(startTile) || avoidedTiles.Contains(escapePath.Last())) {
+				return [];
+			}
+			return [
+				.. escapePath,
+				.. AStar(escapePath.Last(), goalTiles, invalidTiles, boardSize, toroidal, travelCost, maxDistance)
+			];
+		} else {
+			// No escape, just normal path.
+			return AStar(startTile, goalTiles, invalidTiles, boardSize, toroidal, travelCost, maxDistance);
+		}
 	}
 
-	public static Tile[] AStar(Tile startTile, List<Tile> goalTiles, List<Tile> avoidedTiles, List<Tile> invalidTiles) {
-		
+	private static Tile[] AStar(
+		Tile startTile,
+		HashSet<Tile> goalTiles,
+		HashSet<Tile> invalidTiles,
+		int boardSize,
+		bool toroidal,
+		Func<Tile, Tile, int> travelCost,
+		int maxDistance
+	) {
+		Dictionary<Tile, int> f = [];
+		Dictionary<Tile, int> g = [];
+		Dictionary<Tile, int> h = [];
+		Dictionary<Tile, int> distanceFromStart = [];
+		f[startTile] = 0;
+		g[startTile] = 0;
+		distanceFromStart[startTile] = 0;
+		HashSet<Tile> open = [startTile];
+		HashSet<Tile> closed = [];
+		Dictionary<Tile, Tile> parent = [];
+
+		while (open.Count > 0) {
+			// Find tile in open with the lowest f-score.
+			int lowestF = int.MaxValue;
+			Tile q = null;
+			foreach (Tile openTile in open) {
+				if (!f.TryGetValue(openTile, out int fValue)) {
+					fValue = goalTiles.Min(
+						goalTile => CalculateOctileDistance(openTile, goalTile, boardSize, toroidal, out _)
+					);
+					f[openTile] = fValue;
+				}
+				if (fValue < lowestF) {
+					lowestF = fValue;
+					q = openTile;
+				}
+			}
+
+			open.Remove(q);
+			closed.Add(q);
+
+			// Don't consider neighbors that are too far from start tile.
+			if (distanceFromStart[q] > maxDistance) {
+				continue;
+			}
+
+			// Determine q's successors.
+			foreach (Tile successor in q.Neighbors) {
+				if (successor == null || invalidTiles.Contains(successor)) {
+					continue;
+				}
+
+				parent[successor] = q;
+
+				if (goalTiles.Contains(successor)) {
+					// We're done. Reconstruct the path.
+					List<Tile> path = [successor];
+					while (parent.ContainsKey(path.Last())) {
+						path.Add(parent[path.Last()]);
+					}
+					if (path.Count > 0 && path.Last().Equals(startTile)) {
+						path.RemoveAt(path.Count - 1);
+						path.Reverse();
+						return [.. path];
+					}
+					throw new Exception("A* path reconstruction failed to reach start tile.");
+				}
+
+				// Compute g, h, and f scores for successor.
+				int tentativeG = g[q] + travelCost(q, successor);
+				h[successor] = h.TryGetValue(successor, out int value) ? value : goalTiles.Min(
+					goalTile => CalculateOctileDistance(successor, goalTile, boardSize, toroidal, out _)
+				);
+				int tentativeF = g[successor] + h[successor];
+
+				// Check against open and closed lists.
+				if ((open.Contains(successor) || closed.Contains(successor)) && tentativeF >= f[successor]) {
+					continue;
+				}
+
+				// This path to successor is better than any previous one.
+				g[successor] = tentativeG;
+				f[successor] = tentativeF;
+				distanceFromStart[successor] = distanceFromStart[q] + 1;
+				open.Add(successor);
+			}
+		}
+
+		// No path found.
+		return [];
 	}
 }
 }

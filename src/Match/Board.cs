@@ -27,6 +27,7 @@ public partial class Board {
 	public readonly List<Tile[,]> Tiles = [];
 	private readonly HashSet<Piece> pieces = [];
 	private readonly bool mToroidal;
+	public bool Toroidal { get => mToroidal; }
 
 	public Board(bool toroidal) {
 		mToroidal = toroidal;
@@ -148,7 +149,7 @@ public partial class Board {
 
 	/**
 	 * Free-for-all
-	*/
+	 */
 	public static Vector2I[] GetStartingPositions(Match.MatchType matchType, int playerCount) {
 		int boardSizeTotal = BOARD_SIZE * (int) Math.Pow(2, (int) Tile.MAX_PARTITION);
 		int boardSpace = boardSizeTotal * boardSizeTotal;
@@ -240,134 +241,7 @@ public partial class Board {
 		if (range == Command.RangeEnum.NOT_APPLICABLE) {
 			throw new ArgumentException("Range cannot be NOT_APPLICABLE for method \"AreInRange\".");
 		}
-		return Command.RangeEnumToUnits(range) >= CalculateOctileDistance(s1, s2, out _);
-	}
-
-	// TODO - needs testing
-	public int CalculateOctileDistance(Spacial s1, Spacial s2, out DirectionEnum directionToGo) {
-		int horizontalDirectionToGo = -2; // -2 means undetermined.
-		int horizontalDistance = 0;
-
-		int s1Left = Tile.GetPositionAtSideOf(s1, DirectionEnum.WEST);
-		int s2Right = Tile.GetPositionAtSideOf(s2, DirectionEnum.EAST);
-		int s1Right = Tile.GetPositionAtSideOf(s1, DirectionEnum.EAST);
-		int s2Left = Tile.GetPositionAtSideOf(s2, DirectionEnum.WEST);
-		if (s1Right >= s2Left && s1Left <= s2Right) {
-			// If the shapes overlap horizontally, no horizontal movement needed.
-			horizontalDirectionToGo = (int) DirectionEnum.NONE;
-			horizontalDistance = 0;
-		} else if (s1Left > s2Right) {
-			// s1 is to the right of s2.
-			int nonToroidalDistance = s1Left - s2Right;
-			if (mToroidal) {
-				// Check if it's shorter to go left (west) around the toroidal board.
-				int toroidalDistance = GetTotalSize() - s1Right + s2Left - 1;
-				if (toroidalDistance < nonToroidalDistance) {
-					horizontalDirectionToGo = (int) DirectionEnum.WEST;
-					horizontalDistance = toroidalDistance;
-				} else {
-					horizontalDirectionToGo = (int) DirectionEnum.EAST;
-					horizontalDistance = nonToroidalDistance;
-				}
-			} else {
-				horizontalDirectionToGo = (int) DirectionEnum.EAST;
-				horizontalDistance = nonToroidalDistance;
-			}
-		} else if (s1Right < s2Left) {
-			// s1 is to the left of s2.
-			int nonToroidalDistance = s2Left - s1Right;
-			if (mToroidal) {
-				// Check if it's shorter to go right (east) around the toroidal board.
-				int toroidalDistance = GetTotalSize() - s2Right + s1Right - 1;
-				if (toroidalDistance < nonToroidalDistance) {
-					horizontalDirectionToGo = (int) DirectionEnum.EAST;
-					horizontalDistance = toroidalDistance;
-				} else {
-					horizontalDirectionToGo = (int) DirectionEnum.WEST;
-					horizontalDistance = nonToroidalDistance;
-				}
-			} else {
-				horizontalDirectionToGo = (int) DirectionEnum.WEST;
-				horizontalDistance = nonToroidalDistance;
-			}
-		}
-
-		int verticalDirectionToGo = -2; // -2 means undetermined.
-		int verticalDistance = 0;
-
-		int s1Top = Tile.GetPositionAtSideOf(s1, DirectionEnum.NORTH);
-		int s2Bottom = Tile.GetPositionAtSideOf(s2, DirectionEnum.SOUTH);
-		int s1Bottom = Tile.GetPositionAtSideOf(s1, DirectionEnum.SOUTH);
-		int s2Top = Tile.GetPositionAtSideOf(s2, DirectionEnum.NORTH);
-		if (s1Bottom >= s2Top && s1Top <= s2Bottom) {
-			// If the shapes overlap vertically, no vertical movement needed.
-			verticalDirectionToGo = (int) DirectionEnum.NONE;
-			verticalDistance = 0;
-		} else if (s1Top > s2Bottom) {
-			// s1 is below s2.
-			int nonToroidalDistance = s1Top - s2Bottom;
-			if (mToroidal) {
-				// Check if it's shorter to go up (north) around the toroidal board.
-				int toroidalDistance = GetTotalSize() - s1Bottom + s2Top - 1;
-				if (toroidalDistance < nonToroidalDistance) {
-					verticalDirectionToGo = (int) DirectionEnum.NORTH;
-					verticalDistance = toroidalDistance;
-				} else {
-					verticalDirectionToGo = (int) DirectionEnum.SOUTH;
-					verticalDistance = nonToroidalDistance;
-				}
-			} else {
-				verticalDirectionToGo = (int) DirectionEnum.SOUTH;
-				verticalDistance = nonToroidalDistance;
-			}
-		} else if (s1Bottom < s2Top) {
-			// s1 is above s2.
-			int nonToroidalDistance = s2Top - s1Bottom;
-			if (mToroidal) {
-				// Check if it's shorter to go down (south) around the toroidal board.
-				int toroidalDistance = GetTotalSize() - s2Bottom + s1Top - 1;
-				if (toroidalDistance < nonToroidalDistance) {
-					verticalDirectionToGo = (int) DirectionEnum.SOUTH;
-					verticalDistance = toroidalDistance;
-				} else {
-					verticalDirectionToGo = (int) DirectionEnum.NORTH;
-					verticalDistance = nonToroidalDistance;
-				}
-			} else {
-				verticalDirectionToGo = (int) DirectionEnum.NORTH;
-				verticalDistance = nonToroidalDistance;
-			}
-		}
-
-		if (horizontalDirectionToGo == -2 || verticalDirectionToGo == -2) {
-			throw new Exception("Direction to go was not determined correctly.");
-		}
-
-		if (horizontalDirectionToGo == (int) DirectionEnum.NONE) {
-			directionToGo = (DirectionEnum) verticalDirectionToGo;
-			return verticalDistance * ORTHOGONAL_UNITS;
-		} else if (verticalDirectionToGo == (int) DirectionEnum.NONE) {
-			directionToGo = (DirectionEnum) horizontalDirectionToGo;
-			return horizontalDistance * ORTHOGONAL_UNITS;
-		} else {
-			// Both horizontal and vertical movement needed. Calculate octile distance.
-			if (horizontalDistance < verticalDistance) {
-				directionToGo = Util.Combine((DirectionEnum) horizontalDirectionToGo, (DirectionEnum) verticalDirectionToGo);
-				return horizontalDistance * DIAGONAL_UNITS + (verticalDistance - horizontalDistance) * ORTHOGONAL_UNITS;
-			} else {
-				directionToGo = Util.Combine((DirectionEnum) horizontalDirectionToGo, (DirectionEnum) verticalDirectionToGo);
-				return verticalDistance * DIAGONAL_UNITS + (horizontalDistance - verticalDistance) * ORTHOGONAL_UNITS;
-			}
-		}
-	}
-
-	public static DirectionEnum GetDirectionTowards(Tile fromTile, Tile toTile) {
-		for (int i = 0; i < fromTile.Neighbors.Length; i++) {
-			if (fromTile.Neighbors[i] == toTile) {
-				return (DirectionEnum) i;
-			}
-		}
-		throw new ArgumentException("The provided tile is not a neighbor of the fromTile.");
+		return Command.RangeEnumToUnits(range) >= Tile.CalculateOctileDistance(s1, s2, GetTotalSize(), mToroidal, out _);
 	}
 }
 }

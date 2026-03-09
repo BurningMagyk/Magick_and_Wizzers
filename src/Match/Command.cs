@@ -32,8 +32,9 @@ public class Command {
 		get => status;
 		private set {
 			status = value;
-			TotalTiles = CalculateTotalTilesFrom([.. targets]);
-		}
+		TotalTiles = CalculateTotalTilesFrom([.. targets], out Tile[] peripheralTiles);
+				PeripheralTiles = peripheralTiles;
+	  }
 	}
   public Ability Sauce { get; private set; } = null;
 
@@ -42,6 +43,7 @@ public class Command {
   public Vector2I TargetCountRange { get; private set; }
 
 	public Tile[] TotalTiles { get; private set; }
+	public Tile[] PeripheralTiles { get; private set; }
 
 	public readonly object[] specsArgs;
 
@@ -249,12 +251,15 @@ public class Command {
 		return false;
 	}
 
-	private Tile[] CalculateTotalTilesFrom(RangedTarget[] rangedTargets) {
+	private Tile[] CalculateTotalTilesFrom(RangedTarget[] rangedTargets, out Tile[] periphery) {
 		List<Tile> totalTiles = [];
+		periphery = [];
 		if (Type == CommandType.APPROACH || Type == CommandType.AVOID || Type == CommandType.INTERACT) {
 			foreach (RangedTarget rangedTarget in rangedTargets) {
 				if (rangedTarget.Target is Spacial spacialTarget) {
-					totalTiles.AddRange(Tile.BreathFrom(spacialTarget.GetTiles(), RangeEnumToUnits(rangedTarget.Range)));
+					totalTiles.AddRange(
+						Tile.BreathFrom(spacialTarget.GetTiles(), RangeEnumToUnits(rangedTarget.Range), out periphery)
+					);
 				}
 			}
 		} else {
